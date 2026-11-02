@@ -1,5 +1,9 @@
 # 0.11.0 — P2-006 (2 November 2026)
 
+## 0.12.0 — P2-007 (2 November 2026)
+
+Institution Next.js/TypeScript question bank with structured seven-type editors, history/conflict recovery, independent review, protected media, atomic import controls and server-derived candidate rendering. Added scoped reviewer preview API and separate disposable real-service browser gate; existing schema/Python dependency pins unchanged. Acceptance pending strict local/browser/new CI; no deployment.
+
 Bounded internal JSON preview, atomic all-type draft import and immutable idempotent success receipts; shared no-commit draft/reference validation paths; guarded migration 0008 and role/readiness checks. Accepted predecessor 709e448. Previous seven migrations, content.v1 and pinned dependencies unchanged. New local/CI acceptance pending.
 
 # 0.10.1 — P2-005 corrections
@@ -62,3 +66,15 @@ Recorded the user's successful P1 003 gate. Added explicit audit snapshots, scop
 
 ## 0.4.1 — 1 November 2026
 Test-only correction: compare stable credential error fields while separately validating unique request IDs and matching instance/header values. Runtime behavior and migrations are unchanged. Added guarded one-file patch tool. User reported 226 passed and one obsolete assertion failure; final PostgreSQL rerun remains pending.
+
+## Frontend 0.12.1 — P2-007 correction
+
+Decorative navigation glyphs excluded from accessible names; named workspace alerts prevent ambiguity with Next route announcements. Browser assertions scoped to the named application alert. Vitest pinned to patched 4.1.12 with refreshed npm lock. Backend 0.12.0 and schema 0008 unchanged. Owner backend gate passed; corrected browser/new-CI acceptance pending.
+
+## Frontend 0.12.2 — saved-editor and viewport correction
+
+Explicit parent/child prompt labels for prepopulated editors, responsive grid/control sizing and stable post-reload width check with diagnostic attachment. One saved-label regression added (18 frontend tests). Backend and dependency versions unchanged; corrected live browser acceptance pending.
+
+## Frontend0.12.3 — table-label containment
+
+Preserve accessible action names without absolute hidden spans; locally position the scrolling table. Expand width diagnostics while preserving the strict viewport assertion. Owner seven-type/snapshot and tenant/role scenarios pass; final viewport/new-CI acceptance pending. No dependencies/backend changes.

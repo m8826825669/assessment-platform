@@ -1,0 +1,11 @@
+P2-007 frontend correction 0.12.2 — 2 November 2026
+
+Owner evidence: backend659 strict pass retained. Frontend0.12.1 npm audit zero;17 tests/type/format/build pass. Browser1/3 passes(role/tenant); prefilled exact prompt selector times out despite editor present; final mobile-width assertion fails after real image/conflict steps. Accessibility snapshots read; no exact overflowing DOM geometry supplied.
+
+Root cause of prompt selector confirmed against installed Playwright1.58.2 injected getElementLabels/elementText implementation: wrapped label text recursively includes a textarea's text node. Explicit sibling label for / unique React useId control id removes value-dependent label text without changing prompt/content semantics. New SSR regression checks populated passage-parent/child labels and unique association.18 frontend tests pass under existing Vitest4.1.12. Typecheck, Prettier and production webpack build passed. All3 browser scenarios collect; corrected live browser execution is not available in this authoring environment and remains pending.
+
+Responsive sizing: min-width0 on grid/flex children and controls; minmax(0,1fr) for responsive single-column grids; wrapping legend/footer; no overflow hiding. Browser waits for reload control enabled, attaches class/geometry JSON, and still requires document.scrollWidth<=innerWidth. This is a correction candidate, not a claimed actual mobile viewport pass. Original180s scenario timeout unchanged.
+
+No dependency version change; package/lock root version only0.12.2. Existing Vite config-loader advisory warning remains nonfatal. API/backend0.12.0, Python locks, all8 migrations/schema0008, infrastructure, authorization/projection and stored content unchanged. No full backend rerun needed for these frontend/docs-only bytes.
+
+Packaging: reconstructed0.12.1 source baseline verified from original0.12.0 ZIP plus hash-checked0.12.1 patch. Every backend file compared byte-identical. Source patch before/after hashes checked; apply/repeat/refusal with environment/.git/node_modules sentinels preserved; manifest digests, actual Git whitespace including EOF, ZIP CRC verified. No actual remote Git/CI/production operations performed.

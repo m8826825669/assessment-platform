@@ -47,8 +47,6 @@ def apply(source: Path, target: Path) -> Path:
         "0008_question_imports.py",
     ]:
         baseline = Path("backend/alembic/versions") / revision
-        if revision == "0008_question_imports.py" and not (target / baseline).exists():
-            continue  # New in this bundle; compare it on subsequent applications.
         if (
             not (target / baseline).is_file()
             or sha256((target / baseline).read_bytes()).digest()

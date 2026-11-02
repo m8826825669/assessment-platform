@@ -10,7 +10,15 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 from app.identity.api import Actor, Db
 from app.media.api import PublicMedia
 from app.question_bank import review
-from app.question_bank.api import Filters, Limit, Offset, QuestionDetail, TaxonSnapshot, VersionMetadata
+from app.question_bank.api import (
+    Filters,
+    Limit,
+    Offset,
+    QuestionDetail,
+    QuestionPreview,
+    TaxonSnapshot,
+    VersionMetadata,
+)
 from app.question_bank.contracts import Label
 
 router = APIRouter(prefix="/api/v1/tenants/{tenant_id}", tags=["question review"])
@@ -87,3 +95,18 @@ def selections(
 @router.get("/question-selections/{version_id}", response_model=SelectedContent)
 def selection(tenant_id: UUID, version_id: UUID, actor: Actor, db: Db):
     return review.selections(db, tenant_id, actor, 0, 1, version_id)[0]
+
+
+@router.get("/question-reviews/{question_id}/versions/{version_id}/preview", response_model=QuestionPreview)
+def preview(tenant_id: UUID, question_id: UUID, version_id: UUID, actor: Actor, db: Db):
+    from app.media.service import snapshots
+    from app.question_bank.contracts import candidate_view, validate_content
+
+    # Reuse exact-version review authority, including the submitted-version row policy.
+    saved = review.detail(db, tenant_id, actor, question_id, version_id)
+    return {
+        "question_id": question_id,
+        "version_id": version_id,
+        "content": candidate_view(validate_content(saved["content"])),
+        "media": snapshots(db, tenant_id, version_id, verify=True),
+    }

@@ -56,6 +56,23 @@ jobs:
           exit 1
       - name: Full gate (no skipped tests)
         run: backend/.venv/bin/python scripts/verify.py
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: matrix.python == '3.12'
+        with:
+          node-version: '22'
+      - name: Frontend pinned checks and build
+        if: matrix.python == '3.12'
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run typecheck
+          npm run format:check
+          npm test
+          npm run build
+          npx playwright install --with-deps chromium
+      - name: Actual browser journeys with disposable PostgreSQL and media
+        if: matrix.python == '3.12'
+        run: backend/.venv/bin/python -m pytest backend/browser_checks -q --require-postgres
       - name: Gate summary
         if: always()
         run: |

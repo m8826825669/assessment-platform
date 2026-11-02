@@ -1,0 +1,51 @@
+P2-007 authoring evidence — 2 November 2026
+
+Python 3.12.14 / Node 24.22.1 / npm 11.9.0 / Linux. Existing Python lock files unchanged.
+Portable engineering gate: 393 tests passed, zero skips, one existing TestClient warning, 5.58s. Dependency compatibility/pins, Ruff lint/format passed. VERIFICATION=PARTIAL_PASS.
+Frontend: 17 tests passed (14 all-type renderer/editor + 3 fixed-upstream proxy); TypeScript route generation/check passed; Prettier check passed; Next 16.4.3 production webpack build passed. React 19.3.1, TypeScript 6.0.2, Playwright 1.58.2, Vitest 4.0.18, Prettier 3.6.2 pinned with npm lock. npm production dependency audit returned zero reported vulnerabilities at authoring time; this is not a security assessment.
+Python full collection: 659 (393 portable + 266 integration). Separate real-browser harness: 1 Python test collected; Playwright list: 3 actual-service scenarios collected. These have NOT executed in the authoring environment. Local PostgreSQL/private storage/ClamAV/Chromium evidence and new actual CI remain pending.
+
+Reviewer preview: new scoped exact-version safe projection endpoint; no role/privilege/schema changes. Seven real-database test cases cover all content types, pre-submission privacy, wrong tenant, coordinator denial, unauthenticated denial and no-store public projection. Existing backend tests remain the regression gate.
+
+Managed browser preview attempted through supported sites-preview; launcher supplied '--host' and '--strictPort', which Next does not accept. Preview stopped before healthy state; no alternate browser-control route or fake screenshot was used. Build/component checks do not prove real browser correctness or WCAG compliance.
+
+Protected comparisons: all eight accepted migration bytes; original master/Word roadmap; v1 content contract/domain/examples; Python requirements/developer verification scripts; media Dockerfile/compose unchanged. CI is intentionally extended only for frontend/build/browser checks on PostgreSQL/Python 3.12, retaining all four existing matrix jobs. No remote commit/push/CI, database migration, production deployment or application-account provisioning performed here.
+
+Packaging: baseline updater smoke preserves .git, backend .env/.venv, frontend .env.local/node_modules sentinels; altered 0008 is rejected. Actual Git whitespace check includes EOF. ZIP CRC and every manifest digest verified; .next/node_modules/artifacts/caches/private configuration excluded.
+
+Sanitized Python report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T10:43:43.315492+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 393,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T10:43:51.469133+00:00"
+}

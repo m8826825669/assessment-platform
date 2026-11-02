@@ -161,14 +161,14 @@
         "TEN-01",
         "GOV-01"
       ],
-      "status": "implemented_pending_local_postgresql_storage_and_ci_verification",
+      "status": "done",
       "acceptance": "Internal JSON preview and atomic draft commit; malformed/foreign references rejected without partial writes; idempotent retries, conflict on changed key payload; private content absent from logs/audit.",
       "depends_on": [
         "P2-003",
         "P2-004",
         "P2-005"
       ],
-      "evidence": "393 portable tests passed; 652 collected, including PostgreSQL atomic/retry/role/rollback coverage and a live media import journey. Real new increment gate pending; see VALIDATION_P2_006.txt."
+      "evidence": "Owner screenshots: 652 strict tests, VERIFICATION=PASS, five dependencies ready, worker healthy; pushed 6bae92a and green Foundation gate #7. See LOCAL_VERIFICATION_P2_006.md."
     },
     {
       "id": "P2-007",
@@ -179,7 +179,7 @@
         "IAM-01",
         "ACC-01"
       ],
-      "status": "queued",
+      "status": "implemented_pending_local_browser_postgresql_and_ci_verification",
       "acceptance": "Prototype then real browser journeys for seven types, review/history/media/import UI, candidate-safe preview traffic, keyboard/error/conflict recovery and narrow-screen evidence.",
       "depends_on": [
         "P2-003",
@@ -187,7 +187,7 @@
         "P2-005",
         "P2-006"
       ],
-      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+      "evidence": "Owner backend659; UI0.12.2 frontend18/type/format/build pass; seven-type author/review/coordinator/snapshot and role/tenant browser scenarios pass. Narrow width390/474 fails; UI0.12.3 table-label containment correction, actual viewport/manual/new CI pending. See LOCAL_VERIFICATION_P2_007.md."
     },
     {
       "id": "P2-008",

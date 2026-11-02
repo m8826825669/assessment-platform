@@ -1,0 +1,11 @@
+P2-007 frontend correction 0.12.1 — 2 November 2026
+
+Owner backend 659 tests passed, zero skips, 664.15s. Owner original UI 17 tests/typecheck/format/build passed; all three real browser scenarios failed on navigation accessible-name and alert-selector defects. No corrected live browser pass is claimed.
+
+Correction: five decorative navigation glyphs aria-hidden; application alert accessible name Workspace error; both application error assertions target that named alert. No assertion or timeout removed. Frontend Vitest 4.0.18 -> 4.1.12 with exact package/lock, frontend version 0.12.1, Node >=22.12.0 (owner 22.22.0 compatible).
+
+Authoring Linux / Node24: format check, Next route TypeScript check, all 17 frontend tests under Vitest4.1.12, production webpack build passed. npm full audit: zero reported vulnerabilities across all severity buckets. Vite emitted an advisory config-loader warning about ESM TypeScript config loaded as CommonJS; checks still passed. This is not a runtime failure or security finding. All three Playwright scenarios collect; live services/browser unavailable in this authoring environment, so corrected gate remains pending on owner machine and new CI.
+
+Upstream advisories checked: GHSA-5xrq-8626-4rwp (Vitest UI server Windows file access/execution), GHSA-82fw-gwwq-j7x9 (mocker redirect path traversal), GHSA-qxg6-89mg-rqv8 (manual mock injection; backport4.1.12). Existing npm test invokes run mode rather than a UI server; upgrade removes reported vulnerable dev-tool dependencies without a blanket force fix.
+
+Packaging checks: every backend source/migration/lock file byte-equal to 0.12.0 bundle; patch hashes before/after verified; standard-library updater applied to extracted baseline, repeated apply no-op, unexpected edited file refused before writes. Git/environment/node_modules sentinels preserved; manifest and ZIP CRC verified. No backend regression rerun is required for these frontend/docs-only bytes. No application database/storage changes or remote Git operations.

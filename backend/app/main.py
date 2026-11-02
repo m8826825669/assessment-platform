@@ -38,7 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Institutional Assessment API",
-        version="0.11.0",
+        version="0.12.0",
         lifespan=lifespan,
         responses={
             code: {"model": Problem, "description": "Structured API problem"} for code in ERROR_STATUSES

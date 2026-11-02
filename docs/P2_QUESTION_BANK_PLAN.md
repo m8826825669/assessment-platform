@@ -71,6 +71,6 @@ The UI uses the intended Next.js/TypeScript stack after the journey prototype; a
 - Browser journey, keyboard/error recovery and media accessibility evidence are retained.
 - Known gaps are recorded; no production-readiness or P3 examination-publication claim is inferred.
 
-## First implementation boundary
+## Current implementation boundary
 
-P2-001 through P2-005 are accepted; latest accepted commit 709e448. Source 0.11.0 implements P2-006 atomic internal JSON imports and awaits strict local/new-CI acceptance. No frontend or grading engine yet. Current statuses/evidence are in BACKLOG.json and PROGRESS.md; original task order unchanged.
+P2-001 through P2-006 are accepted; latest accepted owner commit 6bae92a. Source 0.12.0 implements P2-007 institution browser workflows and a real-service browser gate, pending strict new local/browser/CI acceptance. P2-008 remains queued. Original task order and final goal are unchanged.

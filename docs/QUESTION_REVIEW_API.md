@@ -70,3 +70,7 @@ Audit/outbox use question.review_submitted/returned/approved/retired/superseded.
 ## Acceptance boundary
 
 Portable tests and parsed SQL do not prove database semantics. Strict local PostgreSQL tests and a new actual CI run are required for P2-003 acceptance. Added cases cover all seven SQL/public projections, self-review across roles and editors/submitters, return/edit flows, stale decisions, edit/approval races, role/session revocation while waiting, scoped visibility, immutable history, forged decisions, missing projections, failure rollback, v0.7 upgrade preservation and worker separation. Browser workflow acceptance remains later P2 work.
+
+## P2-007 reviewer candidate rendering
+
+GET /api/v1/tenants/{tenant_id}/question-reviews/{question_id}/versions/{version_id}/preview uses the existing exact-version review authority (authors own feedback, reviewers submitted versions, admins scoped institution). It returns question_id/version_id, v1 candidate projection and verified accessible media only. It omits private marking fields, hash and review reasons. No role, grant, RLS or schema change. Existing author preview and coordinator approved selection routes retain their boundaries.

@@ -62,6 +62,7 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
         "/api/v1/tenants/{tenant_id}/questions/{question_id}/preview",
         "/api/v1/tenants/{tenant_id}/question-reviews",
         "/api/v1/tenants/{tenant_id}/question-reviews/{question_id}/versions/{version_id}",
+        "/api/v1/tenants/{tenant_id}/question-reviews/{question_id}/versions/{version_id}/preview",
         "/api/v1/tenants/{tenant_id}/question-selections",
         "/api/v1/tenants/{tenant_id}/question-selections/{version_id}",
         "/api/v1/tenants/{tenant_id}/taxonomy",

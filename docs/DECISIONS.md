@@ -90,3 +90,24 @@ DEC 048 Source/API 0.8.0 adds migration 0005_question_review and explicit runtim
 - Immutable success receipts scope UUID idempotency keys to institution + user across sessions. Equivalent canonical typed requests replay original IDs/time without side effects; changed valid payload conflicts, failures do not consume keys, new keys intentionally create new imports. Retired/unavailable references do not prevent acknowledging an already-committed receipt.
 - Fingerprint includes ordered rows, refs, title, v1 body hashes and sorted metadata IDs. Preserve original content/hash schema and seven prior migrations. Batch audit stores UUID/count only; private keys/references/raw rows stay out of audit/outbox. Runtime receipt INSERT/SELECT only; worker gets no private receipt access.
 - Source/API 0.11.0 and new migration 0008, with role/readiness changes, must pass strict new local/CI acceptance before P2-007 frontend journeys. No dependency/storage changes or production performance claim.
+
+## P2-007 decisions (2 November 2026)
+
+- Accept P2-006 on owner screenshot evidence for 6bae92a / Foundation gate #7, 652 strict tests and healthy API/worker. Preserve all eight accepted migration files and original roadmap.
+- Add the intended Next.js/TypeScript institution workspace as a local repository application. No hosted Site, deployment, candidate runner, exam assembly or grading is introduced. Use plain CSS with native accessible controls; no extra component framework is necessary for the initial bounded screens.
+- Pin Next 16.4.3 / React 19.3.1 and the resolved npm lock; minimum project Node 22. Preserve Python dependency locks. Browser tokens live in memory only; refreshing requires sign-in. A fixed operator-configured server proxy forwards explicit headers and bounded bodies, never browser-selected origins or cookies.
+- Saved candidate rendering uses existing backend allowlisted projection, not private form contents. Add an exact-version reviewer preview route using the existing review authority/RLS and media verification; no new database privileges or migrations. All seven renderer branches escape plain text; staff marking fields are visibly separated.
+- Retain unsaved form values on validation/conflict errors; reload/discard is explicit. Import commit attempts freeze payload/key until an explicit new-batch action. No local-storage draft/token cache, service worker or third-party analytics.
+- Add component/proxy checks and a separate real PostgreSQL/S3/ClamAV Playwright gate. The existing Python full gate and a real browser pass are both required, followed by actual new-commit CI. Managed authoring preview failed because its launcher supplied unsupported Next CLI flags; no actual browser verification is claimed here. CI adds frontend/build/browser steps to the Python 3.12 PostgreSQL job, retaining all other jobs.
+
+### P2-007 owner browser corrections
+
+Preserve the successful 659-test backend gate. Mark decorative sidebar glyphs aria-hidden; give the application error alert a stable accessible name and scope browser selectors to that name, preserving Next route announcements. Keep the behavioral assertions and timeouts. Replace the affected Vitest 4.0.18 development dependency with exact 4.1.12 and regenerate its lock; do not use a blanket force fix. API/schema/Python/storage behavior stays unchanged. Corrected frontend/browser and actual new CI are still required.
+
+### P2-007 saved-editor and viewport corrections
+
+Use explicit unique prompt label/control association so imported saved textarea values cannot affect exact label queries; preserve existing field names and content. Constrain intrinsic responsive grid/control widths instead of hiding document overflow. Wait for the reload action to finish, then keep the same document-width acceptance criterion and attach safe class/geometry diagnostics. Owner accessibility snapshots do not identify the exact geometric overflow source; do not claim viewport acceptance without the corrected real browser run. Dependencies, API and schema unchanged.
+
+### P2-007 table-label containment
+
+Retain the owner's two successful0.12.2 browser scenarios. Remove absolute sr-only table title spans, preserving their semantics in explicit button aria-labels; establish a table scroll containing block. This addresses a code-supported root overflow source consistent with document474/body390 metrics; no actual corrected viewport pass is inferred. Keep strict document-width assertion and improve positioned/shadow diagnostics instead of clipping the document or extending timeouts. Dependencies and all backend/schema bytes unchanged.

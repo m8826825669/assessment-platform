@@ -1,0 +1,31 @@
+{
+  "name": "assessment-workspace",
+  "version": "0.12.3",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build --webpack",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:browser": "playwright test",
+    "format:check": "prettier --check app components lib tests browser *.ts package.json"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "prettier": "3.6.2",
+    "typescript": "6.0.2",
+    "vitest": "4.1.12"
+  }
+}

@@ -11,3 +11,9 @@ artifacts/
 
 # Local patch backups
 *.before-correlation-fix
+
+# Frontend generated output
+.next/
+*.tsbuildinfo
+playwright-report/
+test-results/

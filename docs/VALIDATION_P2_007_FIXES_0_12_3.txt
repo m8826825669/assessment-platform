@@ -1,0 +1,11 @@
+P2-007 frontend correction0.12.3 —2 November2026
+
+Owner0.12.2 frontend18 tests/type/format/build passed. Actual seven-type import/author/review/coordinator/immutable snapshot journey passed49.4s and tenant/role passed5.2s. Only image/conflict final mobile width failed: viewport390/document474/body390; ordinary outside-table offender list empty. Python harness failed79.58s; browser gate not accepted.
+
+Code-supported overflow source: absolute sr-only spans in offscreen scrolling table cells have no local containing block. Replace them with equivalent explicit button aria-labels, retaining the question title and hiding only the decorative arrow from accessibility; give table scrollport position:relative. No overflow hiding or acceptance relaxation. This is consistent with root-only overflow geometry, not a claimed corrected real browser pass.
+
+Authoring:18 frontend tests passed; TypeScript/Prettier and production Next webpack build passed. All3 Playwright scenarios collect. Width assertion still document.scrollWidth<=innerWidth; diagnostic now inspects positioned table descendants and shadow DOM, adding position/containing-block/shadow metadata without text/secrets. No changed scenario timeout. Corrected real viewport/manual checks and new actual CI remain pending.
+
+No dependency changes: root frontend version0.12.3 only. Existing Vitest4.1.12 and zero owner audit retained; nonfatal Vite loader warning tracked. Backend/API0.12.0 and every backend source/migration/lock byte unchanged; no schema/grant/storage/account change or backend rerun.
+
+Packaging: reconstruct0.12.2 from original sourceZIP plus checksum-validated0.12.1 and0.12.2 patches. All backend bytes, dependency packages and hashes protected. Before/after patch hashes, updater apply/repeat/refusal, .git/env/venv/node_modules preservation, resulting full manifest, Git whitespace and ZIPCRC/digests verified. No remote Git/CI/deployment operations performed.
