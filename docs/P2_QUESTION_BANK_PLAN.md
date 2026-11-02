@@ -73,4 +73,4 @@ The UI uses the intended Next.js/TypeScript stack after the journey prototype; a
 
 ## First implementation boundary
 
-P2-001 is accepted with local PostgreSQL and correct remote CI evidence in LOCAL_VERIFICATION_P2_001.md. P2-002 is accepted at e18af0c; source 0.8.0 implements P2-003 review/approval/retirement and awaits its own PostgreSQL/CI gate. There is still no protected media, frontend or grading engine. Follow BACKLOG.json and PROGRESS.md for current task status; this plan retains the original task order.
+P2-001 through P2-003 are accepted; latest accepted source commit 5bc13f9. Source 0.9.0 implements P2-004 taxonomy/retrieval and awaits its own strict PostgreSQL/CI gate. There is still no protected media, frontend or grading engine. Follow BACKLOG.json and PROGRESS.md for current task status; original task order is unchanged.

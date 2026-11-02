@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 
-EXPECTED_DATABASE_REVISION = "0005_question_review"
+EXPECTED_DATABASE_REVISION = "0006_question_taxonomy"
 
 # The runtime must be neither migration owner nor a role that can bypass row policies.
 RUNTIME_ROLE_SAFE = text("""
@@ -22,16 +22,18 @@ SELECT NOT r.rolsuper AND NOT r.rolbypassrls AND NOT r.rolcreatedb
 FROM pg_roles r WHERE r.rolname = current_user
 """)
 RLS_CONFIGURED = text("""
-SELECT count(*) = 11 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
-AND (SELECT count(*) = 5 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
+SELECT count(*) = 13 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+AND (SELECT count(*) = 7 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
      WHERE NOT t.tgisinternal AND
      ((t.tgrelid = 'public.questions'::regclass AND t.tgname = 'question_identity_guard') OR
       (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard') OR
       (t.tgrelid = 'public.question_review_events'::regclass AND t.tgname = 'question_review_guard') OR
       (t.tgrelid = 'public.question_selections'::regclass AND t.tgname = 'question_selection_guard') OR
-      (t.tgrelid = 'public.question_review_events'::regclass AND t.tgname = 'question_review_projection_guard')))
+      (t.tgrelid = 'public.question_review_events'::regclass AND t.tgname = 'question_review_projection_guard') OR
+      (t.tgrelid = 'public.taxonomy_terms'::regclass AND t.tgname = 'taxonomy_term_guard') OR
+      (t.tgrelid = 'public.question_version_taxa'::regclass AND t.tgname = 'version_taxon_guard')))
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections')
+WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa')
 """)
 
 
@@ -70,6 +72,23 @@ SELECT has_table_privilege(current_user, 'audit_records', 'SELECT')
    AND NOT has_column_privilege(current_user, 'question_selections', 'tenant_id', 'UPDATE')
    AND NOT has_column_privilege(current_user, 'question_selections', 'question_id', 'UPDATE')
    AND NOT has_column_privilege(current_user, 'question_selections', 'created_at', 'UPDATE')
+   AND has_table_privilege(current_user, 'taxonomy_terms', 'SELECT')
+   AND has_table_privilege(current_user, 'taxonomy_terms', 'INSERT')
+   AND has_column_privilege(current_user, 'taxonomy_terms', 'label', 'UPDATE')
+   AND has_column_privilege(current_user, 'taxonomy_terms', 'state', 'UPDATE')
+   AND has_column_privilege(current_user, 'taxonomy_terms', 'revision', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'tenant_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'parent_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'kind', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'code', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'created_by', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'taxonomy_terms', 'created_at', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'taxonomy_terms', 'DELETE, TRUNCATE')
+   AND has_table_privilege(current_user, 'question_version_taxa', 'SELECT')
+   AND has_table_privilege(current_user, 'question_version_taxa', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'question_version_taxa', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'question_version_taxa', 'DELETE, TRUNCATE')
 """)
 WORKER_GRANTS_READY = text("""
 SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
@@ -87,6 +106,10 @@ SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
    AND NOT has_any_column_privilege(current_user, 'question_selections', 'SELECT, INSERT, UPDATE')
    AND NOT has_table_privilege(current_user, 'question_review_events', 'DELETE, TRUNCATE')
    AND NOT has_table_privilege(current_user, 'question_selections', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'taxonomy_terms', 'SELECT, INSERT, UPDATE')
+   AND NOT has_any_column_privilege(current_user, 'question_version_taxa', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'taxonomy_terms', 'DELETE, TRUNCATE')
+   AND NOT has_table_privilege(current_user, 'question_version_taxa', 'DELETE, TRUNCATE')
 """)
 
 
@@ -148,7 +171,8 @@ class Database:
                             "AND to_regclass('audit_records') IS NOT NULL AND to_regclass('outbox_events') IS NOT NULL "
                             "AND to_regclass('outbox_deliveries') IS NOT NULL AND to_regclass('consumer_receipts') IS NOT NULL "
                             "AND to_regclass('questions') IS NOT NULL AND to_regclass('question_versions') IS NOT NULL "
-                            "AND to_regclass('question_review_events') IS NOT NULL AND to_regclass('question_selections') IS NOT NULL"
+                            "AND to_regclass('question_review_events') IS NOT NULL AND to_regclass('question_selections') IS NOT NULL "
+                            "AND to_regclass('taxonomy_terms') IS NOT NULL AND to_regclass('question_version_taxa') IS NOT NULL"
                         )
                     )
                     if revisions != {EXPECTED_DATABASE_REVISION} or not tables_exist:

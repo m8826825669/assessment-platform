@@ -1,0 +1,57 @@
+P2-004 authoring evidence — 2 November 2026
+
+CPython 3.12.14 / Linux; existing pinned dependencies unchanged.
+Portable verification: 313 passed, zero skips, one existing Starlette/httpx warning, 3.32 seconds.
+Dependency compatibility/pins, Ruff lint and format passed (89 source files formatted).
+VERIFICATION=PARTIAL_PASS. Full collection 502 tests: 313 portable and 189 PostgreSQL.
+
+Offline SQL: full upgrade 120 statements parsed with pglast 8.7, including ten function-definition statements; downgrade 0006:0005 ten statements including one restored function parsed. Literal runtime SQL and known probe/privilege function arities checked. SQL parsing is syntax evidence only, not RLS/trigger/concurrency or migration execution evidence.
+
+New database tests cover catalogue role boundaries, scoped/retired references, duplicate codes, immutable label history/approved selection, automatic subject inclusion, retirement order, creation-only link guards, SQL-derived snapshots, restricted update/delete/truncate, atomic outbox rollback, fenced concurrent edits, post-lock role/session revocation, literal filtering before pagination, public-only classification access, worker separation and populated 0005 upgrade.
+
+No PostgreSQL server could be executed under this workspace's non-root process constraints. Real PostgreSQL tests, live schema/grants/readiness and new actual CI remain PENDING. No main-database changes, remote commits, pushes or CI runs performed here.
+
+Protected baseline comparisons passed against v0.8: all five prior migrations, dependency locks, v1 content contract, domain reference, synthetic examples, original roadmap/Word baseline.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T04:55:29.602433+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 313,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T04:55:34.068978+00:00"
+}
+
+Package validation:
+Updater applied to extracted accepted v0.8 baseline; .git/.env/.venv sentinels preserved.
+Altered existing 0005 and 0006 migrations rejected before mutation.
+Common staged-whitespace checks passed. ZIP CRC and every manifest digest verified.
+Private configuration, repository metadata, caches, environments and artifacts excluded.

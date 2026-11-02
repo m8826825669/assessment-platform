@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -252,6 +253,7 @@ class QuestionVersion(Base):
     __tablename__ = "question_versions"
     __table_args__ = (
         UniqueConstraint("tenant_id", "question_id", "version_number"),
+        UniqueConstraint("tenant_id", "question_id", "id", name="uq_question_versions_taxonomy_binding"),
         UniqueConstraint(
             "tenant_id", "question_id", "id", "content_hash", name="uq_question_versions_review_binding"
         ),
@@ -273,6 +275,7 @@ class QuestionVersion(Base):
     content: Mapped[dict] = mapped_column(JSONB, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     authored_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_txid: Mapped[int] = mapped_column(BigInteger, server_default=text("txid_current()"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -347,3 +350,64 @@ class QuestionSelection(Base):
     state: Mapped[str] = mapped_column(String(20))
     last_event_id: Mapped[UUID] = mapped_column(Uuid)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class TaxonomyTerm(Base):
+    __tablename__ = "taxonomy_terms"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id"),
+        UniqueConstraint("tenant_id", "kind", "code", name="uq_taxonomy_kind_code"),
+        ForeignKeyConstraint(
+            ["tenant_id", "parent_id"],
+            ["taxonomy_terms.tenant_id", "taxonomy_terms.id"],
+            ondelete="RESTRICT",
+            name="fk_taxonomy_parent",
+        ),
+        CheckConstraint("kind IN ('subject','topic','outcome','tag')", name="kind_values"),
+        CheckConstraint("code ~ '^[a-z][a-z0-9_-]{0,63}$'", name="code_format"),
+        CheckConstraint("length(trim(label)) BETWEEN 1 AND 200", name="label_not_blank"),
+        CheckConstraint("state IN ('active','retired') AND revision > 0", name="state_revision"),
+        CheckConstraint("(kind='topic') = (parent_id IS NOT NULL)", name="topic_parent"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("institutions.id", ondelete="RESTRICT"))
+    kind: Mapped[str] = mapped_column(String(20))
+    code: Mapped[str] = mapped_column(String(64))
+    label: Mapped[str] = mapped_column(String(200))
+    parent_id: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)
+    state: Mapped[str] = mapped_column(String(20), server_default="active")
+    revision: Mapped[int] = mapped_column(Integer, server_default="1")
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class QuestionVersionTaxon(Base):
+    """References and labels frozen within the saved version's creation transaction."""
+
+    __tablename__ = "question_version_taxa"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "question_id", "version_id"],
+            ["question_versions.tenant_id", "question_versions.question_id", "question_versions.id"],
+            ondelete="RESTRICT",
+            name="fk_version_taxon_version",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "term_id"],
+            ["taxonomy_terms.tenant_id", "taxonomy_terms.id"],
+            ondelete="RESTRICT",
+            name="fk_version_taxon_term",
+        ),
+        CheckConstraint("term_revision > 0", name="positive_term_revision"),
+        CheckConstraint("kind_snapshot IN ('subject','topic','outcome','tag')", name="kind_values"),
+        Index("ix_version_taxa_term_version", "tenant_id", "term_id", "version_id"),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    version_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    term_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    question_id: Mapped[UUID] = mapped_column(Uuid)
+    kind_snapshot: Mapped[str] = mapped_column(String(20))
+    code_snapshot: Mapped[str] = mapped_column(String(64))
+    label_snapshot: Mapped[str] = mapped_column(String(200))
+    parent_id_snapshot: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)
+    term_revision: Mapped[int] = mapped_column(Integer)

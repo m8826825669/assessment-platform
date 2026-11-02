@@ -202,7 +202,7 @@ def detail(db, tenant, actor, question_id, version_id, offset=0, limit=100):
     }
 
 
-def queue(db, tenant, actor, offset, limit):
+def queue(db, tenant, actor, offset, limit, filters=None):
     access(db, tenant, actor)
     current = (
         select(QuestionReviewEvent.version_id, func.max(QuestionReviewEvent.sequence).label("sequence"))
@@ -210,7 +210,7 @@ def queue(db, tenant, actor, offset, limit):
         .group_by(QuestionReviewEvent.version_id)
         .subquery()
     )
-    rows = db.scalars(
+    query = (
         select(QuestionVersion)
         .join(
             QuestionReviewEvent,
@@ -228,19 +228,24 @@ def queue(db, tenant, actor, offset, limit):
         )
         .where(QuestionVersion.tenant_id == tenant, QuestionReviewEvent.state == "in_review")
         .order_by(QuestionReviewEvent.created_at, QuestionReviewEvent.id)
-        .offset(offset)
-        .limit(limit)
     )
+    from app.question_bank.taxonomy import apply_filters
+
+    query = apply_filters(db, tenant, query, QuestionVersion, filters, queue=True)
+    rows = db.scalars(query.offset(offset).limit(limit))
     return [service.metadata(saved, db=db) for saved in rows]
 
 
-def selections(db, tenant, actor, offset, limit, version_id=None):
+def selections(db, tenant, actor, offset, limit, version_id=None, filters=None):
     access(db, tenant, actor, permission="exams.manage")
     query = select(QuestionSelection).where(
         QuestionSelection.tenant_id == tenant, QuestionSelection.state == "approved"
     )
     if version_id:
         query = query.where(QuestionSelection.version_id == version_id)
+    from app.question_bank.taxonomy import apply_filters, snapshots
+
+    query = apply_filters(db, tenant, query, QuestionSelection, filters, public=True)
     rows = list(
         db.scalars(
             query.order_by(QuestionSelection.created_at, QuestionSelection.version_id)
@@ -256,6 +261,7 @@ def selections(db, tenant, actor, offset, limit, version_id=None):
             "version_id": row.version_id,
             "title": row.title,
             "content": row.public_content,
+            "taxonomy": snapshots(db, tenant, row.version_id),
         }
         for row in rows
     ]

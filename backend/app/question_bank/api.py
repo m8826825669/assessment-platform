@@ -4,19 +4,20 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
 
 from app.identity.api import Actor, Db
 from app.question_bank import service
 from app.question_bank.contracts import Content, Label
+from app.question_bank.taxonomy import Classification, SearchFilters, search_params
 
 router = APIRouter(prefix="/api/v1/tenants/{tenant_id}/questions", tags=["question bank"])
 Offset = Annotated[int, Query(ge=0, le=1000000)]
 Limit = Annotated[int, Query(ge=1, le=200)]
 
 
-class QuestionCreate(BaseModel):
+class QuestionCreate(Classification):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     title: Annotated[Label, Field(max_length=200)]
     content: Content
@@ -24,6 +25,18 @@ class QuestionCreate(BaseModel):
 
 class QuestionRevise(QuestionCreate):
     expected_revision: Annotated[StrictInt, Field(ge=1, le=2147483646)]
+
+
+class TaxonSnapshot(BaseModel):
+    id: UUID
+    kind: Literal["subject", "topic", "outcome", "tag"]
+    code: str
+    label: str
+    parent_id: UUID | None
+    revision: int
+
+
+Filters = Annotated[SearchFilters, Depends(search_params)]
 
 
 class VersionMetadata(BaseModel):
@@ -37,6 +50,7 @@ class VersionMetadata(BaseModel):
     created_at: datetime
     state: Literal["draft", "in_review", "returned", "approved", "retired", "superseded"]
     review_revision: int
+    taxonomy: list[TaxonSnapshot]
 
 
 class QuestionDetail(VersionMetadata):
@@ -54,12 +68,12 @@ class QuestionPreview(BaseModel):
 
 @router.post("", response_model=QuestionDetail, status_code=201)
 def create(tenant_id: UUID, body: QuestionCreate, actor: Actor, db: Db):
-    return service.create(db, tenant_id, actor, body.title, body.content)
+    return service.create(db, tenant_id, actor, body.title, body.content, body.taxonomy_ids)
 
 
 @router.get("", response_model=list[VersionMetadata])
-def listing(tenant_id: UUID, actor: Actor, db: Db, offset: Offset = 0, limit: Limit = 100):
-    return service.listing(db, tenant_id, actor, offset, limit)
+def listing(tenant_id: UUID, actor: Actor, db: Db, filters: Filters, offset: Offset = 0, limit: Limit = 100):
+    return service.listing(db, tenant_id, actor, offset, limit, filters)
 
 
 @router.get("/{question_id}", response_model=QuestionDetail)
@@ -69,7 +83,9 @@ def get(tenant_id: UUID, question_id: UUID, actor: Actor, db: Db):
 
 @router.post("/{question_id}/versions", response_model=QuestionDetail, status_code=201)
 def revise(tenant_id: UUID, question_id: UUID, body: QuestionRevise, actor: Actor, db: Db):
-    return service.revise(db, tenant_id, actor, question_id, body.expected_revision, body.title, body.content)
+    return service.revise(
+        db, tenant_id, actor, question_id, body.expected_revision, body.title, body.content, body.taxonomy_ids
+    )
 
 
 @router.get("/{question_id}/versions", response_model=list[VersionMetadata])

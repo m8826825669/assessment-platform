@@ -1,3 +1,7 @@
+# 0.9.0 — P2-004 (2 November 2026)
+
+Tenant catalogue and immutable version classification snapshots; title/type/state/AND taxonomy filters on scoped collections; guarded migration 0006, restricted grants/readiness and new validation coverage. P2-003 owner evidence accepted at 5bc13f9. P2-004 portable gate passes; real PostgreSQL and new CI pending. Dependencies, content.v1 and five accepted migrations unchanged.
+
 # Source/API 0.8.0 — P2-003 (2 November 2026)
 
 - Recorded P2-002 local/CI acceptance at e18af0c, with exact provenance limits.

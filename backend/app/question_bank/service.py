@@ -69,7 +69,7 @@ def audit_state(saved):
 
 
 def metadata(saved, db=None):
-    from app.question_bank import review
+    from app.question_bank import review, taxonomy
 
     workflow = review.status(db, saved) if db is not None else {"state": "draft", "review_revision": 0}
     return {
@@ -82,6 +82,7 @@ def metadata(saved, db=None):
         "authored_by": saved.authored_by,
         "created_at": saved.created_at,
         **workflow,
+        "taxonomy": taxonomy.snapshots(db, saved.tenant_id, saved.id) if db is not None else [],
     }
 
 
@@ -95,7 +96,7 @@ def detail(row, saved, db=None):
     }
 
 
-def append_version(db, row, actor, title, content: Content):
+def append_version(db, row, actor, title, content: Content, taxonomy_ids=()):
     saved = QuestionVersion(
         id=uuid4(),
         tenant_id=row.tenant_id,
@@ -109,25 +110,29 @@ def append_version(db, row, actor, title, content: Content):
     )
     db.add(saved)
     db.flush()
+    from app.question_bank.taxonomy import capture
+
+    capture(db, row, saved, taxonomy_ids)
     return saved
 
 
-def create(db, tenant, actor, title, content):
+def create(db, tenant, actor, title, content, taxonomy_ids=()):
     authority(db, tenant, actor, lock=True)
     row = Question(id=uuid4(), tenant_id=tenant, created_by=actor.user_id, revision=1)
     try:
         db.add(row)
         db.flush()  # Current-version FK is deferred until both rows and audit commit.
-        saved = append_version(db, row, actor, title, content)
+        saved = append_version(db, row, actor, title, content, taxonomy_ids)
         audit.record(db, "question.created", actor.user_id, tenant, str(row.id), after=audit_state(saved))
+        result = detail(row, saved, db=db)
         db.commit()
     except IntegrityError:
         db.rollback()
         reject(409, "question_conflict", "Question write conflicted; reload before retrying")
-    return detail(row, saved)
+    return result
 
 
-def revise(db, tenant, actor, identifier, expected_revision, title, content):
+def revise(db, tenant, actor, identifier, expected_revision, title, content, taxonomy_ids=()):
     row = question(db, tenant, actor, identifier, lock=True)
     if row.revision != expected_revision:
         reject(409, "question_conflict", "Question write conflicted; reload before retrying")
@@ -138,7 +143,7 @@ def revise(db, tenant, actor, identifier, expected_revision, title, content):
         supersede_pending(db, row, previous, actor)
         row.revision += 1
         db.flush()
-        saved = append_version(db, row, actor, title, content)
+        saved = append_version(db, row, actor, title, content, taxonomy_ids)
         audit.record(
             db,
             "question.revised",
@@ -148,11 +153,12 @@ def revise(db, tenant, actor, identifier, expected_revision, title, content):
             before=audit_state(previous),
             after=audit_state(saved),
         )
+        result = detail(row, saved, db=db)
         db.commit()
     except IntegrityError:
         db.rollback()
         reject(409, "question_conflict", "Question write conflicted; reload before retrying")
-    return detail(row, saved)
+    return result
 
 
 def get(db, tenant, actor, identifier, version_id=None):
@@ -175,7 +181,7 @@ def history(db, tenant, actor, identifier, offset, limit):
     return [metadata(saved, db=db) for saved in rows]
 
 
-def listing(db, tenant, actor, offset, limit):
+def listing(db, tenant, actor, offset, limit, filters=None):
     member = authority(db, tenant, actor)
     query = (
         select(QuestionVersion)
@@ -191,6 +197,9 @@ def listing(db, tenant, actor, offset, limit):
     )
     if member.role != "admin":
         query = query.where(Question.created_by == actor.user_id)
+    from app.question_bank.taxonomy import apply_filters
+
+    query = apply_filters(db, tenant, query, QuestionVersion, filters)
     return [
         metadata(saved, db=db)
         for saved in db.scalars(query.order_by(Question.created_at, Question.id).offset(offset).limit(limit))

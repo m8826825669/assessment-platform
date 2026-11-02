@@ -1,0 +1,35 @@
+BEGIN;
+
+-- Running downgrade 0006_question_taxonomy -> 0005_question_review
+
+DROP TABLE question_version_taxa;
+
+DROP TABLE taxonomy_terms;
+
+DROP FUNCTION version_taxon_guard();
+
+DROP FUNCTION taxonomy_term_guard();
+
+ALTER TABLE question_versions DROP CONSTRAINT uq_question_versions_taxonomy_binding;
+
+CREATE OR REPLACE FUNCTION question_version_guard() RETURNS trigger LANGUAGE plpgsql
+        SET search_path = pg_catalog, public AS $$
+        DECLARE current_revision integer;
+        BEGIN
+            IF TG_OP <> 'INSERT' THEN
+                RAISE EXCEPTION 'Saved question versions are immutable' USING ERRCODE = '42501';
+            END IF;
+            SELECT q.revision INTO current_revision FROM public.questions q
+                WHERE q.tenant_id = NEW.tenant_id AND q.id = NEW.question_id FOR UPDATE;
+            IF current_revision IS NULL OR current_revision <> NEW.version_number THEN
+                RAISE EXCEPTION 'Version must match the current revision' USING ERRCODE = '23514';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+ALTER TABLE question_versions DROP COLUMN created_txid;
+
+UPDATE alembic_version SET version_num='0005_question_review' WHERE alembic_version.version_num = '0006_question_taxonomy';
+
+COMMIT;
+

@@ -16,6 +16,10 @@ from app.request_context import request_id
 
 LOGGER = logging.getLogger("assessment.errors")
 MESSAGES = {
+    "taxonomy_not_found": "Taxonomy term not found",
+    "taxonomy_conflict": "Taxonomy changed or conflicts; reload before retrying",
+    "taxonomy_limit": "Use at most 64 taxonomy references including subject parents",
+    "invalid_search": "Unsupported state for this collection",
     "review_conflict": "Review state changed; reload before retrying",
     "review_self": "An independent reviewer is required",
     "question_not_found": "Question not found",

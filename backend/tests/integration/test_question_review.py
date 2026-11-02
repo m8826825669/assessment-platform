@@ -105,7 +105,7 @@ def test_all_types_review_and_sql_projection_match_public_contract(security_data
     selected = db.client.get(path(db, "question-selections", "/" + row["version_id"]), headers=coordinator)
     assert selected.status_code == 200, selected.text
     assert selected.json()["content"] == candidate_view(validate_content(row["content"]))
-    assert set(selected.json()) == {"question_id", "version_id", "title", "content"}
+    assert set(selected.json()) == {"question_id", "version_id", "title", "content", "taxonomy"}
     with db.runtime_engine.begin() as connection:
         context(connection, db, "candidate")
         assert connection.scalar(text("SELECT count(*) FROM question_versions")) == 0

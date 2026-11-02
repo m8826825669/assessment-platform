@@ -113,12 +113,12 @@
         "IAM-01",
         "GOV-01"
       ],
-      "status": "implemented_pending_local_postgresql_and_ci_verification",
+      "status": "done",
       "acceptance": "444 strict tests with zero skips; exact version/hash/counter decisions, independent reviewer including origin/editor/submitter and admin/role changes, supersession/edit races, retired selection exclusion, private draft/comment denial, immutable events, atomic projection/audit/outbox and actual CI on the new commit.",
       "depends_on": [
         "P2-002"
       ],
-      "evidence": "Portable gate and parsed migration evidence in VALIDATION_P2_003.txt. Real PostgreSQL and new CI acceptance pending; no remote run claimed."
+      "evidence": "Owner strict Windows gate VERIFICATION=PASS, 0005 head and clean schema, roles/worker/API ready; pushed commit 5bc13f9 and green Foundation gate #4 screenshot. Exact screenshot test count partly obscured; no run ID/job logs supplied. See LOCAL_VERIFICATION_P2_003.md."
     },
     {
       "id": "P2-004",
@@ -127,13 +127,13 @@
         "QBK-01",
         "TEN-01"
       ],
-      "status": "queued",
-      "acceptance": "Tenant-safe taxonomy links, immutable historical labels/references, bounded stable pagination and role-scoped search; real database/API rejection paths.",
+      "status": "implemented_pending_local_postgresql_and_ci_verification",
+      "acceptance": "502 strict tests with zero skips; tenant-scoped taxonomy, frozen labels, creation-only links, role-scoped literal title/type/state/AND taxonomy filters, bounded deterministic pagination; clean migration/grants/readiness and actual new-commit CI.",
       "depends_on": [
         "P2-002",
         "P2-003"
       ],
-      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+      "evidence": "313 portable tests passed; PostgreSQL suite collected but not executed here. See VALIDATION_P2_004.txt and P2_004_UPGRADE_WINDOWS.md."
     },
     {
       "id": "P2-005",

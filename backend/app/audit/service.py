@@ -28,7 +28,15 @@ QUESTION_ACTIONS = frozenset({"question.created", "question.revised"})
 REVIEW_ACTIONS = frozenset(
     {"question.review_" + action for action in ("submitted", "returned", "approved", "retired", "superseded")}
 )
-ACTIONS = EMPTY_ACTIONS | MEMBERSHIP_ACTIONS | QUESTION_ACTIONS | REVIEW_ACTIONS | {REQUEUE_ACTION}
+TAXONOMY_ACTIONS = frozenset({"taxonomy.created", "taxonomy.changed"})
+ACTIONS = (
+    EMPTY_ACTIONS
+    | MEMBERSHIP_ACTIONS
+    | QUESTION_ACTIONS
+    | REVIEW_ACTIONS
+    | TAXONOMY_ACTIONS
+    | {REQUEUE_ACTION}
+)
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})
 
 
@@ -41,11 +49,19 @@ def clean_state(action: str, state: dict | None) -> dict:
         allowed = {"version_id", "revision", "content_hash"}
     if action in REVIEW_ACTIONS:
         allowed = {"version_id", "revision", "content_hash", "review_revision", "review_state"}
+    if action in TAXONOMY_ACTIONS:
+        allowed = {"term_id", "term_revision", "term_state"}
     if action == REQUEUE_ACTION:
         allowed = {"status", "attempts", "reason_code"}
     if state.keys() - allowed:
         raise ValueError("Unapproved audit state field")
     for key, value in state.items():
+        if key == "term_id":
+            state[key] = str(UUID(str(value)))
+        if key == "term_revision" and (type(value) is not int or not 1 <= value <= 2147483647):
+            raise ValueError("Invalid taxonomy revision")
+        if key == "term_state" and value not in {"active", "retired"}:
+            raise ValueError("Invalid taxonomy state")
         if key == "review_revision" and (type(value) is not int or not 0 <= value <= 2147483647):
             raise ValueError("Invalid review revision")
         if key == "review_state" and value not in {

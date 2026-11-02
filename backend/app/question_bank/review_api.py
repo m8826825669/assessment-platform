@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
 from app.identity.api import Actor, Db
 from app.question_bank import review
-from app.question_bank.api import Limit, Offset, QuestionDetail, VersionMetadata
+from app.question_bank.api import Filters, Limit, Offset, QuestionDetail, TaxonSnapshot, VersionMetadata
 from app.question_bank.contracts import Label
 
 router = APIRouter(prefix="/api/v1/tenants/{tenant_id}", tags=["question review"])
@@ -45,6 +45,7 @@ class ReviewDetail(QuestionDetail):
 
 
 class SelectedContent(BaseModel):
+    taxonomy: list[TaxonSnapshot]
     question_id: UUID
     version_id: UUID
     title: str
@@ -52,8 +53,8 @@ class SelectedContent(BaseModel):
 
 
 @router.get("/question-reviews", response_model=list[VersionMetadata])
-def queue(tenant_id: UUID, actor: Actor, db: Db, offset: Offset = 0, limit: Limit = 100):
-    return review.queue(db, tenant_id, actor, offset, limit)
+def queue(tenant_id: UUID, actor: Actor, db: Db, filters: Filters, offset: Offset = 0, limit: Limit = 100):
+    return review.queue(db, tenant_id, actor, offset, limit, filters)
 
 
 @router.get("/question-reviews/{question_id}/versions/{version_id}", response_model=ReviewDetail)
@@ -75,8 +76,10 @@ def decide(tenant_id: UUID, question_id: UUID, version_id: UUID, body: ReviewBod
 
 
 @router.get("/question-selections", response_model=list[SelectedContent])
-def selections(tenant_id: UUID, actor: Actor, db: Db, offset: Offset = 0, limit: Limit = 100):
-    return review.selections(db, tenant_id, actor, offset, limit)
+def selections(
+    tenant_id: UUID, actor: Actor, db: Db, filters: Filters, offset: Offset = 0, limit: Limit = 100
+):
+    return review.selections(db, tenant_id, actor, offset, limit, filters=filters)
 
 
 @router.get("/question-selections/{version_id}", response_model=SelectedContent)
