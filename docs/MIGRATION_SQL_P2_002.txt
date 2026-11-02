@@ -1,0 +1,364 @@
+BEGIN;
+
+CREATE TABLE alembic_version (
+    version_num VARCHAR(32) NOT NULL,
+    CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
+);
+
+-- Running upgrade  -> 0001_foundation
+
+CREATE TABLE institutions (
+    id UUID NOT NULL,
+    slug VARCHAR(80) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    status VARCHAR(20) DEFAULT 'active' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_institutions PRIMARY KEY (id),
+    CONSTRAINT uq_institutions_slug UNIQUE (slug),
+    CONSTRAINT ck_institutions_slug_format CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+    CONSTRAINT ck_institutions_name_not_blank CHECK (length(trim(name)) > 0),
+    CONSTRAINT ck_institutions_status_values CHECK (status IN ('active', 'suspended'))
+);
+
+CREATE TABLE users (
+    id UUID NOT NULL,
+    email VARCHAR(320) NOT NULL,
+    display_name VARCHAR(200) NOT NULL,
+    is_active BOOLEAN DEFAULT true NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_users PRIMARY KEY (id),
+    CONSTRAINT uq_users_email UNIQUE (email),
+    CONSTRAINT ck_users_email_normalized CHECK (email = lower(trim(email)) AND length(email) > 3),
+    CONSTRAINT ck_users_name_not_blank CHECK (length(trim(display_name)) > 0)
+);
+
+CREATE TABLE memberships (
+    id UUID NOT NULL,
+    tenant_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    status VARCHAR(20) DEFAULT 'active' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_memberships PRIMARY KEY (id),
+    CONSTRAINT uq_memberships_tenant_id UNIQUE (tenant_id, user_id),
+    CONSTRAINT fk_memberships_tenant_id_institutions FOREIGN KEY(tenant_id) REFERENCES institutions (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_memberships_user_id_users FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_memberships_status_values CHECK (status IN ('active', 'suspended'))
+);
+
+CREATE INDEX ix_memberships_user_id ON memberships (user_id);
+
+INSERT INTO alembic_version (version_num) VALUES ('0001_foundation') RETURNING alembic_version.version_num;
+
+-- Running upgrade 0001_foundation -> 0002_identity_tenancy
+
+ALTER TABLE users ADD COLUMN password_hash VARCHAR(512);
+
+ALTER TABLE memberships ADD COLUMN role VARCHAR(30) DEFAULT 'candidate' NOT NULL;
+
+ALTER TABLE memberships ADD CONSTRAINT ck_memberships_role_values CHECK (role IN ('admin', 'coordinator', 'author', 'reviewer', 'invigilator', 'examiner', 'candidate'));
+
+CREATE TABLE auth_sessions (
+    id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    token_hash VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    revoked_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT pk_auth_sessions PRIMARY KEY (id),
+    CONSTRAINT fk_auth_sessions_user_id_users FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT uq_auth_sessions_token_hash UNIQUE (token_hash),
+    CONSTRAINT ck_auth_sessions_token_hash_format CHECK (token_hash ~ '^[0-9a-f]{64}$'),
+    CONSTRAINT ck_auth_sessions_expiry_after_creation CHECK (expires_at > created_at)
+);
+
+CREATE INDEX ix_auth_sessions_user_id ON auth_sessions (user_id);
+
+CREATE TABLE login_buckets (
+    bucket_key VARCHAR(64) NOT NULL,
+    window_started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    attempts INTEGER NOT NULL,
+    CONSTRAINT pk_login_buckets PRIMARY KEY (bucket_key),
+    CONSTRAINT ck_login_buckets_positive_attempts CHECK (attempts > 0)
+);
+
+CREATE TABLE security_events (
+    id UUID NOT NULL,
+    tenant_id UUID,
+    actor_user_id UUID,
+    action VARCHAR(80) NOT NULL,
+    subject_id TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_security_events PRIMARY KEY (id)
+);
+
+CREATE INDEX ix_security_events_tenant_id ON security_events (tenant_id);
+
+ALTER TABLE institutions ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE institutions FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_boundary ON institutions USING (id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) WITH CHECK (id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+
+ALTER TABLE memberships ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE memberships FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_boundary ON memberships USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+
+CREATE POLICY own_memberships ON memberships FOR SELECT USING (
+        NULLIF(current_setting('app.tenant_id', true), '') IS NULL
+        AND user_id = NULLIF(current_setting('app.actor_user_id', true), '')::uuid
+    );
+
+CREATE POLICY own_institutions ON institutions FOR SELECT USING (
+        NULLIF(current_setting('app.tenant_id', true), '') IS NULL
+        AND EXISTS (SELECT 1 FROM memberships m WHERE m.tenant_id = institutions.id
+            AND m.user_id = NULLIF(current_setting('app.actor_user_id', true), '')::uuid
+            AND m.status = 'active')
+    );
+
+ALTER TABLE security_events ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE security_events FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY security_event_append ON security_events FOR INSERT WITH CHECK (
+        tenant_id IS NULL OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+    );
+
+CREATE POLICY security_event_operator_read ON security_events FOR SELECT USING (
+        pg_has_role(current_user, pg_get_userbyid((SELECT relowner FROM pg_class
+            WHERE oid = 'public.security_events'::regclass)), 'MEMBER')
+    );
+
+UPDATE alembic_version SET version_num='0002_identity_tenancy' WHERE alembic_version.version_num = '0001_foundation';
+
+-- Running upgrade 0002_identity_tenancy -> 0003_audit_outbox
+
+CREATE TABLE audit_records (
+    id UUID NOT NULL,
+    tenant_id UUID,
+    scope_key VARCHAR(36) NOT NULL,
+    actor_user_id UUID,
+    actor_kind VARCHAR(20) NOT NULL,
+    actor_reference VARCHAR(128),
+    action VARCHAR(80) NOT NULL,
+    subject_id UUID,
+    before_state JSONB DEFAULT '{}'::jsonb NOT NULL,
+    after_state JSONB DEFAULT '{}'::jsonb NOT NULL,
+    request_id UUID,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_audit_records PRIMARY KEY (id),
+    CONSTRAINT uq_audit_records_id UNIQUE (id, scope_key),
+    CONSTRAINT ck_audit_records_scope_matches_tenant CHECK (scope_key = COALESCE(tenant_id::text, 'global')),
+    CONSTRAINT ck_audit_records_state_objects CHECK (jsonb_typeof(before_state) = 'object' AND jsonb_typeof(after_state) = 'object'),
+    CONSTRAINT ck_audit_records_actor_kind_values CHECK (actor_kind IN ('user', 'operator', 'anonymous'))
+);
+
+CREATE INDEX ix_audit_records_tenant_created ON audit_records (tenant_id, created_at, id);
+
+CREATE TABLE outbox_events (
+    id UUID NOT NULL,
+    audit_id UUID NOT NULL,
+    tenant_id UUID,
+    scope_key VARCHAR(36) NOT NULL,
+    event_type VARCHAR(80) NOT NULL,
+    payload JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_outbox_events PRIMARY KEY (id),
+    CONSTRAINT uq_outbox_events_audit_id UNIQUE (audit_id),
+    CONSTRAINT fk_outbox_events_audit_id_audit_records FOREIGN KEY(audit_id, scope_key) REFERENCES audit_records (id, scope_key) ON DELETE RESTRICT,
+    CONSTRAINT ck_outbox_events_scope_matches_tenant CHECK (scope_key = COALESCE(tenant_id::text, 'global')),
+    CONSTRAINT ck_outbox_events_payload_object CHECK (jsonb_typeof(payload) = 'object')
+);
+
+CREATE TABLE outbox_deliveries (
+    event_id UUID NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending' NOT NULL,
+    attempts INTEGER DEFAULT '0' NOT NULL,
+    max_attempts INTEGER DEFAULT '5' NOT NULL,
+    available_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    lease_token UUID,
+    lease_expires_at TIMESTAMP WITH TIME ZONE,
+    delivered_at TIMESTAMP WITH TIME ZONE,
+    last_error_code VARCHAR(80),
+    CONSTRAINT pk_outbox_deliveries PRIMARY KEY (event_id),
+    CONSTRAINT fk_outbox_deliveries_event_id_outbox_events FOREIGN KEY(event_id) REFERENCES outbox_events (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_outbox_deliveries_status_values CHECK (status IN ('pending', 'processing', 'delivered', 'dead')),
+    CONSTRAINT ck_outbox_deliveries_attempt_bounds CHECK (max_attempts BETWEEN 1 AND 20 AND attempts BETWEEN 0 AND max_attempts),
+    CONSTRAINT ck_outbox_deliveries_lease_matches_status CHECK ((status = 'processing' AND lease_token IS NOT NULL AND lease_expires_at IS NOT NULL) OR (status <> 'processing' AND lease_token IS NULL AND lease_expires_at IS NULL)),
+    CONSTRAINT ck_outbox_deliveries_delivery_matches_status CHECK ((status = 'delivered') = (delivered_at IS NOT NULL))
+);
+
+CREATE INDEX ix_outbox_deliveries_ready ON outbox_deliveries (status, available_at);
+
+CREATE TABLE consumer_receipts (
+    consumer VARCHAR(80) NOT NULL,
+    event_id UUID NOT NULL,
+    payload_hash VARCHAR(64) NOT NULL,
+    processed_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_consumer_receipts PRIMARY KEY (consumer, event_id),
+    CONSTRAINT fk_consumer_receipts_event_id_outbox_events FOREIGN KEY(event_id) REFERENCES outbox_events (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_consumer_receipts_hash_format CHECK (payload_hash ~ '^[0-9a-f]{64}$')
+);
+
+ALTER TABLE audit_records ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE audit_records FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE outbox_events ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE outbox_events FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE outbox_deliveries ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE outbox_deliveries FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE consumer_receipts ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE consumer_receipts FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY scoped_append ON audit_records FOR INSERT WITH CHECK (tenant_id IS NULL OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+
+CREATE POLICY scoped_append ON outbox_events FOR INSERT WITH CHECK (tenant_id IS NULL OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+
+CREATE POLICY tenant_audit_read ON audit_records FOR SELECT USING (
+        tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+    );
+
+CREATE POLICY operator_audit_read ON audit_records FOR SELECT USING (
+        pg_has_role(current_user, pg_get_userbyid((SELECT relowner FROM pg_class
+            WHERE oid = 'public.audit_records'::regclass)), 'MEMBER')
+    );
+
+CREATE POLICY worker_read ON outbox_events FOR SELECT USING (true);
+
+CREATE POLICY enqueue ON outbox_deliveries FOR INSERT WITH CHECK (true);
+
+CREATE POLICY worker_read ON outbox_deliveries FOR SELECT USING (true);
+
+CREATE POLICY worker_update ON outbox_deliveries FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY worker_read ON consumer_receipts FOR SELECT USING (true);
+
+CREATE POLICY worker_append ON consumer_receipts FOR INSERT WITH CHECK (true);
+
+UPDATE alembic_version SET version_num='0003_audit_outbox' WHERE alembic_version.version_num = '0002_identity_tenancy';
+
+-- Running upgrade 0003_audit_outbox -> 0004_question_versions
+
+CREATE TABLE questions (
+    id UUID NOT NULL,
+    tenant_id UUID NOT NULL,
+    created_by UUID NOT NULL,
+    revision INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_questions PRIMARY KEY (id),
+    CONSTRAINT uq_questions_tenant_id UNIQUE (tenant_id, id),
+    CONSTRAINT fk_questions_tenant_id_institutions FOREIGN KEY(tenant_id) REFERENCES institutions (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_questions_created_by_users FOREIGN KEY(created_by) REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_questions_positive_revision CHECK (revision > 0)
+);
+
+CREATE INDEX ix_questions_tenant_created ON questions (tenant_id, created_at, id);
+
+CREATE TABLE question_versions (
+    id UUID NOT NULL,
+    tenant_id UUID NOT NULL,
+    question_id UUID NOT NULL,
+    version_number INTEGER NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    schema_version VARCHAR(40) NOT NULL,
+    content JSONB NOT NULL,
+    content_hash VARCHAR(64) NOT NULL,
+    authored_by UUID NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT pk_question_versions PRIMARY KEY (id),
+    CONSTRAINT uq_question_versions_tenant_id UNIQUE (tenant_id, question_id, version_number),
+    CONSTRAINT fk_question_versions_tenant_id_questions FOREIGN KEY(tenant_id, question_id) REFERENCES questions (tenant_id, id) ON DELETE RESTRICT,
+    CONSTRAINT fk_question_versions_authored_by_users FOREIGN KEY(authored_by) REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_question_versions_positive_version CHECK (version_number > 0),
+    CONSTRAINT ck_question_versions_title_not_blank CHECK (length(trim(title)) > 0),
+    CONSTRAINT ck_question_versions_schema_version CHECK (schema_version = 'question-content.v1'),
+    CONSTRAINT ck_question_versions_content_object CHECK (jsonb_typeof(content) = 'object'),
+    CONSTRAINT ck_question_versions_hash_format CHECK (content_hash ~ '^[0-9a-f]{64}$')
+);
+
+ALTER TABLE questions ADD CONSTRAINT fk_questions_current_version FOREIGN KEY(tenant_id, id, revision) REFERENCES question_versions (tenant_id, question_id, version_number) DEFERRABLE INITIALLY DEFERRED;
+
+CREATE FUNCTION question_identity_guard() RETURNS trigger LANGUAGE plpgsql
+        SET search_path = pg_catalog, public AS $$
+        BEGIN
+            IF TG_OP = 'DELETE' THEN
+                RAISE EXCEPTION 'Question identity is retained' USING ERRCODE = '42501';
+            END IF;
+            IF NEW.id IS DISTINCT FROM OLD.id OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
+               OR NEW.created_by IS DISTINCT FROM OLD.created_by OR NEW.created_at IS DISTINCT FROM OLD.created_at
+               OR NEW.revision::bigint <> OLD.revision::bigint + 1 THEN
+                RAISE EXCEPTION 'Only the next revision is allowed' USING ERRCODE = '23514';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+CREATE TRIGGER question_identity_guard BEFORE UPDATE OR DELETE ON questions FOR EACH ROW EXECUTE FUNCTION question_identity_guard();
+
+CREATE FUNCTION question_version_guard() RETURNS trigger LANGUAGE plpgsql
+        SET search_path = pg_catalog, public AS $$
+        DECLARE current_revision integer;
+        BEGIN
+            IF TG_OP <> 'INSERT' THEN
+                RAISE EXCEPTION 'Saved question versions are immutable' USING ERRCODE = '42501';
+            END IF;
+            SELECT q.revision INTO current_revision FROM public.questions q
+                WHERE q.tenant_id = NEW.tenant_id AND q.id = NEW.question_id FOR UPDATE;
+            IF current_revision IS NULL OR current_revision <> NEW.version_number THEN
+                RAISE EXCEPTION 'Version must match the current revision' USING ERRCODE = '23514';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+CREATE TRIGGER question_version_guard BEFORE INSERT OR UPDATE OR DELETE ON question_versions FOR EACH ROW EXECUTE FUNCTION question_version_guard();
+
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE questions FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE question_versions ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE question_versions FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY question_read ON questions FOR SELECT USING ((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND (EXISTS (SELECT 1 FROM public.memberships m
+        JOIN public.institutions i ON i.id = m.tenant_id
+        JOIN public.users u ON u.id = m.user_id
+        WHERE m.tenant_id = questions.tenant_id AND m.user_id = NULLIF(current_setting('app.actor_user_id', true), '')::uuid
+        AND m.status = 'active' AND i.status = 'active' AND u.is_active
+        AND (m.role = 'admin' OR (m.role = 'author' AND questions.created_by = NULLIF(current_setting('app.actor_user_id', true), '')::uuid)))));
+
+CREATE POLICY question_create ON questions FOR INSERT WITH CHECK (((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND (EXISTS (SELECT 1 FROM public.memberships m
+        JOIN public.institutions i ON i.id = m.tenant_id
+        JOIN public.users u ON u.id = m.user_id
+        WHERE m.tenant_id = questions.tenant_id AND m.user_id = NULLIF(current_setting('app.actor_user_id', true), '')::uuid
+        AND m.status = 'active' AND i.status = 'active' AND u.is_active
+        AND (m.role = 'admin' OR (m.role = 'author' AND questions.created_by = NULLIF(current_setting('app.actor_user_id', true), '')::uuid))))) AND created_by = NULLIF(current_setting('app.actor_user_id', true), '')::uuid AND revision = 1);
+
+CREATE POLICY question_revise ON questions FOR UPDATE USING ((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND (EXISTS (SELECT 1 FROM public.memberships m
+        JOIN public.institutions i ON i.id = m.tenant_id
+        JOIN public.users u ON u.id = m.user_id
+        WHERE m.tenant_id = questions.tenant_id AND m.user_id = NULLIF(current_setting('app.actor_user_id', true), '')::uuid
+        AND m.status = 'active' AND i.status = 'active' AND u.is_active
+        AND (m.role = 'admin' OR (m.role = 'author' AND questions.created_by = NULLIF(current_setting('app.actor_user_id', true), '')::uuid))))) WITH CHECK ((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND (EXISTS (SELECT 1 FROM public.memberships m
+        JOIN public.institutions i ON i.id = m.tenant_id
+        JOIN public.users u ON u.id = m.user_id
+        WHERE m.tenant_id = questions.tenant_id AND m.user_id = NULLIF(current_setting('app.actor_user_id', true), '')::uuid
+        AND m.status = 'active' AND i.status = 'active' AND u.is_active
+        AND (m.role = 'admin' OR (m.role = 'author' AND questions.created_by = NULLIF(current_setting('app.actor_user_id', true), '')::uuid)))));
+
+CREATE POLICY question_version_read ON question_versions FOR SELECT USING ((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND EXISTS (SELECT 1 FROM public.questions q
+        WHERE q.tenant_id = question_versions.tenant_id AND q.id = question_versions.question_id));
+
+CREATE POLICY question_version_append ON question_versions FOR INSERT WITH CHECK (((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND EXISTS (SELECT 1 FROM public.questions q
+        WHERE q.tenant_id = question_versions.tenant_id AND q.id = question_versions.question_id)) AND authored_by = NULLIF(current_setting('app.actor_user_id', true), '')::uuid);
+
+UPDATE alembic_version SET version_num='0004_question_versions' WHERE alembic_version.version_num = '0003_audit_outbox';
+
+COMMIT;
+

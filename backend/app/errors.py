@@ -16,6 +16,8 @@ from app.request_context import request_id
 
 LOGGER = logging.getLogger("assessment.errors")
 MESSAGES = {
+    "question_not_found": "Question not found",
+    "question_conflict": "Question write conflicted; reload before retrying",
     "invalid_credentials": "Invalid email or password",
     "invalid_session": "Authentication required",
     "login_throttled": "Too many attempts; try again later",

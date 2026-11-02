@@ -8,6 +8,7 @@ from app.config import Settings
 from app.db.database import Database
 from app.errors import ERROR_STATUSES, Problem, install
 from app.identity.api import router
+from app.question_bank.api import router as questions_router
 
 
 class Liveness(BaseModel):
@@ -32,7 +33,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Institutional Assessment API",
-        version="0.4.0",
+        version="0.7.0",
         lifespan=lifespan,
         responses={
             code: {"model": Problem, "description": "Structured API problem"} for code in ERROR_STATUSES
@@ -43,6 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(router)
 
     app.include_router(audit_router)
+    app.include_router(questions_router)
     install(app)
 
     @app.get("/api/v1/health", response_model=Liveness, tags=["operations"])

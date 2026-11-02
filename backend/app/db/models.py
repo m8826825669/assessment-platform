@@ -218,3 +218,56 @@ class ConsumerReceipt(Base):
     )
     payload_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     processed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Question(Base):
+    """Stable ownership and a fenced pointer to the latest immutable saved draft."""
+
+    __tablename__ = "questions"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id"),
+        CheckConstraint("revision > 0", name="positive_revision"),
+        ForeignKeyConstraint(
+            ["tenant_id", "id", "revision"],
+            [
+                "question_versions.tenant_id",
+                "question_versions.question_id",
+                "question_versions.version_number",
+            ],
+            name="fk_questions_current_version",
+            deferrable=True,
+            initially="DEFERRED",
+            use_alter=True,
+        ),
+        Index("ix_questions_tenant_created", "tenant_id", "created_at", "id"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("institutions.id", ondelete="RESTRICT"))
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class QuestionVersion(Base):
+    __tablename__ = "question_versions"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "question_id", "version_number"),
+        ForeignKeyConstraint(
+            ["tenant_id", "question_id"], ["questions.tenant_id", "questions.id"], ondelete="RESTRICT"
+        ),
+        CheckConstraint("version_number > 0", name="positive_version"),
+        CheckConstraint("length(trim(title)) > 0", name="title_not_blank"),
+        CheckConstraint("schema_version = 'question-content.v1'", name="schema_version"),
+        CheckConstraint("jsonb_typeof(content) = 'object'", name="content_object"),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="hash_format"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    question_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    version_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    schema_version: Mapped[str] = mapped_column(String(40), nullable=False)
+    content: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    authored_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

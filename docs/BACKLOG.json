@@ -81,12 +81,12 @@
         "PUB-01",
         "SEC-01"
       ],
-      "status": "implemented_pending_local_and_ci_verification",
+      "status": "done",
       "acceptance": "Seven types validate; malformed content rejected; recursive candidate projection omits secrets; immutable nested snapshots and deterministic full-content fingerprints; strict local regression and actual CI pass.",
       "depends_on": [
         "P1-005"
       ],
-      "evidence": "See P2_QUESTION_BANK_PLAN.md and VALIDATION_P2_001.txt; content unit evidence only, local strict regression and new CI run pending."
+      "evidence": "Owner Windows/PostgreSQL: 299 passed, zero skips, 147.03s, full verification pass; correct CI run 41378575934 / commit 918036d has all four jobs green. See LOCAL_VERIFICATION_P2_001.md."
     },
     {
       "id": "P2-002",
@@ -98,12 +98,12 @@
         "IAM-01",
         "GOV-01"
       ],
-      "status": "queued",
-      "acceptance": "Real PostgreSQL migration/grants/readiness, tenant and direct SQL denial, immutable history, stale-write conflicts, concurrent version uniqueness, atomic mutation/audit/outbox; API tests and actual CI pass.",
+      "status": "implemented_pending_local_postgresql_and_ci_verification",
+      "acceptance": "Real PostgreSQL upgrade preserves prior data; schema/grants/readiness match; scoped saved-draft APIs and immutable version history; stale/concurrent edit and revocation tests; atomic audit/outbox rollback; all 357 strict tests with zero skips and actual CI on the new commit.",
       "depends_on": [
         "P2-001"
       ],
-      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+      "evidence": "230 portable tests passed; SQL and PL/pgSQL parse evidence only. 127 PostgreSQL tests require local execution. See VALIDATION_P2_002.txt and P2_002_UPGRADE_WINDOWS.md. No new CI run claimed."
     },
     {
       "id": "P2-003",

@@ -69,3 +69,19 @@ def test_audit_outbox_migration_has_scope_fk_and_no_transport_credentials(monkey
     assert "CREATE TABLE outbox_deliveries" in script
     assert "CREATE ROLE" not in script
     assert "0003_audit_outbox" in script
+
+
+def test_question_schema_has_scoped_current_version_fk_and_immutable_guards(monkeypatch):
+    monkeypatch.setenv("ASSESSMENT_DATABASE_URL", "postgresql+psycopg://local@localhost/disposable")
+    settings = config()
+    output = StringIO()
+    settings.output_buffer = output
+    command.upgrade(settings, "head", sql=True)
+    script = output.getvalue()
+    assert "DEFERRABLE INITIALLY DEFERRED" in script
+    assert "FOREIGN KEY(tenant_id, id, revision)" in script
+    assert "FOREIGN KEY(tenant_id, question_id) REFERENCES questions (tenant_id, id)" in script
+    assert "CREATE TRIGGER question_version_guard" in script
+    assert "CREATE TRIGGER question_identity_guard" in script
+    assert "CREATE POLICY question_version_append" in script
+    assert "SECURITY DEFINER" not in script

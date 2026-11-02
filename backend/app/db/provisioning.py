@@ -68,6 +68,11 @@ def grant_runtime(connection: Connection, role: str) -> None:
     )
     connection.execute(sql.SQL("GRANT UPDATE (role, status) ON memberships TO {}").format(identifier))
 
+    connection.execute(
+        sql.SQL("GRANT SELECT, INSERT ON questions, question_versions TO {}").format(identifier)
+    )
+    connection.execute(sql.SQL("GRANT UPDATE (revision) ON questions TO {}").format(identifier))
+
 
 def grant_worker(connection: Connection, role: str) -> None:
     identifier = restricted_role(connection, role)

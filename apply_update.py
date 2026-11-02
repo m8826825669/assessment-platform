@@ -36,8 +36,15 @@ def apply(source: Path, target: Path) -> Path:
             raise ValueError("Source verification failed for " + relative)
         safe_path(target, relative)
         entries.append(relative)
-    for revision in ["0001_foundation.py", "0002_identity_tenancy.py", "0003_audit_outbox.py"]:
+    for revision in [
+        "0001_foundation.py",
+        "0002_identity_tenancy.py",
+        "0003_audit_outbox.py",
+        "0004_question_versions.py",
+    ]:
         baseline = Path("backend/alembic/versions") / revision
+        if revision == "0004_question_versions.py" and not (target / baseline).exists():
+            continue  # New in this bundle; compare it on subsequent applications.
         if (
             not (target / baseline).is_file()
             or sha256((target / baseline).read_bytes()).digest()

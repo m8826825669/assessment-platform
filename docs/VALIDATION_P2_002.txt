@@ -1,0 +1,58 @@
+P2-002 authoring evidence — 2 November 2026
+
+CPython 3.12.14 on Linux; existing pinned development resolution.
+Final portable verification:
+  dependency compatibility/pin checks passed
+  Ruff lint and format checks passed
+  230 tests passed, zero skips, one existing Starlette/httpx warning, 2.60 seconds
+  VERIFICATION=PARTIAL_PASS
+Full collection: 357 tests, including 127 PostgreSQL tests.
+Offline Alembic upgrade SQL generated; pglast 8.7 parsed all 72 statements and both PL/pgSQL trigger functions.
+Four top-level runtime privilege/RLS SQL queries parsed, with known built-in function argument counts checked.
+Parsing does not prove SQL semantics, permissions, transactional behavior or concurrency.
+Real PostgreSQL execution is unavailable in this workspace; strict local and actual CI execution remain mandatory.
+No remote commit, CI run, API deployment or main database migration was performed here.
+Protected byte comparisons against v0.6 passed: migrations 0001-0003, dependency lockfiles, question-content contract/examples and both original roadmap baseline files.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T03:09:44.058777+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 230,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T03:09:47.555019+00:00"
+}
+
+Package checks:
+- Update applied to extracted v0.6 source; repository/configuration/environment sentinels preserved.
+- Reapplying over an altered 0004 migration was rejected before copying.
+- ZIP CRC and all manifest member hashes verified.
+- Text files checked for staged-whitespace problems; no credentials or local environments included.

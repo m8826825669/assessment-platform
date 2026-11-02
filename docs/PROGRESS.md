@@ -1,23 +1,25 @@
 # Progress
 
-Controlling scope: MASTER_ROADMAP.md v1.0. Updated 2 November 2026; source release 0.6, P2-001. The original roadmap and Word baseline remain unchanged.
+Controlling baseline: MASTER_ROADMAP.md v1.0; P2 plan: P2_QUESTION_BANK_PLAN.md. Updated 2 November 2026. Source/API release 0.7.0, P2-002. Original roadmap/Word baseline unchanged.
 
 ## Completed
 
-P0 and P1 engineering foundation are complete. P1-001 through P1-005 are accepted with linked evidence in BACKLOG.json and P1_ACCEPTANCE.md. The owner verified 236 tests with zero skips in the working Windows environment twice and the separate .venv-p1-005-fresh environment once (160.02 seconds). CI screenshot: run 41375023675 attempt 2, commit b00e0a8, all three PostgreSQL/Python jobs and the partial Windows job succeeded. Remote logs/test counts were not independently fetched; the screenshot proves job outcomes only. Earlier identity/runtime/worker evidence remains in LOCAL_VERIFICATION_P1_002/003/004.md.
+P0 and P1 engineering foundation are accepted; see P1_ACCEPTANCE.md. P2-001 is accepted from the owner's local 299-test strict PostgreSQL pass (147.03s, zero skips) and all four CI jobs green for the correct commit 918036d / run 41378575934. An older b00e0a8 rerun was excluded. See LOCAL_VERIFICATION_P2_001.md. Screenshot evidence proves job conclusions; remote logs/full SHA were not independently fetched.
 
-## Current: P2-001 content contracts
+## Current implementation: P2-002
 
-P2_QUESTION_BANK_PLAN.md expands the whole milestone into eight tasks, including persistence, independent review, taxonomy, protected media, atomic imports, frontend journeys and final acceptance. The final goal and milestone sequence are unchanged.
+Persistent tenant-owned questions and immutable saved versions, current revision fencing, scoped composite references, guarded appends, own-author/admin draft CRUD subset (create/read/new-version/history), staff-only safe preview, current authority rechecks after lock waits, and atomic business/audit/outbox writes. No destructive draft edit or delete operation exists; every accepted save is a new snapshot.
 
-First bounded implementation: seven typed plain-text question-content contracts, semantic validation, immutable nested validated values, explicit recursive candidate-safe projection and schema-versioned content fingerprints. Added synthetic examples, generated JSON Schema, contract documentation and 63 focused tests. No new API routes, migration, grants, dependency versions, media storage or scoring engine. Existing application API package version stays 0.4.0; source archive release is 0.6.
+Migration 0004_question_versions creates the two new tables, policies, current-version FK and two guards. Application requires nine forced-RLS tables, enabled immutable guards and new restricted API grants; worker is denied question-table rights. API/source version 0.7.0. Dependencies, all three older migration bytes and question-content.v1 remain unchanged.
 
-## Acceptance status
+Portable evidence: 230 tests passed with no skips; dependency/lint/format checks clean. Full suite collection: 357 tests, including 127 PostgreSQL tests. SQL parser accepted 72 migration statements and both PL/pgSQL functions; syntax only, not database execution. See VALIDATION_P2_002.txt for exact evidence and limits.
 
-P2-001 IMPLEMENTED, STRICT LOCAL REGRESSION AND NEW REMOTE CI PENDING. P2 is IN PROGRESS. P1's successful run is historical evidence, not a passing P2 run. Authoring evidence is in VALIDATION_P2_001.txt; unit tests prove content behavior only.
+## Gate and next action
 
-Next: apply P2_001_UPGRADE_WINDOWS.md to the clean repository, inspect the source changes, run the strict local gate (expected 299 tests), commit/push and inspect every new CI job. Once P2-001 passes, start P2-002 persistent question versions. No new migration is needed for P2-001; existing head remains 0003_audit_outbox.
+P2-002 IMPLEMENTED, LOCAL POSTGRESQL AND NEW REMOTE CI ACCEPTANCE PENDING. P2 overall remains in progress. This workspace cannot execute PostgreSQL under its required non-root server process constraints. Do not count portable tests or SQL parsing as persistence/concurrency proof.
 
-## Limits
+Follow P2_002_UPGRADE_WINDOWS.md: stop old processes, apply separate source bundle, migrate to 0004, compare schema, refresh existing restricted role grants, run all 357 tests with zero skips, restart/check readiness and worker status, inspect/commit/push and verify every CI job for the new commit. Then record P2-002 acceptance and implement P2-003 independent review/approval. Historical passing CI does not validate new source.
 
-Question bank persistence/review/media/import/UI and real examination delivery/scoring/results are not delivered yet. Existing domain kernel remains an in-memory reference. The worker has local receipt effects only. No external transport, production deployment, measured capacity, recovery/accessibility certification or product-completion claim. Existing Starlette/httpx warning remains visible.
+## Explicit limits
+
+All saved versions are drafts; review/approval/retirement and approved selection are P2-003. Taxonomy, protected media, atomic imports and browser authoring are later P2 tasks. No frontend, live candidate runner, scoring/results or adaptive testing is delivered. Current preview is a staff-only JSON projection. Database credentials remain private server capabilities; an owner able to disable guards is outside the append-only protection claim. Initial create has no replay idempotency key; revision retries are conflict-controlled. Authoring mutations currently serialize per institution, without a capacity promise. Existing Starlette/httpx TestClient warning remains visible. Production/security/accessibility/recovery gates remain later work.

@@ -1,22 +1,22 @@
 # Institutional Assessment Platform
 
-MASTER_ROADMAP.md in docs remains the controlling v1.0 plan. Read AGENTS.md, docs/PROGRESS.md and docs/BACKLOG.json before changes.
+Controlling roadmap: docs/MASTER_ROADMAP.md v1.0. Read AGENTS.md, docs/PROGRESS.md and docs/BACKLOG.json before changes. P2 task/acceptance plan: docs/P2_QUESTION_BANK_PLAN.md.
 
-## Source release 0.6 — P2-001
+## Source/API 0.7.0 — persistent saved drafts (P2-002)
 
-P1 engineering foundation is accepted: local and separate-environment 236-test PostgreSQL gates, and all four remote CI jobs for b00e0a8. See docs/P1_ACCEPTANCE.md for provenance and limits.
+P1 is accepted and P2-001 passed the owner's strict 299-test PostgreSQL gate and all four CI jobs for commit 918036d. This increment adds persistent question identities, immutable content/title versions, revision conflicts, author/admin boundaries and atomic audit/outbox records. Candidate-safe JSON preview is staff-only. Review/approval and the frontend remain future P2 work.
 
-P2 is now expanded into eight tasks in docs/P2_QUESTION_BANK_PLAN.md. This first increment implements seven content-validation contracts, immutable nested values, safe candidate-preview projection and full-content fingerprints. Examples and JSON Schema are included. Persistence, review, taxonomy, media, imports and browser journeys remain upcoming P2 tasks. No new question-bank API, grading engine or frontend is claimed.
+## Upgrade
 
-## Upgrade and verify
+Follow docs/P2_002_UPGRADE_WINDOWS.md. Apply the extracted bundle separately; stop old API/worker processes, migrate to 0004_question_versions, compare schema and refresh the existing restricted API role. Keep migration/API/worker credentials separate. No role recreation or institution bootstrap. No dependency upgrades.
 
-Follow docs/P2_001_UPGRADE_WINDOWS.md. Existing schema remains 0003_audit_outbox; no new migration/role/bootstrap is needed. API package version remains 0.4.0 because existing endpoints are unchanged.
+## Verification
 
 ```text
 python scripts/setup_dev.py
 backend/.venv/bin/python scripts/verify.py --unit-only
 ```
 
-Windows uses backend\.venv\Scripts\python.exe. Full mode requires disposable PostgreSQL test administration; --local-postgres privately loads existing migration settings. See docs/DEVELOPER_GUIDE.md.
+Windows uses backend\.venv\Scripts\python.exe. Full acceptance requires disposable PostgreSQL test administration and all 357 tests with zero skips. Existing Windows installations can use --local-postgres as documented. Portable tests and SQL parsing do not prove database behavior.
 
-Current source needs its own strict local and remote CI acceptance before P2-002. Candidate preview projection is a content helper, not an authorization boundary. See docs/QUESTION_CONTENT_CONTRACT.md.
+See docs/QUESTION_BANK_API.md for routes, ownership, snapshots, retry semantics and audit privacy. Content contracts remain documented in docs/QUESTION_CONTENT_CONTRACT.md. All seven question types are retained. P2-002 is implemented pending actual local PostgreSQL and new remote CI evidence; P2 overall is incomplete.

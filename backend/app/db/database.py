@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 
-EXPECTED_DATABASE_REVISION = "0003_audit_outbox"
+EXPECTED_DATABASE_REVISION = "0004_question_versions"
 
 # The runtime must be neither migration owner nor a role that can bypass row policies.
 RUNTIME_ROLE_SAFE = text("""
@@ -22,9 +22,13 @@ SELECT NOT r.rolsuper AND NOT r.rolbypassrls AND NOT r.rolcreatedb
 FROM pg_roles r WHERE r.rolname = current_user
 """)
 RLS_CONFIGURED = text("""
-SELECT count(*) = 7 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+SELECT count(*) = 9 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+AND (SELECT count(*) = 2 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
+     WHERE NOT t.tgisinternal AND
+     ((t.tgrelid = 'public.questions'::regclass AND t.tgname = 'question_identity_guard') OR
+      (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard')))
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts')
+WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions')
 """)
 
 
@@ -36,6 +40,18 @@ SELECT has_table_privilege(current_user, 'audit_records', 'SELECT')
    AND has_table_privilege(current_user, 'users', 'SELECT')
    AND NOT has_table_privilege(current_user, 'outbox_deliveries', 'SELECT')
    AND NOT has_table_privilege(current_user, 'consumer_receipts', 'INSERT')
+   AND has_table_privilege(current_user, 'questions', 'SELECT')
+   AND has_table_privilege(current_user, 'questions', 'INSERT')
+   AND has_column_privilege(current_user, 'questions', 'revision', 'UPDATE')
+   AND has_table_privilege(current_user, 'question_versions', 'SELECT')
+   AND has_table_privilege(current_user, 'question_versions', 'INSERT')
+   AND NOT has_table_privilege(current_user, 'question_versions', 'UPDATE, DELETE, TRUNCATE')
+   AND NOT has_table_privilege(current_user, 'questions', 'DELETE, TRUNCATE')
+   AND NOT has_column_privilege(current_user, 'questions', 'created_by', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'questions', 'tenant_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'questions', 'id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'questions', 'created_at', 'UPDATE')
+   AND NOT has_any_column_privilege(current_user, 'question_versions', 'UPDATE')
 """)
 WORKER_GRANTS_READY = text("""
 SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
@@ -45,6 +61,10 @@ SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
    AND has_table_privilege(current_user, 'consumer_receipts', 'INSERT')
    AND NOT has_table_privilege(current_user, 'users', 'SELECT')
    AND NOT has_table_privilege(current_user, 'audit_records', 'INSERT')
+   AND NOT has_table_privilege(current_user, 'questions', 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE')
+   AND NOT has_table_privilege(current_user, 'question_versions', 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'questions', 'SELECT, INSERT, UPDATE')
+   AND NOT has_any_column_privilege(current_user, 'question_versions', 'SELECT, INSERT, UPDATE')
 """)
 
 
@@ -104,7 +124,8 @@ class Database:
                             "AND to_regclass('memberships') IS NOT NULL AND to_regclass('auth_sessions') IS NOT NULL "
                             "AND to_regclass('login_buckets') IS NOT NULL AND to_regclass('security_events') IS NOT NULL "
                             "AND to_regclass('audit_records') IS NOT NULL AND to_regclass('outbox_events') IS NOT NULL "
-                            "AND to_regclass('outbox_deliveries') IS NOT NULL AND to_regclass('consumer_receipts') IS NOT NULL"
+                            "AND to_regclass('outbox_deliveries') IS NOT NULL AND to_regclass('consumer_receipts') IS NOT NULL "
+                            "AND to_regclass('questions') IS NOT NULL AND to_regclass('question_versions') IS NOT NULL"
                         )
                     )
                     if revisions != {EXPECTED_DATABASE_REVISION} or not tables_exist:

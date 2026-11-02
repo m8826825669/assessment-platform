@@ -1,1 +1,1 @@
-"""Governed question-bank contracts; persistence and routes follow in P2-002."""
+"""Governed question content and persistent saved drafts; review follows in P2-003."""

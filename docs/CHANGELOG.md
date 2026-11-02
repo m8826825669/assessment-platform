@@ -1,3 +1,12 @@
+# Source/API 0.7.0 — P2-002 (2 November 2026)
+
+- Recorded P2-001 local/CI acceptance for 918036d and run 41378575934.
+- Added tenant-owned question identities, immutable saved versions, scoped deferred current-pointer FK, revision/immutability triggers and author/admin row policies.
+- Added staff draft create/read/list/history/new-version/preview APIs with stale-write conflicts and post-lock authority checks.
+- Added safe question audit metadata and atomic outbox integration; worker has no question data grants.
+- Added new-grant/guard readiness checks, migration 0004 and upgrade documentation. Earlier migrations, content contracts and dependency locks are unchanged.
+- Added database/HTTP/migration coverage; portable gate passes, new PostgreSQL/CI acceptance pending. No review/approval, media, import, grading or frontend feature is claimed.
+
 # Source release 0.6 — P2-001 (2 November 2026)
 
 - Recorded P1 engineering acceptance from local/separate-environment verification and actual CI job outcomes.

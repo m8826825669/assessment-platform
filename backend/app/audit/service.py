@@ -1,3 +1,4 @@
+import re
 from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
@@ -23,7 +24,8 @@ EMPTY_ACTIONS = frozenset(
 )
 MEMBERSHIP_ACTIONS = frozenset({"membership.created", "membership.changed", "operator.membership_created"})
 REQUEUE_ACTION = "operator.outbox_requeued"
-ACTIONS = EMPTY_ACTIONS | MEMBERSHIP_ACTIONS | {REQUEUE_ACTION}
+QUESTION_ACTIONS = frozenset({"question.created", "question.revised"})
+ACTIONS = EMPTY_ACTIONS | MEMBERSHIP_ACTIONS | QUESTION_ACTIONS | {REQUEUE_ACTION}
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})
 
 
@@ -32,11 +34,19 @@ def clean_state(action: str, state: dict | None) -> dict:
         raise ValueError("Unregistered audit action")
     state = dict(state or {})
     allowed = {"role", "status", "user_id"} if action in MEMBERSHIP_ACTIONS else set()
+    if action in QUESTION_ACTIONS:
+        allowed = {"version_id", "revision", "content_hash"}
     if action == REQUEUE_ACTION:
         allowed = {"status", "attempts", "reason_code"}
     if state.keys() - allowed:
         raise ValueError("Unapproved audit state field")
     for key, value in state.items():
+        if key == "version_id":
+            state[key] = str(UUID(str(value)))
+        if key == "revision" and (type(value) is not int or not 1 <= value <= 2147483647):
+            raise ValueError("Invalid audited revision")
+        if key == "content_hash" and (not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)):
+            raise ValueError("Invalid audited content hash")
         if key == "role" and value not in ROLE_PERMISSIONS:
             raise ValueError("Invalid audited role")
         if key == "status":

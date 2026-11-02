@@ -1,6 +1,6 @@
 [project]
 name = "institutional-assessment-platform"
-version = "0.4.0"
+version = "0.7.0"
 description = "Institutional assessment API and domain foundation"
 requires-python = ">=3.11"
 dependencies = [

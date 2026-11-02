@@ -73,4 +73,4 @@ The UI uses the intended Next.js/TypeScript stack after the journey prototype; a
 
 ## First implementation boundary
 
-This release implements P2-001 content contracts and their unit evidence only. There are no new database tables/migrations, review routes, storage, frontend or grading engine. P2-001 remains pending full regression/CI acceptance on the new source before starting P2-002.
+P2-001 is accepted with local PostgreSQL and correct remote CI evidence in LOCAL_VERIFICATION_P2_001.md. Source 0.7.0 implements P2-002 saved-draft persistence and awaits its own PostgreSQL/CI gate. There are still no review/approval routes, storage, frontend or grading engine. Follow BACKLOG.json and PROGRESS.md for current task status; this plan retains the original task order.
