@@ -721,4 +721,3 @@ CREATE TRIGGER version_taxon_guard BEFORE INSERT OR UPDATE OR DELETE ON question
 UPDATE alembic_version SET version_num='0006_question_taxonomy' WHERE alembic_version.version_num = '0005_question_review';
 
 COMMIT;
-

@@ -32,4 +32,3 @@ ALTER TABLE question_versions DROP COLUMN created_txid;
 UPDATE alembic_version SET version_num='0005_question_review' WHERE alembic_version.version_num = '0006_question_taxonomy';
 
 COMMIT;
-
