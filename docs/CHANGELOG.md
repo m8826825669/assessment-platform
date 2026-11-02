@@ -1,3 +1,7 @@
+# 0.11.0 — P2-006 (2 November 2026)
+
+Bounded internal JSON preview, atomic all-type draft import and immutable idempotent success receipts; shared no-commit draft/reference validation paths; guarded migration 0008 and role/readiness checks. Accepted predecessor 709e448. Previous seven migrations, content.v1 and pinned dependencies unchanged. New local/CI acceptance pending.
+
 # 0.10.1 — P2-005 corrections
 
 Correct downgrade policy dependencies, condition storage reads on explicit version IDs, reject trailing image payloads and correct live EICAR expectations. Existing policy refresh required; no application schema upgrade/downgrade, bucket recreation, credential rotation or dependency changes. Full 581-test local/CI gate pending.

@@ -169,19 +169,25 @@ def download(db, tenant, actor, identifier):
     return asset.mime_type, checked_bytes(db, asset)
 
 
-def capture(db, row, saved, actor, ids):
+def validate_references(db, tenant, actor, ids):
     if not ids:
-        return
+        return []
     gateway(db)
+    member = questions.authority(db, tenant, actor)
+    assets = []
     for identifier in ids:
-        asset = find(db, row.tenant_id, identifier)
-        # RLS plus the link guard enforce admin/own-author assignment, including direct SQL.
-        member = questions.authority(db, row.tenant_id, actor)
+        asset = find(db, tenant, identifier)
         if member.role != "admin" and asset.created_by != actor.user_id:
             reject(404, "media_not_found", "Media not found")
         if asset.state != "clean":
             reject(409, "media_not_clean", "Media is not available for use")
         checked_bytes(db, asset)
+        assets.append(asset)
+    return assets
+
+
+def capture(db, row, saved, actor, ids):
+    for asset in validate_references(db, row.tenant_id, actor, ids):
         db.add(
             QuestionVersionMedia(
                 tenant_id=row.tenant_id, question_id=row.id, version_id=saved.id, asset_id=asset.id

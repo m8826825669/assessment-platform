@@ -70,6 +70,9 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
         "/api/v1/tenants/{tenant_id}/media/{asset_id}",
         "/api/v1/tenants/{tenant_id}/media/{asset_id}/content",
         "/api/v1/tenants/{tenant_id}/media/{asset_id}/scan",
+        "/api/v1/tenants/{tenant_id}/question-imports",
+        "/api/v1/tenants/{tenant_id}/question-imports/preview",
+        "/api/v1/tenants/{tenant_id}/question-imports/{batch_id}",
         "/api/v1/health",
         "/api/v1/ready",
         "/api/v1/auth/login",
@@ -88,11 +91,11 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
 @pytest.mark.parametrize(
     "revisions,tables_exist,expected",
     [
-        (["0007_authoring_media"], True, "ok"),
+        (["0008_question_imports"], True, "ok"),
         ([], True, "not_ready"),
         (["old_revision"], True, "not_ready"),
-        (["0007_authoring_media", "other_branch"], True, "not_ready"),
-        (["0007_authoring_media"], False, "not_ready"),
+        (["0008_question_imports", "other_branch"], True, "not_ready"),
+        (["0008_question_imports"], False, "not_ready"),
     ],
 )
 def test_schema_readiness_decisions(revisions, tables_exist, expected):
@@ -137,6 +140,6 @@ def test_readiness_reports_missing_audit_outbox_grants():
     database.engine.dispose()
     database.engine = MagicMock()
     connection = database.engine.connect.return_value.__enter__.return_value
-    connection.execute.return_value.scalars.return_value = iter(["0007_authoring_media"])
+    connection.execute.return_value.scalars.return_value = iter(["0008_question_imports"])
     connection.scalar.side_effect = [True, True, True, False]
     assert database.readiness() == {"postgresql": "ok", "schema": "ok", "runtime_role": "missing_grants"}

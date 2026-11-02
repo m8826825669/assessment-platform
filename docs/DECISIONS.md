@@ -81,3 +81,12 @@ DEC 048 Source/API 0.8.0 adds migration 0005_question_review and explicit runtim
 ### P2-005 correction after owner live testing
 
 0.10.0 real gate failed three cases (569 passed). Correct the still-unaccepted 0007 downgrade only, keeping upgrade AST and accepted six migrations unchanged; do not perform a main DB downgrade. Require an explicit real version ID in MinIO read policy because GetObjectVersion also matches GetObject. Refresh existing policy without rotating keys/recreating storage. Reject image trailing payloads and retain current validation on stored-byte reads; standard raw EICAR and format rejection are distinct evidence. 0.10.1 remains pending its own strict live/CI gate.
+
+## P2-006 decisions (2 November 2026)
+
+- Accept P2-005 from owner 581-test corrected pass, real storage/scanning/readiness and green workflow #6 for 709e448. No individual CI logs/run ID supplied.
+- First import internal JSON profile v1, all seven existing content types, 2 MiB/50 rows/16 total media references. No QTI/LTI/CSV/Excel/update-import/approval authority; existing resources must already be valid.
+- Preview is read-only/advisory and uses candidate projection; commit reuses a no-commit normal draft staging primitive in a single institution-serialized transaction, with live authority rechecked. Failures roll back all question/version/link/receipt/audit/outbox rows.
+- Immutable success receipts scope UUID idempotency keys to institution + user across sessions. Equivalent canonical typed requests replay original IDs/time without side effects; changed valid payload conflicts, failures do not consume keys, new keys intentionally create new imports. Retired/unavailable references do not prevent acknowledging an already-committed receipt.
+- Fingerprint includes ordered rows, refs, title, v1 body hashes and sorted metadata IDs. Preserve original content/hash schema and seven prior migrations. Batch audit stores UUID/count only; private keys/references/raw rows stay out of audit/outbox. Runtime receipt INSERT/SELECT only; worker gets no private receipt access.
+- Source/API 0.11.0 and new migration 0008, with role/readiness changes, must pass strict new local/CI acceptance before P2-007 frontend journeys. No dependency/storage changes or production performance claim.

@@ -1,0 +1,57 @@
+P2-006 authoring evidence — 2 November 2026
+
+CPython 3.12.14 / Linux. Existing pinned runtime/development dependencies unchanged.
+Portable gate: 393 passed, zero skips, one existing Starlette/httpx warning, 3.62 seconds.
+Dependency compatibility/pins, Ruff lint and format passed. VERIFICATION=PARTIAL_PASS.
+Full collection: 652 tests: 393 portable and 259 integration. New import contract tests and 38 integration cases include one mandatory live private-media import journey.
+
+Offline evidence: full Alembic upgrade 146 statements parsed with pglast 8.7, including thirteen function-definition statements; downgrade 0008:0007 five statements parsed. Literal readiness/privilege SQL and known probe arities checked. All seven synthetic question types validate against the new profile. OpenAPI import body schema is reference-free; JSON schema/example included.
+These checks prove syntax/contracts only, not live SQL/RLS/rollback/concurrency behavior.
+
+Integration coverage authored/collected: read-only all-type preview, initial draft import, immutable success receipts, response/ID replay after later edits, changed-payload conflict, concurrent duplicates, new-key/actor/tenant scope, role denial, invalid later references, atomic row/receipt/audit/outbox failures, post-lock role/session revocation, SQL receipt immutability and forged old-version rejection, safe local worker event, unavailable/foreign/unclean media, real storage/taxonomy import, replay after retirement, malformed/mime/oversize/privacy error paths.
+
+Authoring workspace cannot run supported real PostgreSQL, object storage or ClamAV; no live migration, database/storage test, remote commit/push/CI or deployment occurred here. Full new local/CI acceptance remains pending. Owner evidence accepting predecessor 709e448 is separately recorded in LOCAL_VERIFICATION_P2_005.md.
+
+Protected comparisons passed: seven accepted migration files, dependency declarations/locks, v1 content contract/domain/examples, original master/Word roadmap, media Dockerfile/compose and CI. No accepted migration edit, dependency upgrade, scanner/storage reprovisioning or final-goal change.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T09:37:42.446403+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 393,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T09:37:47.998063+00:00"
+}
+
+Packaging evidence:
+Updater applied to extracted accepted-code 0.10.1 baseline; environment/repository sentinels preserved.
+Altered existing 0007 and 0008 rejected before copying. Actual git whitespace check includes EOF.
+ZIP CRC and every packaged manifest digest verified; private configuration, environments, caches and artifacts excluded.

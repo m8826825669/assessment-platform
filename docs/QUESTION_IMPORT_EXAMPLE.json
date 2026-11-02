@@ -1,0 +1,146 @@
+{
+  "schema_version": "assessment-question-import.v1",
+  "items": [
+    {
+      "reference": "example_1",
+      "title": "Synthetic single_choice question",
+      "content": {
+        "item_id": "item_one",
+        "prompt": "Choose the correct answer.",
+        "points": "2",
+        "kind": "single_choice",
+        "options": [
+          {
+            "id": "a",
+            "text": "First option"
+          },
+          {
+            "id": "b",
+            "text": "Second option"
+          }
+        ],
+        "correct_option_id": "a"
+      }
+    },
+    {
+      "reference": "example_2",
+      "title": "Synthetic multiple_select question",
+      "content": {
+        "item_id": "item_one",
+        "prompt": "Choose the correct answer.",
+        "points": "2",
+        "kind": "multiple_select",
+        "options": [
+          {
+            "id": "a",
+            "text": "First option"
+          },
+          {
+            "id": "b",
+            "text": "Second option"
+          }
+        ],
+        "correct_option_ids": [
+          "a",
+          "b"
+        ]
+      }
+    },
+    {
+      "reference": "example_3",
+      "title": "Synthetic numeric question",
+      "content": {
+        "item_id": "item_one",
+        "prompt": "What is six divided by two?",
+        "points": "2",
+        "kind": "numeric",
+        "expected": "3",
+        "absolute_tolerance": "0.01",
+        "unit_label": null
+      }
+    },
+    {
+      "reference": "example_4",
+      "title": "Synthetic short_answer question",
+      "content": {
+        "item_id": "item_one",
+        "prompt": "Name the capital of France.",
+        "points": "2",
+        "kind": "short_answer",
+        "accepted_answers": [
+          "Paris"
+        ]
+      }
+    },
+    {
+      "reference": "example_5",
+      "title": "Synthetic essay question",
+      "content": {
+        "item_id": "item_one",
+        "prompt": "Explain your reasoning.",
+        "points": "2",
+        "rubric": [
+          {
+            "id": "reasoning",
+            "description": "Evaluate the reasoning.",
+            "max_points": "2"
+          }
+        ],
+        "marker_guidance": "Private reference explanation.",
+        "kind": "essay"
+      }
+    },
+    {
+      "reference": "example_6",
+      "title": "Synthetic file_upload question",
+      "content": {
+        "item_id": "item_one",
+        "prompt": "Upload your written explanation.",
+        "points": "2",
+        "rubric": [
+          {
+            "id": "reasoning",
+            "description": "Evaluate the reasoning.",
+            "max_points": "2"
+          }
+        ],
+        "marker_guidance": "Private reference explanation.",
+        "kind": "file_upload",
+        "allowed_extensions": [
+          ".pdf",
+          ".txt"
+        ]
+      }
+    },
+    {
+      "reference": "example_7",
+      "title": "Synthetic passage_group question",
+      "content": {
+        "item_id": "passage_one",
+        "prompt": "Read and answer.",
+        "points": "2",
+        "kind": "passage_group",
+        "passage": "A short example passage.",
+        "children": [
+          {
+            "item_id": "item_one",
+            "prompt": "Choose the correct answer.",
+            "points": "2",
+            "kind": "single_choice",
+            "options": [
+              {
+                "id": "a",
+                "text": "First option"
+              },
+              {
+                "id": "b",
+                "text": "Second option"
+              }
+            ],
+            "correct_option_id": "a"
+          }
+        ]
+      }
+    }
+  ]
+}

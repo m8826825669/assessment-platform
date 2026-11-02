@@ -73,4 +73,4 @@ The UI uses the intended Next.js/TypeScript stack after the journey prototype; a
 
 ## First implementation boundary
 
-P2-001 through P2-004 are accepted; latest accepted commit 5b3e6a8. Source 0.10.0 implements P2-005 private static-image authoring media and awaits strict local PostgreSQL/storage/scanner and new CI acceptance. No imports, frontend or grading engine yet. Current statuses/evidence are in BACKLOG.json and PROGRESS.md; original task order unchanged.
+P2-001 through P2-005 are accepted; latest accepted commit 709e448. Source 0.11.0 implements P2-006 atomic internal JSON imports and awaits strict local/new-CI acceptance. No frontend or grading engine yet. Current statuses/evidence are in BACKLOG.json and PROGRESS.md; original task order unchanged.

@@ -121,14 +121,20 @@ def append_version(db, row, actor, title, content: Content, taxonomy_ids=(), med
     return saved
 
 
+def stage_create(db, tenant, actor, title, content, taxonomy_ids=(), media_ids=()):
+    """Append one draft/audit/outbox without committing; caller holds current institution authority lock."""
+    row = Question(id=uuid4(), tenant_id=tenant, created_by=actor.user_id, revision=1)
+    db.add(row)
+    db.flush()  # Current-version FK is deferred until both rows exist.
+    saved = append_version(db, row, actor, title, content, taxonomy_ids, media_ids)
+    audit.record(db, "question.created", actor.user_id, tenant, str(row.id), after=audit_state(saved))
+    return row, saved
+
+
 def create(db, tenant, actor, title, content, taxonomy_ids=(), media_ids=()):
     authority(db, tenant, actor, lock=True)
-    row = Question(id=uuid4(), tenant_id=tenant, created_by=actor.user_id, revision=1)
     try:
-        db.add(row)
-        db.flush()  # Current-version FK is deferred until both rows and audit commit.
-        saved = append_version(db, row, actor, title, content, taxonomy_ids, media_ids)
-        audit.record(db, "question.created", actor.user_id, tenant, str(row.id), after=audit_state(saved))
+        row, saved = stage_create(db, tenant, actor, title, content, taxonomy_ids, media_ids)
         result = detail(row, saved, db=db)
         db.commit()
     except IntegrityError:

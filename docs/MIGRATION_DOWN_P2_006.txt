@@ -1,0 +1,11 @@
+BEGIN;
+
+-- Running downgrade 0008_question_imports -> 0007_authoring_media
+
+DROP TABLE question_import_receipts;
+
+DROP FUNCTION question_import_receipt_guard();
+
+UPDATE alembic_version SET version_num='0007_authoring_media' WHERE alembic_version.version_num = '0008_question_imports';
+
+COMMIT;

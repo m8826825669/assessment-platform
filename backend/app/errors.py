@@ -16,6 +16,11 @@ from app.request_context import request_id
 
 LOGGER = logging.getLogger("assessment.errors")
 MESSAGES = {
+    "import_invalid": "Invalid import document",
+    "import_conflict": "Import key was used for a different document",
+    "import_not_found": "Import receipt not found",
+    "import_too_large": "Import document exceeds the size limit",
+    "import_media_type": "Use an application/json import document",
     "media_unavailable": "Media service unavailable",
     "media_not_found": "Media not found",
     "media_invalid": "Invalid media input",
@@ -42,7 +47,7 @@ MESSAGES = {
     "membership_conflict": "Cannot create membership for this user",
     "invalid_pagination": "Use offset >= 0 and limit between 1 and 200",
 }
-ERROR_STATUSES = (400, 401, 403, 404, 405, 409, 413, 422, 429, 500, 503)
+ERROR_STATUSES = (400, 401, 403, 404, 405, 409, 413, 415, 422, 429, 500, 503)
 
 
 class FieldProblem(BaseModel):

@@ -472,7 +472,7 @@ def test_upgrade_from_populated_p1_preserves_existing_records(test_database):
         assert connection.scalar(select(Institution.name).where(Institution.id == tenant)) == "Preserved"
         assert connection.scalar(select(User.email).where(User.id == user)) == "preserved@example.test"
         assert connection.scalar(select(Membership.role).where(Membership.user_id == user)) == "author"
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0007_authoring_media"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0008_question_imports"
 
 
 def test_readiness_requires_new_runtime_grants(security_database):

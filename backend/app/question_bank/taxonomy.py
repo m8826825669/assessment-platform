@@ -181,12 +181,17 @@ def resolve(db, tenant, ids, *, active=True):
     return terms
 
 
-def capture(db, row, saved, ids):
-    terms = resolve(db, row.tenant_id, ids)
+def classification_terms(db, tenant, ids):
+    terms = resolve(db, tenant, ids)
     parents = {term.parent_id for term in terms if term.parent_id} - {term.id for term in terms}
-    terms += resolve(db, row.tenant_id, tuple(parents))
+    terms += resolve(db, tenant, tuple(parents))
     if len(terms) > 64:
         reject(422, "taxonomy_limit", "Use at most 64 taxonomy references including subject parents")
+    return terms
+
+
+def capture(db, row, saved, ids):
+    terms = classification_terms(db, row.tenant_id, ids)
     # Subject links are flushed first so topic links can require their frozen parent reference.
     for subject_pass in [True, False]:
         for term in terms:

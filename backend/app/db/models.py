@@ -468,3 +468,29 @@ class QuestionVersionMedia(Base):
     version_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     asset_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     question_id: Mapped[UUID] = mapped_column(Uuid)
+
+
+class QuestionImportReceipt(Base):
+    """Immutable success receipt: IDs only; no raw uploaded content or storage credentials."""
+
+    __tablename__ = "question_import_receipts"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id", "actor_user_id", "idempotency_key", name="uq_question_import_actor_key"
+        ),
+        CheckConstraint("profile = 'assessment-question-import.v1'", name="profile"),
+        CheckConstraint("request_hash ~ '^[0-9a-f]{64}$'", name="request_hash"),
+        CheckConstraint("item_count BETWEEN 1 AND 50", name="item_count"),
+        CheckConstraint(
+            "jsonb_typeof(result) = 'array' AND jsonb_array_length(result) = item_count", name="result_array"
+        ),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("institutions.id", ondelete="RESTRICT"))
+    actor_user_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    idempotency_key: Mapped[UUID] = mapped_column(Uuid)
+    profile: Mapped[str] = mapped_column(String(50))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    item_count: Mapped[int] = mapped_column(Integer)
+    result: Mapped[list] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
