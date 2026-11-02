@@ -20,6 +20,7 @@ bearer = HTTPBearer(auto_error=False)
 
 def get_db(request: Request):
     with request.app.state.database.sessions() as session:
+        session.info["media"] = request.app.state.media
         session.info["request_id"] = getattr(request.state, "request_id", None)
         yield session
 

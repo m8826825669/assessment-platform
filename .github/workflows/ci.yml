@@ -12,7 +12,7 @@ jobs:
   postgres:
     name: PostgreSQL 17 / Python ${{ matrix.python }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +34,7 @@ jobs:
     env:
       ASSESSMENT_TEST_ADMIN_URL: postgresql+psycopg://assessment_ci:assessment_ci_disposable_only@127.0.0.1:5432/postgres
       ASSESSMENT_ALLOW_TEST_DATABASE_CREATION: '1'
+      ASSESSMENT_ALLOW_TEST_MEDIA_CREATION: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -43,6 +44,16 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install pinned environment
         run: python scripts/setup_dev.py
+      - name: Start isolated object storage and scanner
+        run: |
+          docker compose -f infrastructure/compose.media.yaml up -d --build media_test_store clamav
+          for attempt in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:19010/minio/health/live >/dev/null && docker compose -f infrastructure/compose.media.yaml exec -T clamav clamdscan --ping=1; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
       - name: Full gate (no skipped tests)
         run: backend/.venv/bin/python scripts/verify.py
       - name: Gate summary
@@ -51,6 +62,9 @@ jobs:
           if [ -f artifacts/verification.json ]; then
             cat artifacts/verification.json >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Stop disposable media services
+        if: always()
+        run: docker compose -f infrastructure/compose.media.yaml down -v
   windows:
     name: Windows / Python 3.12 (partial)
     runs-on: windows-2022

@@ -28,6 +28,7 @@ QUESTION_ACTIONS = frozenset({"question.created", "question.revised"})
 REVIEW_ACTIONS = frozenset(
     {"question.review_" + action for action in ("submitted", "returned", "approved", "retired", "superseded")}
 )
+MEDIA_ACTIONS = frozenset({"media.reserved", "media.uploaded", "media.scanned"})
 TAXONOMY_ACTIONS = frozenset({"taxonomy.created", "taxonomy.changed"})
 ACTIONS = (
     EMPTY_ACTIONS
@@ -35,6 +36,7 @@ ACTIONS = (
     | QUESTION_ACTIONS
     | REVIEW_ACTIONS
     | TAXONOMY_ACTIONS
+    | MEDIA_ACTIONS
     | {REQUEUE_ACTION}
 )
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})
@@ -49,6 +51,8 @@ def clean_state(action: str, state: dict | None) -> dict:
         allowed = {"version_id", "revision", "content_hash"}
     if action in REVIEW_ACTIONS:
         allowed = {"version_id", "revision", "content_hash", "review_revision", "review_state"}
+    if action in MEDIA_ACTIONS:
+        allowed = {"asset_id", "media_revision", "media_state"}
     if action in TAXONOMY_ACTIONS:
         allowed = {"term_id", "term_revision", "term_state"}
     if action == REQUEUE_ACTION:
@@ -56,6 +60,12 @@ def clean_state(action: str, state: dict | None) -> dict:
     if state.keys() - allowed:
         raise ValueError("Unapproved audit state field")
     for key, value in state.items():
+        if key == "asset_id":
+            state[key] = str(UUID(str(value)))
+        if key == "media_revision" and (type(value) is not int or not 1 <= value <= 2147483647):
+            raise ValueError("Invalid media revision")
+        if key == "media_state" and value not in {"pending", "quarantine", "clean", "rejected"}:
+            raise ValueError("Invalid media state")
         if key == "term_id":
             state[key] = str(UUID(str(value)))
         if key == "term_revision" and (type(value) is not int or not 1 <= value <= 2147483647):

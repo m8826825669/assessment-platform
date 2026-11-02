@@ -17,3 +17,5 @@ services:
       retries: 12
 volumes:
   assessment_pgdata:
+
+# Media services are defined in compose.media.yaml to keep existing PostgreSQL untouched.

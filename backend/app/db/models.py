@@ -411,3 +411,60 @@ class QuestionVersionTaxon(Base):
     label_snapshot: Mapped[str] = mapped_column(String(200))
     parent_id_snapshot: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)
     term_revision: Mapped[int] = mapped_column(Integer)
+
+
+class MediaAsset(Base):
+    __tablename__ = "media_assets"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "id"),
+        CheckConstraint("mime_type IN ('image/png','image/jpeg')", name="mime_type"),
+        CheckConstraint("length(trim(description)) BETWEEN 3 AND 1000", name="description"),
+        CheckConstraint(
+            "state IN ('pending','quarantine','clean','rejected') AND revision > 0", name="state_revision"
+        ),
+        CheckConstraint(
+            "(state='pending' AND object_key IS NULL AND object_version IS NULL AND digest IS NULL AND byte_length IS NULL AND width IS NULL AND height IS NULL) OR (state<>'pending' AND object_key IS NOT NULL AND object_version IS NOT NULL AND object_version <> 'null' AND digest IS NOT NULL AND byte_length IS NOT NULL AND width IS NOT NULL AND height IS NOT NULL AND digest ~ '^[0-9a-f]{64}$' AND byte_length BETWEEN 1 AND 8388608 AND width > 0 AND height > 0 AND width::bigint*height <= 20000000)",
+            name="stored_bytes",
+        ),
+        Index("ix_media_assets_tenant_creator", "tenant_id", "created_by", "id"),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("institutions.id", ondelete="RESTRICT"))
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    filename: Mapped[str] = mapped_column(String(160))
+    mime_type: Mapped[str] = mapped_column(String(40))
+    description: Mapped[str] = mapped_column(String(1000))
+    state: Mapped[str] = mapped_column(String(20), server_default="pending")
+    revision: Mapped[int] = mapped_column(Integer, server_default="1")
+    object_key: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    object_version: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    digest: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    byte_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    scanner_version: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class QuestionVersionMedia(Base):
+    __tablename__ = "question_version_media"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "question_id", "version_id"],
+            ["question_versions.tenant_id", "question_versions.question_id", "question_versions.id"],
+            ondelete="RESTRICT",
+            name="fk_version_media_version",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "asset_id"],
+            ["media_assets.tenant_id", "media_assets.id"],
+            ondelete="RESTRICT",
+            name="fk_version_media_asset",
+        ),
+        Index("ix_version_media_asset_version", "tenant_id", "asset_id", "version_id"),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    version_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    asset_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    question_id: Mapped[UUID] = mapped_column(Uuid)

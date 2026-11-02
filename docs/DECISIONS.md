@@ -67,3 +67,17 @@ DEC 048 Source/API 0.8.0 adds migration 0005_question_review and explicit runtim
 - Automatically include a topic's active subject. Maximum 64 references includes closure. Revision payloads fully replace classification; omission means empty. Retirement prevents new assignment but preserves old snapshots and filterability.
 - Reuse existing permission-scoped collections with literal title/type/state/AND reference filters before bounded deterministic pagination. No secret-content search, full-text/relevance or descendant expansion. Initial offset paging promises no cross-request snapshot under concurrent writes.
 - Catalogue, authoring and review mutations share institution serialization and post-lock authority checks; do not infer production throughput. Worker receives no taxonomy data privileges. Every new business mutation keeps atomic safe audit/outbox behavior.
+
+## P2-005 decisions (2 November 2026)
+
+- Accept P2-004 on owner evidence for 5b3e6a8; preserve roadmap and six earlier migrations.
+- First secure static PNG/JPEG at question scope, with required immutable accessible descriptions; do not enable broader formats without validation/rendering acceptance. This is an explicit format boundary within P2-005, not completion of UI/media accessibility certification.
+- Keep v1 content/hash unchanged and add frozen relational media references, bound by exact question version identity and creation transaction. Omitted media_ids clears a new version's attachment list.
+- Use private versioned S3 object reads, exact length/hash checks and server-proxied authorization; no bearer public URLs, object overwrite route, listing or deletion authority in application storage credentials.
+- Use explicit fenced synchronous ClamAV scanning with quarantine-on-error and signature freshness checks. Do not broaden the local outbox consumer into an external scanner worker. Database guards enforce legal states/clean references; external verdict correctness is a trusted application boundary.
+- Use separate disposable test storage, real IAM/anonymous denials and real ClamAV/EICAR checks in strict local/CI acceptance. New dependencies are pinned; prior pins unchanged. Source-built archived MinIO is for local fixtures only; production storage support/licensing remains unresolved until release.
+- SQL/audit/outbox are atomic, external object PUT is not. A failure may orphan an inaccessible opaque-key object; never auto-delete live bytes as rollback. Document reconciliation/retention/recovery gates rather than inventing a distributed transaction.
+
+### P2-005 correction after owner live testing
+
+0.10.0 real gate failed three cases (569 passed). Correct the still-unaccepted 0007 downgrade only, keeping upgrade AST and accepted six migrations unchanged; do not perform a main DB downgrade. Require an explicit real version ID in MinIO read policy because GetObjectVersion also matches GetObject. Refresh existing policy without rotating keys/recreating storage. Reject image trailing payloads and retain current validation on stored-byte reads; standard raw EICAR and format rejection are distinct evidence. 0.10.1 remains pending its own strict live/CI gate.

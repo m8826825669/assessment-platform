@@ -1,0 +1,56 @@
+P2-005 authoring evidence — 2 November 2026
+
+CPython 3.12.14 / Linux. Portable gate: 351 passed, zero skips, one existing Starlette/httpx warning, 3.60 seconds. Dependency compatibility/pins and Ruff lint/format passed. VERIFICATION=PARTIAL_PASS.
+Full collection: 572 tests; 351 portable, 221 integration (including two mandatory live S3/ClamAV tests).
+New dependency pins: MinIO SDK 7.2.20, Pillow 13.0.0, pycryptodome 4.2.0, urllib3 2.8.0; existing pinned versions/markers unchanged. Runtime now also includes certifi at its existing development pin.
+
+Offline SQL: complete upgrade 138 statements with twelve function-definition statements parsed using pglast 8.7; downgrade seven statements parsed. Literal runtime SQL/probe arities checked. Compose/workflow YAML parsed. These are syntax/configuration checks only, not live migration, policy or container execution evidence.
+Protected comparisons against v0.9 passed for six prior migrations, question-content.v1/domain/examples, controlling roadmap and Word baseline. Existing package pins/markers preserved across runtime/dev resolutions.
+
+New portable evidence covers decoded format/type/size/truncation/animation, untrusted request bounds/authority fields, exact-version checksum reads/connection cleanup, scan verdict/freshness failure paths, safe audit and scoped storage policy. Integration tests cover actual SQL/RLS/role state/attachment immutability, post-lock revocation, rollback, concurrency, retired selection access and unavailable object gating. Controlled adapters in database tests are labelled separately from live service tests.
+Mandatory live tests provision a random dedicated bucket/restricted IAM user on loopback port 19010, verify private/list/delete/latest-read denials, exact-version stability under operator overwrite and failure after deletion, actual clean PNG scanning/review/selection/download, and EICAR rejection through ClamAV. These tests are authored/collected, NOT executed here.
+
+This workspace has no Docker/Go/ClamAV executable or runnable PostgreSQL service under supported non-root constraints. No storage build/container/antivirus/PostgreSQL execution, remote push/CI or production deployment is claimed. Strict owner local live and new actual CI gates remain pending. Source-built archived MinIO is a development fixture, not approved production storage.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T06:26:34.968242+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 351,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T06:26:40.711986+00:00"
+}
+
+Packaging checks:
+Updater applied to extracted v0.9; repository/environment/configuration sentinels preserved.
+Altered existing 0006 and 0007 rejected before copying.
+Actual git diff --no-index --check run against an extracted baseline, including EOF whitespace.
+ZIP CRC and every manifest member digest verified; local configurations/caches/environments excluded.

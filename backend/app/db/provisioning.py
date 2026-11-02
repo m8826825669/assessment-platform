@@ -88,6 +88,15 @@ def grant_runtime(connection: Connection, role: str) -> None:
         sql.SQL("GRANT UPDATE (label, state, revision) ON taxonomy_terms TO {}").format(identifier)
     )
 
+    connection.execute(
+        sql.SQL("GRANT SELECT, INSERT ON media_assets, question_version_media TO {}").format(identifier)
+    )
+    connection.execute(
+        sql.SQL(
+            "GRANT UPDATE (state, revision, object_key, object_version, digest, byte_length, width, height, scanner_version, error_code) ON media_assets TO {}"
+        ).format(identifier)
+    )
+
 
 def grant_worker(connection: Connection, role: str) -> None:
     identifier = restricted_role(connection, role)
@@ -98,8 +107,10 @@ def grant_worker(connection: Connection, role: str) -> None:
         "OR has_table_privilege(%s, 'question_review_events', 'DELETE, TRUNCATE') "
         "OR has_table_privilege(%s, 'question_selections', 'DELETE, TRUNCATE') "
         "OR has_any_column_privilege(%s, 'taxonomy_terms', 'SELECT, INSERT, UPDATE') "
-        "OR has_any_column_privilege(%s, 'question_version_taxa', 'SELECT, INSERT, UPDATE')",
-        (role, role, role, role, role, role, role, role),
+        "OR has_any_column_privilege(%s, 'question_version_taxa', 'SELECT, INSERT, UPDATE') "
+        "OR has_any_column_privilege(%s, 'media_assets', 'SELECT, INSERT, UPDATE') "
+        "OR has_any_column_privilege(%s, 'question_version_media', 'SELECT, INSERT, UPDATE')",
+        (role, role, role, role, role, role, role, role, role, role),
     ).fetchone()[0]:
         raise ValueError("Use a separate worker role; API privileges are already present")
     grant_connection(connection, identifier)

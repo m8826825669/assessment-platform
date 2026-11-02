@@ -141,6 +141,10 @@ def decide(db, tenant, actor, question_id, version_id, body):
         transition(previous.state if previous else "draft", body.action)
     except ValueError:
         reject(409, "review_conflict", "Review state changed; reload before retrying")
+    if body.action in {"submit", "approve"}:
+        from app.media.service import snapshots as media_snapshots
+
+        media_snapshots(db, tenant, saved.id, verify=True)
     try:
         event = append(db, row, saved, actor, body.action, previous, body.reason)
         if body.action == "approve":
@@ -243,6 +247,7 @@ def selections(db, tenant, actor, offset, limit, version_id=None, filters=None):
     )
     if version_id:
         query = query.where(QuestionSelection.version_id == version_id)
+    from app.media.service import snapshots as media_snapshots
     from app.question_bank.taxonomy import apply_filters, snapshots
 
     query = apply_filters(db, tenant, query, QuestionSelection, filters, public=True)
@@ -262,6 +267,7 @@ def selections(db, tenant, actor, offset, limit, version_id=None, filters=None):
             "title": row.title,
             "content": row.public_content,
             "taxonomy": snapshots(db, tenant, row.version_id),
+            "media": media_snapshots(db, tenant, row.version_id, verify=True),
         }
         for row in rows
     ]

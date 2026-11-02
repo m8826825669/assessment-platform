@@ -8,6 +8,8 @@ from app.config import Settings
 from app.db.database import Database
 from app.errors import ERROR_STATUSES, Problem, install
 from app.identity.api import router
+from app.media.adapters import Gateway
+from app.media.api import router as media_router
 from app.question_bank.api import router as questions_router
 from app.question_bank.review_api import router as review_router
 from app.question_bank.taxonomy_api import router as taxonomy_router
@@ -35,7 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Institutional Assessment API",
-        version="0.9.0",
+        version="0.10.1",
         lifespan=lifespan,
         responses={
             code: {"model": Problem, "description": "Structured API problem"} for code in ERROR_STATUSES
@@ -43,12 +45,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.database = database
     app.state.settings = resolved_settings
+    app.state.media = Gateway(resolved_settings) if resolved_settings.media_enabled else None
     app.include_router(router)
 
     app.include_router(audit_router)
     app.include_router(questions_router)
     app.include_router(review_router)
     app.include_router(taxonomy_router)
+    app.include_router(media_router)
     install(app)
 
     @app.get("/api/v1/health", response_model=Liveness, tags=["operations"])
@@ -64,6 +68,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     def ready(response: Response) -> Readiness:
         dependencies = database.readiness()
+        if app.state.media is not None:
+            dependencies.update(app.state.media.ready())
         is_ready = all(value == "ok" for value in dependencies.values())
         response.status_code = 200 if is_ready else 503
         response.headers["Cache-Control"] = "no-store"

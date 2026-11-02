@@ -1,0 +1,17 @@
+BEGIN;
+
+-- Running downgrade 0007_authoring_media -> 0006_question_taxonomy
+
+DROP POLICY media_read ON media_assets;
+
+DROP TABLE question_version_media;
+
+DROP TABLE media_assets;
+
+DROP FUNCTION version_media_guard();
+
+DROP FUNCTION media_asset_guard();
+
+UPDATE alembic_version SET version_num='0006_question_taxonomy' WHERE alembic_version.version_num = '0007_authoring_media';
+
+COMMIT;

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 
-EXPECTED_DATABASE_REVISION = "0006_question_taxonomy"
+EXPECTED_DATABASE_REVISION = "0007_authoring_media"
 
 # The runtime must be neither migration owner nor a role that can bypass row policies.
 RUNTIME_ROLE_SAFE = text("""
@@ -22,8 +22,8 @@ SELECT NOT r.rolsuper AND NOT r.rolbypassrls AND NOT r.rolcreatedb
 FROM pg_roles r WHERE r.rolname = current_user
 """)
 RLS_CONFIGURED = text("""
-SELECT count(*) = 13 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
-AND (SELECT count(*) = 7 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
+SELECT count(*) = 15 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+AND (SELECT count(*) = 9 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
      WHERE NOT t.tgisinternal AND
      ((t.tgrelid = 'public.questions'::regclass AND t.tgname = 'question_identity_guard') OR
       (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard') OR
@@ -31,9 +31,11 @@ AND (SELECT count(*) = 7 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
       (t.tgrelid = 'public.question_selections'::regclass AND t.tgname = 'question_selection_guard') OR
       (t.tgrelid = 'public.question_review_events'::regclass AND t.tgname = 'question_review_projection_guard') OR
       (t.tgrelid = 'public.taxonomy_terms'::regclass AND t.tgname = 'taxonomy_term_guard') OR
-      (t.tgrelid = 'public.question_version_taxa'::regclass AND t.tgname = 'version_taxon_guard')))
+      (t.tgrelid = 'public.question_version_taxa'::regclass AND t.tgname = 'version_taxon_guard') OR
+      (t.tgrelid = 'public.media_assets'::regclass AND t.tgname = 'media_asset_guard') OR
+      (t.tgrelid = 'public.question_version_media'::regclass AND t.tgname = 'version_media_guard')))
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa')
+WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa', 'media_assets', 'question_version_media')
 """)
 
 
@@ -89,6 +91,30 @@ SELECT has_table_privilege(current_user, 'audit_records', 'SELECT')
    AND has_table_privilege(current_user, 'question_version_taxa', 'INSERT')
    AND NOT has_any_column_privilege(current_user, 'question_version_taxa', 'UPDATE')
    AND NOT has_table_privilege(current_user, 'question_version_taxa', 'DELETE, TRUNCATE')
+   AND has_table_privilege(current_user, 'media_assets', 'SELECT')
+   AND has_table_privilege(current_user, 'media_assets', 'INSERT')
+   AND has_table_privilege(current_user, 'question_version_media', 'SELECT')
+   AND has_table_privilege(current_user, 'question_version_media', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'question_version_media', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'media_assets', 'DELETE, TRUNCATE')
+   AND NOT has_table_privilege(current_user, 'question_version_media', 'DELETE, TRUNCATE')
+   AND has_column_privilege(current_user, 'media_assets', 'state', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'revision', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'object_key', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'object_version', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'digest', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'byte_length', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'width', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'height', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'scanner_version', 'UPDATE')
+   AND has_column_privilege(current_user, 'media_assets', 'error_code', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'tenant_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'created_by', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'filename', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'mime_type', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'description', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'media_assets', 'created_at', 'UPDATE')
 """)
 WORKER_GRANTS_READY = text("""
 SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
@@ -110,6 +136,10 @@ SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
    AND NOT has_any_column_privilege(current_user, 'question_version_taxa', 'SELECT, INSERT, UPDATE')
    AND NOT has_table_privilege(current_user, 'taxonomy_terms', 'DELETE, TRUNCATE')
    AND NOT has_table_privilege(current_user, 'question_version_taxa', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'media_assets', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'media_assets', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'question_version_media', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'question_version_media', 'DELETE, TRUNCATE')
 """)
 
 
@@ -172,7 +202,8 @@ class Database:
                             "AND to_regclass('outbox_deliveries') IS NOT NULL AND to_regclass('consumer_receipts') IS NOT NULL "
                             "AND to_regclass('questions') IS NOT NULL AND to_regclass('question_versions') IS NOT NULL "
                             "AND to_regclass('question_review_events') IS NOT NULL AND to_regclass('question_selections') IS NOT NULL "
-                            "AND to_regclass('taxonomy_terms') IS NOT NULL AND to_regclass('question_version_taxa') IS NOT NULL"
+                            "AND to_regclass('taxonomy_terms') IS NOT NULL AND to_regclass('question_version_taxa') IS NOT NULL "
+                            "AND to_regclass('media_assets') IS NOT NULL AND to_regclass('question_version_media') IS NOT NULL"
                         )
                     )
                     if revisions != {EXPECTED_DATABASE_REVISION} or not tables_exist:

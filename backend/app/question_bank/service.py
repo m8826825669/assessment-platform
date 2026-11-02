@@ -69,6 +69,7 @@ def audit_state(saved):
 
 
 def metadata(saved, db=None):
+    from app.media import service as media
     from app.question_bank import review, taxonomy
 
     workflow = review.status(db, saved) if db is not None else {"state": "draft", "review_revision": 0}
@@ -82,6 +83,7 @@ def metadata(saved, db=None):
         "authored_by": saved.authored_by,
         "created_at": saved.created_at,
         **workflow,
+        "media": media.snapshots(db, saved.tenant_id, saved.id) if db is not None else [],
         "taxonomy": taxonomy.snapshots(db, saved.tenant_id, saved.id) if db is not None else [],
     }
 
@@ -96,7 +98,7 @@ def detail(row, saved, db=None):
     }
 
 
-def append_version(db, row, actor, title, content: Content, taxonomy_ids=()):
+def append_version(db, row, actor, title, content: Content, taxonomy_ids=(), media_ids=()):
     saved = QuestionVersion(
         id=uuid4(),
         tenant_id=row.tenant_id,
@@ -113,16 +115,19 @@ def append_version(db, row, actor, title, content: Content, taxonomy_ids=()):
     from app.question_bank.taxonomy import capture
 
     capture(db, row, saved, taxonomy_ids)
+    from app.media.service import capture as capture_media
+
+    capture_media(db, row, saved, actor, media_ids)
     return saved
 
 
-def create(db, tenant, actor, title, content, taxonomy_ids=()):
+def create(db, tenant, actor, title, content, taxonomy_ids=(), media_ids=()):
     authority(db, tenant, actor, lock=True)
     row = Question(id=uuid4(), tenant_id=tenant, created_by=actor.user_id, revision=1)
     try:
         db.add(row)
         db.flush()  # Current-version FK is deferred until both rows and audit commit.
-        saved = append_version(db, row, actor, title, content, taxonomy_ids)
+        saved = append_version(db, row, actor, title, content, taxonomy_ids, media_ids)
         audit.record(db, "question.created", actor.user_id, tenant, str(row.id), after=audit_state(saved))
         result = detail(row, saved, db=db)
         db.commit()
@@ -132,7 +137,7 @@ def create(db, tenant, actor, title, content, taxonomy_ids=()):
     return result
 
 
-def revise(db, tenant, actor, identifier, expected_revision, title, content, taxonomy_ids=()):
+def revise(db, tenant, actor, identifier, expected_revision, title, content, taxonomy_ids=(), media_ids=()):
     row = question(db, tenant, actor, identifier, lock=True)
     if row.revision != expected_revision:
         reject(409, "question_conflict", "Question write conflicted; reload before retrying")
@@ -143,7 +148,7 @@ def revise(db, tenant, actor, identifier, expected_revision, title, content, tax
         supersede_pending(db, row, previous, actor)
         row.revision += 1
         db.flush()
-        saved = append_version(db, row, actor, title, content, taxonomy_ids)
+        saved = append_version(db, row, actor, title, content, taxonomy_ids, media_ids)
         audit.record(
             db,
             "question.revised",
@@ -207,6 +212,8 @@ def listing(db, tenant, actor, offset, limit, filters=None):
 
 
 def preview(db, tenant, actor, identifier, version_id=None):
+    from app.media.service import snapshots as media_snapshots
+
     row = question(db, tenant, actor, identifier)
     saved = version(db, row, version_id)
     # Never serialize the staff detail here. The hash and every key/rubric stay private.
@@ -214,4 +221,5 @@ def preview(db, tenant, actor, identifier, version_id=None):
         "question_id": row.id,
         "version_id": saved.id,
         "content": candidate_view(validate_content(saved.content)),
+        "media": media_snapshots(db, tenant, saved.id, verify=True),
     }

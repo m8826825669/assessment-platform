@@ -8,6 +8,8 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
 
 from app.identity.api import Actor, Db
+from app.media.api import PublicMedia
+from app.media.contracts import Attachments
 from app.question_bank import service
 from app.question_bank.contracts import Content, Label
 from app.question_bank.taxonomy import Classification, SearchFilters, search_params
@@ -17,7 +19,7 @@ Offset = Annotated[int, Query(ge=0, le=1000000)]
 Limit = Annotated[int, Query(ge=1, le=200)]
 
 
-class QuestionCreate(Classification):
+class QuestionCreate(Classification, Attachments):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     title: Annotated[Label, Field(max_length=200)]
     content: Content
@@ -51,6 +53,7 @@ class VersionMetadata(BaseModel):
     state: Literal["draft", "in_review", "returned", "approved", "retired", "superseded"]
     review_revision: int
     taxonomy: list[TaxonSnapshot]
+    media: list[PublicMedia]
 
 
 class QuestionDetail(VersionMetadata):
@@ -64,11 +67,12 @@ class QuestionPreview(BaseModel):
     question_id: UUID
     version_id: UUID
     content: dict
+    media: list[PublicMedia]
 
 
 @router.post("", response_model=QuestionDetail, status_code=201)
 def create(tenant_id: UUID, body: QuestionCreate, actor: Actor, db: Db):
-    return service.create(db, tenant_id, actor, body.title, body.content, body.taxonomy_ids)
+    return service.create(db, tenant_id, actor, body.title, body.content, body.taxonomy_ids, body.media_ids)
 
 
 @router.get("", response_model=list[VersionMetadata])
@@ -84,7 +88,15 @@ def get(tenant_id: UUID, question_id: UUID, actor: Actor, db: Db):
 @router.post("/{question_id}/versions", response_model=QuestionDetail, status_code=201)
 def revise(tenant_id: UUID, question_id: UUID, body: QuestionRevise, actor: Actor, db: Db):
     return service.revise(
-        db, tenant_id, actor, question_id, body.expected_revision, body.title, body.content, body.taxonomy_ids
+        db,
+        tenant_id,
+        actor,
+        question_id,
+        body.expected_revision,
+        body.title,
+        body.content,
+        body.taxonomy_ids,
+        body.media_ids,
     )
 
 

@@ -16,6 +16,12 @@ from app.request_context import request_id
 
 LOGGER = logging.getLogger("assessment.errors")
 MESSAGES = {
+    "media_unavailable": "Media service unavailable",
+    "media_not_found": "Media not found",
+    "media_invalid": "Invalid media input",
+    "media_conflict": "Media changed; reload before retrying",
+    "media_not_clean": "Media is not available for use",
+    "media_too_large": "Media exceeds the upload limit",
     "taxonomy_not_found": "Taxonomy term not found",
     "taxonomy_conflict": "Taxonomy changed or conflicts; reload before retrying",
     "taxonomy_limit": "Use at most 64 taxonomy references including subject parents",
@@ -36,7 +42,7 @@ MESSAGES = {
     "membership_conflict": "Cannot create membership for this user",
     "invalid_pagination": "Use offset >= 0 and limit between 1 and 200",
 }
-ERROR_STATUSES = (400, 401, 403, 404, 405, 409, 422, 429, 500, 503)
+ERROR_STATUSES = (400, 401, 403, 404, 405, 409, 413, 422, 429, 500, 503)
 
 
 class FieldProblem(BaseModel):

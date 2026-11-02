@@ -73,4 +73,4 @@ The UI uses the intended Next.js/TypeScript stack after the journey prototype; a
 
 ## First implementation boundary
 
-P2-001 through P2-003 are accepted; latest accepted source commit 5bc13f9. Source 0.9.0 implements P2-004 taxonomy/retrieval and awaits its own strict PostgreSQL/CI gate. There is still no protected media, frontend or grading engine. Follow BACKLOG.json and PROGRESS.md for current task status; original task order is unchanged.
+P2-001 through P2-004 are accepted; latest accepted commit 5b3e6a8. Source 0.10.0 implements P2-005 private static-image authoring media and awaits strict local PostgreSQL/storage/scanner and new CI acceptance. No imports, frontend or grading engine yet. Current statuses/evidence are in BACKLOG.json and PROGRESS.md; original task order unchanged.

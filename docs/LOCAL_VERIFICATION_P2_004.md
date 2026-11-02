@@ -1,0 +1,5 @@
+# P2-004 acceptance — 2 November 2026
+
+Owner Windows/PostgreSQL transcript: 502 passed, zero skips, one existing Starlette/httpx warning, 436.07 seconds; VERIFICATION=PASS. Dependency compatibility/pins, Ruff and formatting passed. Schema 0006_question_taxonomy head and no upgrade operations; restricted runtime/worker roles ready. Worker dead=0, delivered=1, pending=0, processing=0. Screenshot confirms restarted API ready with PostgreSQL/schema/runtime_role all ok.
+
+Initial source commit 30bb295 succeeded. Its staged whitespace check had reported two extra EOF blank lines in generated SQL documents; the owner then applied the documented cleanup and updated their manifest. GitHub Actions screenshot confirms green Foundation gate #5 for cleanup commit 5b3e6a8, “Remove trailing blank lines from migration documents”, branch main, duration 2m25s. Run ID/full SHA and individual job logs were not supplied. This is owner-supplied evidence, not a workspace remote execution. P2-004 accepted; P2-005 requires its own independent gate.

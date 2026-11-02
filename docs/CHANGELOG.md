@@ -1,3 +1,11 @@
+# 0.10.1 — P2-005 corrections
+
+Correct downgrade policy dependencies, condition storage reads on explicit version IDs, reject trailing image payloads and correct live EICAR expectations. Existing policy refresh required; no application schema upgrade/downgrade, bucket recreation, credential rotation or dependency changes. Full 581-test local/CI gate pending.
+
+# 0.10.0 — P2-005 (2 November 2026)
+
+Private authoring image lifecycle, immutable accessible descriptions and version attachments, exact-version storage verification, ClamAV quarantine/scanning and protected downloads. New migration 0007, grants/readiness, SDK/image dependencies, operator provisioning and isolated live storage/scanner CI. Prior six migrations/content.v1 and existing dependency versions unchanged. P2-004 accepted at 5b3e6a8; new increment remains pending live local/CI acceptance.
+
 # 0.9.0 — P2-004 (2 November 2026)
 
 Tenant catalogue and immutable version classification snapshots; title/type/state/AND taxonomy filters on scoped collections; guarded migration 0006, restricted grants/readiness and new validation coverage. P2-003 owner evidence accepted at 5bc13f9. P2-004 portable gate passes; real PostgreSQL and new CI pending. Dependencies, content.v1 and five accepted migrations unchanged.

@@ -1,0 +1,50 @@
+P2-005 corrections 0.10.1 — 2 November 2026
+
+Owner real gate 0.10.0: 569 passed, three failed, 522.02 seconds. Failures: dependent media_read policy during downgrade; MinIO implicit latest GET; incorrect appended-EICAR expectation. P2-005 not accepted.
+
+Authoring correction gate: 360 portable tests passed, zero skips, existing warning, 3.60 seconds. Dependency/lint/format checks pass. Full collection 581 (360 portable, 221 integration); focused suite 47. No real PostgreSQL/MinIO/ClamAV execution available here; corrected local/CI results pending.
+
+Verified correction boundaries: 0007 upgrade AST identical; accepted 0001–0006 byte-identical; dependency locks, content.v1 and master roadmap unchanged. Only 0007 downgrade removes its referencing policy before table drop. Parsed eight downgrade SQL statements. No main database migration/downgrade occurs when applying source.
+
+Policy change requires explicit real s3:versionid to narrow MinIO's documented source-level GetObjectVersion→GetObject matching. refresh-policy changes only existing same-named generated application policy after checking user assignment; no new bucket/user/password/database change. Live tests retain exact-version and latest-read denial requirements.
+
+PNG/JPEG structural parsing rejects trailing payload/duplicate terminators and preserves progressive JPEG. Point-of-use validation blocks legacy byte payloads that fail tightened rules. Standard raw EICAR remains a real scanner rejection test; suffixed PNG rejection is a distinct format-validation check. No antivirus certainty claim.
+
+Targeted updater checks known original/new hashes, backs up and rolls back replaced files on write failure, preserves environment/repository and prior HTTP/1 build fix, and updates affected checksum entries only. Package checks: updater smoke/idempotence/unknown-source rejection, ZIP CRC/hashes and actual git whitespace check including EOF. No forced git operations or external service mutations performed here.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T08:11:19.779437+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 360,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T08:11:25.407180+00:00"
+}

@@ -1,23 +1,27 @@
 # Progress
 
-Controlling baseline: MASTER_ROADMAP.md v1.0; phase plan: P2_QUESTION_BANK_PLAN.md. Updated 2 November 2026. Source/API 0.9.0, P2-004. Original roadmap/Word baseline unchanged.
+Controlling baseline MASTER_ROADMAP.md v1.0; phase plan P2_QUESTION_BANK_PLAN.md. Updated 2 November 2026. Source/API 0.10.1, P2-005. Original roadmap/Word unchanged.
 
 ## Accepted
 
-P0/P1 and P2-001 through P2-003 are accepted. P2-003 owner evidence: strict Windows gate VERIFICATION=PASS, 0005 head, clean schema, roles refreshed, worker healthy, API ready; pushed 5bc13f9 and green Foundation gate #4 screenshot. No run ID/individual job logs supplied; screenshot test count partly obscured. See LOCAL_VERIFICATION_P2_003.md and earlier acceptance records.
+P0/P1 and P2-001 through P2-004. Latest owner evidence: 502 strict tests passed, zero skips, 436.07s; schema 0006 clean, roles/API/worker healthy. CI workflow #5 green for cleanup commit 5b3e6a8. Run ID/individual matrix logs not supplied. See LOCAL_VERIFICATION_P2_004.md.
 
-## Current: P2-004
+## Current: P2-005
 
-Implemented institution subjects, subject-owned topics, flat outcomes and tags. Admin catalogue changes use fenced revisions and terminal retirement. All four staff roles can read the catalogue; candidate/invigilator/examiner cannot. Classification references and labels freeze within each saved version's creation transaction. Renames/retirements never rewrite saved versions. Topics automatically include their subject snapshot. No approval transfers across a metadata-only revision.
+Implemented private versioned object storage, bounded static PNG/JPEG validation, pending/quarantine/clean/rejected lifecycle, fenced scan retries, ClamAV INSTREAM/fresh signature checks, protected downloads, immutable descriptions/bytes and creation-only question links. Existing public metadata adds safe media descriptors; typed-body v1 remains unchanged. Checks on attachment/submit/approve/selection/preview/download prevent use of missing, altered or unclean bytes. Safe media audit/outbox writes are transactional; external uploads may leave inaccessible orphans if SQL fails. No external effects added to the existing outbox worker.
 
-Author current-version lists, pending review queues and approved selections support bounded literal title, content type, workflow state and AND taxonomy filters before deterministic pagination. Existing role/RLS boundaries apply. Coordinator selection includes approved classification without private version/hash/comment access. New schema head 0006_question_taxonomy; thirteen forced-RLS tables and seven enabled guards. Earlier five migrations, content.v1 and pinned dependencies remain unchanged.
+Head 0007_authoring_media: fifteen forced-RLS tables and nine guards. Earlier six migrations unchanged. New SDK/image dependencies are pinned, previous dependency versions retained. Local private storage provisioning creates a new bucket and separate restricted credential; the API never receives storage administration. Media defaults disabled until explicitly provisioned, preserving existing no-media question behavior. When enabled, readiness includes storage/scanner health.
 
 ## Evidence and next gate
 
-IMPLEMENTED, STRICT LOCAL POSTGRESQL AND NEW CI ACCEPTANCE PENDING. Portable gate: 313 tests passed, zero skips; dependency compatibility/pins, lint and format passed. Full collection 502 tests (189 require real PostgreSQL). Offline migration SQL parsing is syntax evidence only. This workspace cannot run PostgreSQL under its non-root server constraints; no PostgreSQL/CI result is invented. See VALIDATION_P2_004.txt.
+IMPLEMENTED, LOCAL POSTGRESQL/STORAGE/SCANNER AND NEW CI PENDING. Portable gate 360 tests passed, no skips; dependency/lint/format passed. Full collection and SQL evidence in VALIDATION_P2_005.txt. This workspace has no runnable PostgreSQL, Docker, object store or ClamAV, so no live result is inferred from mocks/parsing. New mandatory live tests use dedicated loopback storage, restricted IAM, anonymous/deletion denials, exact-version overwrite/missing checks and real EICAR scanning. CI provisions isolated services and retains the existing three Python/PostgreSQL jobs plus portable Windows job.
 
-Follow P2_004_UPGRADE_WINDOWS.md: apply separate source bundle, migrate, compare schema, refresh restricted grants, run full strict verification, restart API, check worker and readiness. Only after this increment's local and new-commit CI gate can P2-005 protected accessible media begin.
+Follow P2_005_UPGRADE_WINDOWS.md. Prove storage/scanner prerequisites first, then schema/grants, full strict gate, restarted readiness and worker status, then new-commit CI. Do not begin dependent imports until this gate passes. Keep P2-005 acceptance pending if any live service/test is unavailable.
 
 ## Limits
 
-No frontend/browser authoring, protected media/storage scanning, imports, examination publication, candidate runner or evaluation/results yet. Taxonomy outcomes have no arbitrary hierarchy; only topics have subject parents. Search covers titles only, with literal substrings and existing offset pagination. No full-text relevance, descendant expansion, cross-request snapshot consistency or capacity claim. Content hash remains the v1 typed-body fingerprint; immutable version identity binds title/classification/review. Omitting taxonomy_ids on revision clears classification. Authoring/review/catalogue mutation serializes per institution. Privileged database owners can disable guards. Local outbox consumer sends no external messages. Existing TestClient deprecation warning remains tracked.
+Initial media is question-level static PNG/JPEG only, 8 MiB/20MP/16 references; no PDFs/SVG/animation/audio/video or per-option positioning. Accessible description is required but browser/keyboard/screen-reader verification remains P2-007. No frontend, imports, published exams, candidate runner/uploads or grading yet. Clean scan is point-in-time; immutable storage checks do not promise permanent availability. No automated orphan deletion, quotas, threat re-scan policy, storage disaster recovery or production capacity claim. Development MinIO is a pinned source-built fixture from archived upstream; supported production storage/security/licensing remains a release decision. Existing TestClient warning tracked.
+
+## 0.10.1 correction gate
+
+Owner 0.10.0 full run: 569 passed, three failed, 522.02s. Correct downgrade dependency order, require explicit version ID in the existing application storage policy, and reject image trailing payloads rather than assuming ClamAV detects appended EICAR. Raw standard EICAR remains a real scanner test. See P2_005_FIXES_WINDOWS.md. Upgrade SQL and accepted migrations unchanged; no main DB migration/downgrade needed. Full collection now 581; real local correction/CI results pending.

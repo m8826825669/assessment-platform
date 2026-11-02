@@ -1,0 +1,44 @@
+name: assessment-media-local
+services:
+  media_store:
+    build:
+      context: .
+      dockerfile: Dockerfile.minio-test
+    image: assessment-minio-test:2025-10-15
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: assessment_storage_operator
+      MINIO_ROOT_PASSWORD: assessment_storage_local_only
+    ports:
+      - "127.0.0.1:19000:9000"
+      - "127.0.0.1:19001:9001"
+    volumes:
+      - assessment_media:/data
+  media_test_store:
+    build:
+      context: .
+      dockerfile: Dockerfile.minio-test
+    image: assessment-minio-test:2025-10-15
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: assessment_test_operator
+      MINIO_ROOT_PASSWORD: assessment_test_disposable_only
+    ports:
+      - "127.0.0.1:19010:9000"
+  clamav:
+    image: clamav/clamav:1.5.4
+    ports:
+      - "127.0.0.1:13310:3310"
+    volumes:
+      - assessment_clamav:/var/lib/clamav
+    environment:
+      TZ: UTC
+    healthcheck:
+      test: ["CMD", "clamdscan", "--ping=1"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 90s
+volumes:
+  assessment_media:
+  assessment_clamav:

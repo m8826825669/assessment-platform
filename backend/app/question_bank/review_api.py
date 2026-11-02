@@ -8,6 +8,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
 from app.identity.api import Actor, Db
+from app.media.api import PublicMedia
 from app.question_bank import review
 from app.question_bank.api import Filters, Limit, Offset, QuestionDetail, TaxonSnapshot, VersionMetadata
 from app.question_bank.contracts import Label
@@ -46,6 +47,7 @@ class ReviewDetail(QuestionDetail):
 
 class SelectedContent(BaseModel):
     taxonomy: list[TaxonSnapshot]
+    media: list[PublicMedia]
     question_id: UUID
     version_id: UUID
     title: str

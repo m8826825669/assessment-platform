@@ -127,13 +127,13 @@
         "QBK-01",
         "TEN-01"
       ],
-      "status": "implemented_pending_local_postgresql_and_ci_verification",
+      "status": "done",
       "acceptance": "502 strict tests with zero skips; tenant-scoped taxonomy, frozen labels, creation-only links, role-scoped literal title/type/state/AND taxonomy filters, bounded deterministic pagination; clean migration/grants/readiness and actual new-commit CI.",
       "depends_on": [
         "P2-002",
         "P2-003"
       ],
-      "evidence": "313 portable tests passed; PostgreSQL suite collected but not executed here. See VALIDATION_P2_004.txt and P2_004_UPGRADE_WINDOWS.md."
+      "evidence": "Owner 502-test strict pass (436.07s), 0006/schema/grants/API/worker healthy and green Foundation gate #5 for cleanup commit 5b3e6a8. See LOCAL_VERIFICATION_P2_004.md."
     },
     {
       "id": "P2-005",
@@ -144,13 +144,13 @@
         "SEC-01",
         "ACC-01"
       ],
-      "status": "queued",
+      "status": "implemented_pending_local_postgresql_storage_scanner_and_ci_verification",
       "acceptance": "Real object storage integration, quarantine/scanning, content/size verification, immutable bytes, wrong-tenant/download denial and accessible descriptions; no unclean/broken selectable references.",
       "depends_on": [
         "P2-002",
         "P2-003"
       ],
-      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+      "evidence": "Owner 0.10.0 real run: 569 passed, three failed (522.02s). Corrections 0.10.1 have 360 portable passes; 581 full tests collected. Real correction/CI acceptance pending. See P2_005_FIXES_WINDOWS.md."
     },
     {
       "id": "P2-006",
