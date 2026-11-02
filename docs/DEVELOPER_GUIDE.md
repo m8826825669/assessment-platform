@@ -1,6 +1,6 @@
 # Reproducible developer setup and CI (P1-005)
 
-Requirements: CPython 3.11 or newer with venv/pip; the declared CI matrix targets 3.11, 3.12 and 3.13 on Linux, and 3.12 on Windows. These combinations remain proposed until their jobs execute. PostgreSQL 17 is the CI service target. Existing local PostgreSQL installations remain supported through actual test evidence rather than an untested broad version claim.
+Requirements: CPython 3.11 or newer with venv/pip; the declared CI matrix targets 3.11, 3.12 and 3.13 on Linux, and 3.12 on Windows. P1 acceptance for this matrix is recorded in P1_ACCEPTANCE.md; new source increments still require their own successful runs. PostgreSQL 17 is the CI service target. Existing local PostgreSQL installations remain supported through actual test evidence rather than an untested broad version claim.
 
 ## Fresh checkout
 
@@ -34,10 +34,10 @@ Change declarations and regenerate both lockfiles intentionally together using t
 
 `.github/workflows/ci.yml` runs on push, pull requests and manual dispatch. Linux jobs cover Python 3.11/3.12/3.13, each with its own disposable PostgreSQL 17.6 service and a fresh virtual environment. Each runs the full gate. The Windows Python 3.12 job runs portable setup/static/unit checks and is explicitly partial. All Linux jobs plus the Windows job must pass. Service credentials are disposable examples; CI needs no production secrets. The workflow uses read-only repository permissions, no persistent checkout credentials, bounded timeouts, and commit-pinned GitHub actions. It does not deploy or publish releases. No CI artifacts containing raw test failures or configuration are uploaded; sanitized full-gate counts appear in the job summary.
 
-The workflow expects the project at repository root. Configure required branch checks only after the first actual successful run. No remote run has been performed in the authoring session. Retain the run URL, commit SHA and matrix outcomes as evidence before marking CI complete.
+The workflow expects the project at repository root. Configure required branch checks only after the first actual successful run. The owner supplied a successful P1 run screenshot for b00e0a8 / run 41375023675; see P1_ACCEPTANCE.md. Each new source increment requires its own actual run URL, commit and matrix outcomes; prior runs cannot verify later source.
 
 References for maintainers: [PostgreSQL services](https://docs.github.com/en/actions/tutorials/use-containerized-services/create-postgresql-service-containers), [setup-python v5.6.0](https://github.com/actions/setup-python/releases/tag/v5.6.0), [checkout v4.2.2](https://github.com/actions/checkout/releases/tag/v4.2.2). Action pins are deliberate dependency choices, not claims to be the latest release. Review them through the same controlled dependency-update process.
 
 ## Final P1 review
 
-Before P2: retain the fresh local full verification report, actual successful CI run/commit, P1-002/003/004 local evidence, and a readiness/auth/worker smoke against the current source. Confirm the migration head remains 0003 and that API and worker use separate restricted accounts. Record any remaining limitations and approve the P2 task breakdown against MASTER_ROADMAP.md. CI passing does not imply production readiness or delivery of a usable examination runner.
+P1 is accepted as recorded in P1_ACCEPTANCE.md. The following remains the historical P1 review checklist and applies again to relevant regression checks. Before P2: retain the fresh local full verification report, actual successful CI run/commit, P1-002/003/004 local evidence, and a readiness/auth/worker smoke against the current source. Confirm the migration head remains 0003 and that API and worker use separate restricted accounts. Record any remaining limitations and approve the P2 task breakdown against MASTER_ROADMAP.md. CI passing does not imply production readiness or delivery of a usable examination runner.

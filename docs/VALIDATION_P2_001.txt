@@ -1,0 +1,57 @@
+P2-001 authoring evidence — 2 November 2026
+
+Python 3.12.14, Linux, existing pinned development environment.
+Focused tests: 63 passed in 0.15s.
+Portable verification gate:
+  dependencies compatibility and pins: pass
+  Ruff lint: pass
+  Ruff formatting: pass
+  non-database tests: 209 passed, zero skips, 1 existing Starlette/httpx warning, 3.45s
+  VERIFICATION=PARTIAL_PASS
+
+No PostgreSQL server could be launched under the workspace's non-root process requirements; the new strict 299-test local run is pending.
+No question-bank database tables, routes, review, storage, UI or grading behavior is implemented in this increment.
+P1 acceptance is historical evidence from the owner, not substituted for P2 regression or a new CI run.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T02:16:25.041181+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 209,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T02:16:30.187454+00:00"
+}
+
+Release checks:
+- All three migrations and both dependency lockfiles are byte-identical to v0.5.
+- All existing application/domain/test source is byte-identical to v0.5; new content module and test are additions.
+- Updater smoke passed against v0.5 with repository/.env/.venv sentinels preserved.
+- ZIP CRC and every manifest member digest verified.

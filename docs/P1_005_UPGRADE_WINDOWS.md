@@ -1,5 +1,7 @@
 # P1-005 update and verification
 
+Historical release instructions. P1 has since passed; see P1_ACCEPTANCE.md. Current P2 source instructions are P2_001_UPGRADE_WINDOWS.md.
+
 This increment adds developer tooling and CI. Schema head remains `0003_audit_outbox`; no new database migration, role creation, grant refresh or bootstrap is required.
 
 ## Apply to the existing project

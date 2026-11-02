@@ -1,0 +1,115 @@
+[
+  {
+    "item_id": "item_one",
+    "prompt": "Choose the correct answer.",
+    "points": "2",
+    "kind": "single_choice",
+    "options": [
+      {
+        "id": "a",
+        "text": "First option"
+      },
+      {
+        "id": "b",
+        "text": "Second option"
+      }
+    ],
+    "correct_option_id": "a"
+  },
+  {
+    "item_id": "item_one",
+    "prompt": "Choose the correct answer.",
+    "points": "2",
+    "kind": "multiple_select",
+    "options": [
+      {
+        "id": "a",
+        "text": "First option"
+      },
+      {
+        "id": "b",
+        "text": "Second option"
+      }
+    ],
+    "correct_option_ids": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "item_id": "item_one",
+    "prompt": "What is six divided by two?",
+    "points": "2",
+    "kind": "numeric",
+    "expected": "3",
+    "absolute_tolerance": "0.01",
+    "unit_label": null
+  },
+  {
+    "item_id": "item_one",
+    "prompt": "Name the capital of France.",
+    "points": "2",
+    "kind": "short_answer",
+    "accepted_answers": [
+      "Paris"
+    ]
+  },
+  {
+    "item_id": "item_one",
+    "prompt": "Explain your reasoning.",
+    "points": "2",
+    "rubric": [
+      {
+        "id": "reasoning",
+        "description": "Evaluate the reasoning.",
+        "max_points": "2"
+      }
+    ],
+    "marker_guidance": "Private reference explanation.",
+    "kind": "essay"
+  },
+  {
+    "item_id": "item_one",
+    "prompt": "Upload your written explanation.",
+    "points": "2",
+    "rubric": [
+      {
+        "id": "reasoning",
+        "description": "Evaluate the reasoning.",
+        "max_points": "2"
+      }
+    ],
+    "marker_guidance": "Private reference explanation.",
+    "kind": "file_upload",
+    "allowed_extensions": [
+      ".pdf",
+      ".txt"
+    ]
+  },
+  {
+    "item_id": "passage_one",
+    "prompt": "Read and answer.",
+    "points": "2",
+    "kind": "passage_group",
+    "passage": "A short example passage.",
+    "children": [
+      {
+        "item_id": "item_one",
+        "prompt": "Choose the correct answer.",
+        "points": "2",
+        "kind": "single_choice",
+        "options": [
+          {
+            "id": "a",
+            "text": "First option"
+          },
+          {
+            "id": "b",
+            "text": "Second option"
+          }
+        ],
+        "correct_option_id": "a"
+      }
+    ]
+  }
+]

@@ -1,0 +1,648 @@
+{
+  "$defs": {
+    "Criterion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 16000,
+          "title": "Description",
+          "type": "string"
+        },
+        "max_points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Max Points"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "max_points"
+      ],
+      "title": "Criterion",
+      "type": "object"
+    },
+    "Essay": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "rubric": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Rubric",
+          "type": "array"
+        },
+        "marker_guidance": {
+          "maxLength": 16000,
+          "title": "Marker Guidance",
+          "type": "string"
+        },
+        "kind": {
+          "const": "essay",
+          "title": "Kind",
+          "type": "string"
+        },
+        "max_response_characters": {
+          "default": 20000,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Max Response Characters",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "rubric",
+        "marker_guidance",
+        "kind"
+      ],
+      "title": "Essay",
+      "type": "object"
+    },
+    "FileUpload": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "rubric": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Rubric",
+          "type": "array"
+        },
+        "marker_guidance": {
+          "maxLength": 16000,
+          "title": "Marker Guidance",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file_upload",
+          "title": "Kind",
+          "type": "string"
+        },
+        "allowed_extensions": {
+          "items": {
+            "enum": [
+              ".pdf",
+              ".txt",
+              ".png",
+              ".jpg",
+              ".jpeg"
+            ],
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Allowed Extensions",
+          "type": "array"
+        },
+        "max_files": {
+          "default": 1,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Max Files",
+          "type": "integer"
+        },
+        "max_bytes_per_file": {
+          "default": 10485760,
+          "maximum": 20971520,
+          "minimum": 1,
+          "title": "Max Bytes Per File",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "rubric",
+        "marker_guidance",
+        "kind",
+        "allowed_extensions"
+      ],
+      "title": "FileUpload",
+      "type": "object"
+    },
+    "MultipleSelect": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/Option"
+          },
+          "maxItems": 20,
+          "minItems": 2,
+          "title": "Options",
+          "type": "array"
+        },
+        "kind": {
+          "const": "multiple_select",
+          "title": "Kind",
+          "type": "string"
+        },
+        "correct_option_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Correct Option Ids",
+          "type": "array"
+        },
+        "scoring": {
+          "const": "all_or_nothing",
+          "default": "all_or_nothing",
+          "title": "Scoring",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "options",
+        "kind",
+        "correct_option_ids"
+      ],
+      "title": "MultipleSelect",
+      "type": "object"
+    },
+    "Normalization": {
+      "additionalProperties": false,
+      "properties": {
+        "unicode_form": {
+          "const": "NFKC",
+          "default": "NFKC",
+          "title": "Unicode Form",
+          "type": "string"
+        },
+        "case_sensitive": {
+          "default": false,
+          "title": "Case Sensitive",
+          "type": "boolean"
+        },
+        "collapse_whitespace": {
+          "default": true,
+          "title": "Collapse Whitespace",
+          "type": "boolean"
+        }
+      },
+      "title": "Normalization",
+      "type": "object"
+    },
+    "Numeric": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "kind": {
+          "const": "numeric",
+          "title": "Kind",
+          "type": "string"
+        },
+        "expected": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 6,
+          "max_digits": 18,
+          "title": "Expected"
+        },
+        "absolute_tolerance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 6,
+          "default": "0",
+          "ge": 0,
+          "max_digits": 18,
+          "title": "Absolute Tolerance"
+        },
+        "unit_label": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Label"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "kind",
+        "expected"
+      ],
+      "title": "Numeric",
+      "type": "object"
+    },
+    "Option": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 1000,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Option",
+      "type": "object"
+    },
+    "PassageGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "kind": {
+          "const": "passage_group",
+          "title": "Kind",
+          "type": "string"
+        },
+        "passage": {
+          "maxLength": 16000,
+          "title": "Passage",
+          "type": "string"
+        },
+        "children": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "essay": "#/$defs/Essay",
+                "file_upload": "#/$defs/FileUpload",
+                "multiple_select": "#/$defs/MultipleSelect",
+                "numeric": "#/$defs/Numeric",
+                "short_answer": "#/$defs/ShortAnswer",
+                "single_choice": "#/$defs/SingleChoice"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SingleChoice"
+              },
+              {
+                "$ref": "#/$defs/MultipleSelect"
+              },
+              {
+                "$ref": "#/$defs/Numeric"
+              },
+              {
+                "$ref": "#/$defs/ShortAnswer"
+              },
+              {
+                "$ref": "#/$defs/Essay"
+              },
+              {
+                "$ref": "#/$defs/FileUpload"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "kind",
+        "passage",
+        "children"
+      ],
+      "title": "PassageGroup",
+      "type": "object"
+    },
+    "ShortAnswer": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "kind": {
+          "const": "short_answer",
+          "title": "Kind",
+          "type": "string"
+        },
+        "accepted_answers": {
+          "items": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Accepted Answers",
+          "type": "array"
+        },
+        "normalization": {
+          "$ref": "#/$defs/Normalization",
+          "default": {
+            "unicode_form": "NFKC",
+            "case_sensitive": false,
+            "collapse_whitespace": true
+          }
+        },
+        "max_response_characters": {
+          "default": 1000,
+          "maximum": 4000,
+          "minimum": 1,
+          "title": "Max Response Characters",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "kind",
+        "accepted_answers"
+      ],
+      "title": "ShortAnswer",
+      "type": "object"
+    },
+    "SingleChoice": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 16000,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "points": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "decimal_places": 2,
+          "gt": 0,
+          "le": 10000,
+          "max_digits": 7,
+          "title": "Points"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/Option"
+          },
+          "maxItems": 20,
+          "minItems": 2,
+          "title": "Options",
+          "type": "array"
+        },
+        "kind": {
+          "const": "single_choice",
+          "title": "Kind",
+          "type": "string"
+        },
+        "correct_option_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "title": "Correct Option Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "prompt",
+        "points",
+        "options",
+        "kind",
+        "correct_option_id"
+      ],
+      "title": "SingleChoice",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "essay": "#/$defs/Essay",
+      "file_upload": "#/$defs/FileUpload",
+      "multiple_select": "#/$defs/MultipleSelect",
+      "numeric": "#/$defs/Numeric",
+      "passage_group": "#/$defs/PassageGroup",
+      "short_answer": "#/$defs/ShortAnswer",
+      "single_choice": "#/$defs/SingleChoice"
+    },
+    "propertyName": "kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/SingleChoice"
+    },
+    {
+      "$ref": "#/$defs/MultipleSelect"
+    },
+    {
+      "$ref": "#/$defs/Numeric"
+    },
+    {
+      "$ref": "#/$defs/ShortAnswer"
+    },
+    {
+      "$ref": "#/$defs/Essay"
+    },
+    {
+      "$ref": "#/$defs/FileUpload"
+    },
+    {
+      "$ref": "#/$defs/PassageGroup"
+    }
+  ]
+}

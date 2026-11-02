@@ -1,3 +1,10 @@
+# Source release 0.6 — P2-001 (2 November 2026)
+
+- Recorded P1 engineering acceptance from local/separate-environment verification and actual CI job outcomes.
+- Expanded P2 into eight tasks with requirement links, dependencies and explicit PostgreSQL/storage/browser gates.
+- Added seven immutable content contracts, semantic validation, recursive candidate projection, canonical content fingerprint, examples and JSON Schema.
+- Added 63 content tests; existing schema, migrations, endpoint behavior and pinned dependencies unchanged. P2-001 strict local/CI acceptance remains pending.
+
 # Source release 0.5 — P1-005
 
 - Recorded P1-004 local acceptance: 227 strict PostgreSQL tests, clean schema/lint and real worker/repeat smoke.

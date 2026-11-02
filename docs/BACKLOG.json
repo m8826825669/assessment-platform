@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0",
-  "milestone": "P1",
+  "milestone": "P2",
   "items": [
     {
       "id": "P1-001",
@@ -65,13 +65,153 @@
         "OPS-01",
         "GOV-01"
       ],
-      "status": "implemented_pending_fresh_local_and_remote_ci_verification",
+      "status": "done",
       "acceptance": "Fresh environment full verification: static checks, pinned dependencies, 236 tests with zero skips including fresh PostgreSQL migrations; all actual remote CI matrix jobs pass with linked commit/run evidence.",
       "depends_on": [
         "P1-004"
       ],
-      "evidence": "Implementation delivered; authoring and user acceptance evidence recorded separately in VALIDATION_P1_005.txt and PROGRESS.md. Remote CI not run."
+      "evidence": "Windows full gate passed twice; separate .venv-p1-005-fresh full gate: 236 passed, zero skips, 160.02s. Owner CI screenshot: run 41375023675 attempt 2, commit b00e0a8, all four jobs succeeded. See P1_ACCEPTANCE.md."
+    },
+    {
+      "id": "P2-001",
+      "title": "Question content contracts",
+      "requirements": [
+        "QBK-01",
+        "QBK-02",
+        "PUB-01",
+        "SEC-01"
+      ],
+      "status": "implemented_pending_local_and_ci_verification",
+      "acceptance": "Seven types validate; malformed content rejected; recursive candidate projection omits secrets; immutable nested snapshots and deterministic full-content fingerprints; strict local regression and actual CI pass.",
+      "depends_on": [
+        "P1-005"
+      ],
+      "evidence": "See P2_QUESTION_BANK_PLAN.md and VALIDATION_P2_001.txt; content unit evidence only, local strict regression and new CI run pending."
+    },
+    {
+      "id": "P2-002",
+      "title": "Persistent questions and immutable version snapshots",
+      "requirements": [
+        "QBK-01",
+        "TEN-01",
+        "PUB-01",
+        "IAM-01",
+        "GOV-01"
+      ],
+      "status": "queued",
+      "acceptance": "Real PostgreSQL migration/grants/readiness, tenant and direct SQL denial, immutable history, stale-write conflicts, concurrent version uniqueness, atomic mutation/audit/outbox; API tests and actual CI pass.",
+      "depends_on": [
+        "P2-001"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+    },
+    {
+      "id": "P2-003",
+      "title": "Independent question review and selection",
+      "requirements": [
+        "QBK-01",
+        "IAM-01",
+        "GOV-01"
+      ],
+      "status": "queued",
+      "acceptance": "Exact-version review, no self-approval including admins, audited return/approval/retirement, current authority and stale-review fencing; only approved non-retired versions selectable.",
+      "depends_on": [
+        "P2-002"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+    },
+    {
+      "id": "P2-004",
+      "title": "Taxonomy and permission-scoped retrieval",
+      "requirements": [
+        "QBK-01",
+        "TEN-01"
+      ],
+      "status": "queued",
+      "acceptance": "Tenant-safe taxonomy links, immutable historical labels/references, bounded stable pagination and role-scoped search; real database/API rejection paths.",
+      "depends_on": [
+        "P2-002",
+        "P2-003"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+    },
+    {
+      "id": "P2-005",
+      "title": "Private accessible authoring media",
+      "requirements": [
+        "QBK-01",
+        "TEN-01",
+        "SEC-01",
+        "ACC-01"
+      ],
+      "status": "queued",
+      "acceptance": "Real object storage integration, quarantine/scanning, content/size verification, immutable bytes, wrong-tenant/download denial and accessible descriptions; no unclean/broken selectable references.",
+      "depends_on": [
+        "P2-002",
+        "P2-003"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+    },
+    {
+      "id": "P2-006",
+      "title": "Atomic validated question imports",
+      "requirements": [
+        "QBK-01",
+        "QBK-02",
+        "TEN-01",
+        "GOV-01"
+      ],
+      "status": "queued",
+      "acceptance": "Internal JSON preview and atomic draft commit; malformed/foreign references rejected without partial writes; idempotent retries, conflict on changed key payload; private content absent from logs/audit.",
+      "depends_on": [
+        "P2-003",
+        "P2-004",
+        "P2-005"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+    },
+    {
+      "id": "P2-007",
+      "title": "Authoring review and preview browser journeys",
+      "requirements": [
+        "QBK-01",
+        "QBK-02",
+        "IAM-01",
+        "ACC-01"
+      ],
+      "status": "queued",
+      "acceptance": "Prototype then real browser journeys for seven types, review/history/media/import UI, candidate-safe preview traffic, keyboard/error/conflict recovery and narrow-screen evidence.",
+      "depends_on": [
+        "P2-003",
+        "P2-004",
+        "P2-005",
+        "P2-006"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+    },
+    {
+      "id": "P2-008",
+      "title": "Question bank milestone acceptance",
+      "requirements": [
+        "QBK-01",
+        "QBK-02",
+        "TEN-01",
+        "PUB-01",
+        "SEC-01",
+        "ACC-01",
+        "GOV-01"
+      ],
+      "status": "queued",
+      "acceptance": "Full real PostgreSQL/storage/browser/CI evidence; prior used/approved versions survive edits; malformed imports and unauthorized media denied; P2 exit checklist and release limitations recorded.",
+      "depends_on": [
+        "P2-007"
+      ],
+      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
     }
   ],
-  "later_milestones": "P2 through P8 are defined in MASTER_ROADMAP.md; expand into tasks before entering each milestone."
+  "later_milestones": "P3 through P8 retain the controlling roadmap scope; expand tasks before entering each milestone.",
+  "completed_milestones": [
+    "P0",
+    "P1"
+  ]
 }

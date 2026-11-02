@@ -1,28 +1,23 @@
 # Progress
 
-Controlling scope: MASTER_ROADMAP.md v1.0. Source release 0.5, 1 November 2026.
+Controlling scope: MASTER_ROADMAP.md v1.0. Updated 2 November 2026; source release 0.6, P2-001. The original roadmap and Word baseline remain unchanged.
 
-## Completed gates
+## Completed
 
-- P0: roadmap, requirements, architecture decisions and continuity records.
-- P1-001: domain reference kernel, 25 tests.
-- P1-002: real Windows/PostgreSQL migration/schema/readiness and 57 tests; see LOCAL_VERIFICATION_P1_002.md.
-- P1-003: real Windows/PostgreSQL identity/tenant enforcement, 134 tests and restricted-role readiness/auth/logout/revocation smoke; see LOCAL_VERIFICATION_P1_003.md.
-- P1-004: real Windows/PostgreSQL strict suite 227 passed with no skips, clean migration/schema/Ruff, separate worker provisioning and real queued event delivery with an empty repeat. See LOCAL_VERIFICATION_P1_004.md. The 0.4.1 correction changed only the correlation-sensitive test assertion.
+P0 and P1 engineering foundation are complete. P1-001 through P1-005 are accepted with linked evidence in BACKLOG.json and P1_ACCEPTANCE.md. The owner verified 236 tests with zero skips in the working Windows environment twice and the separate .venv-p1-005-fresh environment once (160.02 seconds). CI screenshot: run 41375023675 attempt 2, commit b00e0a8, all three PostgreSQL/Python jobs and the partial Windows job succeeded. Remote logs/test counts were not independently fetched; the screenshot proves job outcomes only. Earlier identity/runtime/worker evidence remains in LOCAL_VERIFICATION_P1_002/003/004.md.
 
-## Current increment: P1-005
+## Current: P2-001 content contracts
 
-Implemented repeatable setup, dependency declaration/lock/installed-version checks, a single verification gate with sanitized counts, skip rejection and explicit partial mode. Added nine tests covering false acceptance, prerequisite opt-in, fail-fast behavior and secret-safe summary output. Added CI source with three Linux Python/PostgreSQL jobs and one partial Windows job. Existing migration bytes, dependency versions and application schema/behavior remain unchanged. Source updater now verifies all three migrations.
+P2_QUESTION_BANK_PLAN.md expands the whole milestone into eight tasks, including persistence, independent review, taxonomy, protected media, atomic imports, frontend journeys and final acceptance. The final goal and milestone sequence are unchanged.
 
-Fresh authoring environment: Python 3.12.14 on Linux; pinned installation, dependency checks, lint/format and 146 non-database tests passed, no skips. Full collection is 236 tests. See VALIDATION_P1_005.txt. Existing Starlette/httpx deprecation warning remains tracked. Ruff import classification is explicit so checks behave consistently across working directories; two test import blocks were normalized, not application logic.
+First bounded implementation: seven typed plain-text question-content contracts, semantic validation, immutable nested validated values, explicit recursive candidate-safe projection and schema-versioned content fingerprints. Added synthetic examples, generated JSON Schema, contract documentation and 63 focused tests. No new API routes, migration, grants, dependency versions, media storage or scoring engine. Existing application API package version stays 0.4.0; source archive release is 0.6.
 
-## Gate status and next action
+## Acceptance status
 
-P1-005 IMPLEMENTED, FRESH LOCAL POSTGRESQL AND ACTUAL REMOTE CI ACCEPTANCE PENDING.
-P1 overall IN PROGRESS. No remote repository was created or published and no CI run occurred.
+P2-001 IMPLEMENTED, STRICT LOCAL REGRESSION AND NEW REMOTE CI PENDING. P2 is IN PROGRESS. P1's successful run is historical evidence, not a passing P2 run. Authoring evidence is in VALIDATION_P2_001.txt; unit tests prove content behavior only.
 
-Apply P1_005_UPGRADE_WINDOWS.md. Run the full gate with the working environment, then a separately created fresh environment. Retain sanitized reports and zero-skips results. Place the complete project at the root of a repository and run the included workflow; retain actual run URL, commit SHA and every job outcome. Review DEVELOPER_GUIDE.md's final P1 checklist. Resolve any failures before closing P1 and expanding P2 tasks. Do not mark authored CI or partial unit checks as passing CI.
+Next: apply P2_001_UPGRADE_WINDOWS.md to the clean repository, inspect the source changes, run the strict local gate (expected 299 tests), commit/push and inspect every new CI job. Once P2-001 passes, start P2-002 persistent question versions. No new migration is needed for P2-001; existing head remains 0003_audit_outbox.
 
-## Scope limits
+## Limits
 
-No frontend, persistent question bank, live examination runner, scoring/results workflow or adaptive testing yet. The domain kernel remains an in-memory reference. Current worker effects are local database receipts only; no external transport, daemon supervision, fanout or ordering guarantee is claimed. Audit and envelopes are append-only for restricted roles, not sealed against the owner. Runtime and worker credentials remain private server capabilities. No public registration, MFA, recovery email, SSO, custom roles, cookie browser integration or platform-owner console yet. Production capacity, recovery, observability, retention and privacy gates remain later work.
+Question bank persistence/review/media/import/UI and real examination delivery/scoring/results are not delivered yet. Existing domain kernel remains an in-memory reference. The worker has local receipt effects only. No external transport, production deployment, measured capacity, recovery/accessibility certification or product-completion claim. Existing Starlette/httpx warning remains visible.
