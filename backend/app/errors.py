@@ -16,6 +16,8 @@ from app.request_context import request_id
 
 LOGGER = logging.getLogger("assessment.errors")
 MESSAGES = {
+    "review_conflict": "Review state changed; reload before retrying",
+    "review_self": "An independent reviewer is required",
     "question_not_found": "Question not found",
     "question_conflict": "Question write conflicted; reload before retrying",
     "invalid_credentials": "Invalid email or password",

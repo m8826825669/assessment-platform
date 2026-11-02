@@ -252,6 +252,9 @@ class QuestionVersion(Base):
     __tablename__ = "question_versions"
     __table_args__ = (
         UniqueConstraint("tenant_id", "question_id", "version_number"),
+        UniqueConstraint(
+            "tenant_id", "question_id", "id", "content_hash", name="uq_question_versions_review_binding"
+        ),
         ForeignKeyConstraint(
             ["tenant_id", "question_id"], ["questions.tenant_id", "questions.id"], ondelete="RESTRICT"
         ),
@@ -270,4 +273,77 @@ class QuestionVersion(Base):
     content: Mapped[dict] = mapped_column(JSONB, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     authored_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class QuestionReviewEvent(Base):
+    """Append-only decisions; the last sequence is the exact version's workflow state."""
+
+    __tablename__ = "question_review_events"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "version_id", "sequence"),
+        UniqueConstraint("tenant_id", "question_id", "version_id", "id", name="uq_review_selection_binding"),
+        ForeignKeyConstraint(
+            ["tenant_id", "question_id", "version_id", "content_hash"],
+            [
+                "question_versions.tenant_id",
+                "question_versions.question_id",
+                "question_versions.id",
+                "question_versions.content_hash",
+            ],
+            ondelete="RESTRICT",
+            name="fk_review_version_binding",
+        ),
+        CheckConstraint("sequence > 0 AND expected_revision > 0", name="positive_revisions"),
+        CheckConstraint(
+            "(action, state) IN (('submit','in_review'),('return','returned'),('approve','approved'),('retire','retired'),('supersede','superseded'))",
+            name="action_state",
+        ),
+        CheckConstraint(
+            "(action IN ('return','retire') AND reason IS NOT NULL AND length(trim(reason)) BETWEEN 1 AND 1000) OR (action NOT IN ('return','retire') AND reason IS NULL)",
+            name="reason_required",
+        ),
+    )
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid)
+    question_id: Mapped[UUID] = mapped_column(Uuid)
+    version_id: Mapped[UUID] = mapped_column(Uuid)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    originating_author: Mapped[UUID] = mapped_column(Uuid)
+    actor_user_id: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    sequence: Mapped[int] = mapped_column(Integer)
+    expected_revision: Mapped[int] = mapped_column(Integer)
+    action: Mapped[str] = mapped_column(String(20))
+    state: Mapped[str] = mapped_column(String(20))
+    reason: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class QuestionSelection(Base):
+    """Contains only public approved content; coordinators never need private version access."""
+
+    __tablename__ = "question_selections"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "question_id", "version_id", "last_event_id"],
+            [
+                "question_review_events.tenant_id",
+                "question_review_events.question_id",
+                "question_review_events.version_id",
+                "question_review_events.id",
+            ],
+            ondelete="RESTRICT",
+            name="fk_selection_review",
+        ),
+        CheckConstraint("state IN ('approved', 'retired')", name="state_values"),
+        CheckConstraint("jsonb_typeof(public_content) = 'object'", name="public_object"),
+        Index("ix_question_selections_tenant_version", "tenant_id", "version_id"),
+    )
+    version_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid)
+    question_id: Mapped[UUID] = mapped_column(Uuid)
+    title: Mapped[str] = mapped_column(String(200))
+    public_content: Mapped[dict] = mapped_column(JSONB)
+    state: Mapped[str] = mapped_column(String(20))
+    last_event_id: Mapped[UUID] = mapped_column(Uuid)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

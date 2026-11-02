@@ -73,4 +73,4 @@ The UI uses the intended Next.js/TypeScript stack after the journey prototype; a
 
 ## First implementation boundary
 
-P2-001 is accepted with local PostgreSQL and correct remote CI evidence in LOCAL_VERIFICATION_P2_001.md. Source 0.7.0 implements P2-002 saved-draft persistence and awaits its own PostgreSQL/CI gate. There are still no review/approval routes, storage, frontend or grading engine. Follow BACKLOG.json and PROGRESS.md for current task status; this plan retains the original task order.
+P2-001 is accepted with local PostgreSQL and correct remote CI evidence in LOCAL_VERIFICATION_P2_001.md. P2-002 is accepted at e18af0c; source 0.8.0 implements P2-003 review/approval/retirement and awaits its own PostgreSQL/CI gate. There is still no protected media, frontend or grading engine. Follow BACKLOG.json and PROGRESS.md for current task status; this plan retains the original task order.

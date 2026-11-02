@@ -35,7 +35,8 @@ class VersionMetadata(BaseModel):
     content_hash: str
     authored_by: UUID
     created_at: datetime
-    state: Literal["draft"]
+    state: Literal["draft", "in_review", "returned", "approved", "retired", "superseded"]
+    review_revision: int
 
 
 class QuestionDetail(VersionMetadata):

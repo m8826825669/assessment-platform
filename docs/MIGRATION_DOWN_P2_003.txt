@@ -1,0 +1,48 @@
+BEGIN;
+
+-- Running downgrade 0005_question_review -> 0004_question_versions
+
+DROP POLICY reviewer_question_read ON questions;
+
+DROP POLICY question_version_read ON question_versions;
+
+DROP POLICY question_version_append ON question_versions;
+
+DROP TRIGGER question_review_projection_guard ON question_review_events;
+
+DROP FUNCTION question_review_projection_guard();
+
+DROP TABLE question_selections;
+
+DROP TABLE question_review_events;
+
+DROP FUNCTION question_selection_guard();
+
+DROP FUNCTION question_public_content(jsonb);
+
+DROP FUNCTION question_review_guard();
+
+CREATE POLICY question_version_read ON question_versions FOR SELECT USING ((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND (EXISTS (SELECT 1 FROM public.questions q WHERE q.tenant_id=question_versions.tenant_id AND q.id=question_versions.question_id)));
+
+CREATE POLICY question_version_append ON question_versions FOR INSERT WITH CHECK ((tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) AND (EXISTS (SELECT 1 FROM public.questions q WHERE q.tenant_id=question_versions.tenant_id AND q.id=question_versions.question_id)) AND authored_by=NULLIF(current_setting('app.actor_user_id', true), '')::uuid);
+
+ALTER TABLE question_versions DROP CONSTRAINT uq_question_versions_review_binding;
+
+CREATE OR REPLACE FUNCTION question_identity_guard() RETURNS trigger LANGUAGE plpgsql
+        SET search_path = pg_catalog, public AS $$
+        BEGIN
+            IF TG_OP = 'DELETE' THEN
+                RAISE EXCEPTION 'Question identity is retained' USING ERRCODE = '42501';
+            END IF;
+            IF NEW.id IS DISTINCT FROM OLD.id OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
+               OR NEW.created_by IS DISTINCT FROM OLD.created_by OR NEW.created_at IS DISTINCT FROM OLD.created_at
+               OR NEW.revision::bigint <> OLD.revision::bigint + 1 THEN
+                RAISE EXCEPTION 'Only the next revision is allowed' USING ERRCODE = '23514';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+UPDATE alembic_version SET version_num='0004_question_versions' WHERE alembic_version.version_num = '0005_question_review';
+
+COMMIT;
+

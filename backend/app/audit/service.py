@@ -25,7 +25,10 @@ EMPTY_ACTIONS = frozenset(
 MEMBERSHIP_ACTIONS = frozenset({"membership.created", "membership.changed", "operator.membership_created"})
 REQUEUE_ACTION = "operator.outbox_requeued"
 QUESTION_ACTIONS = frozenset({"question.created", "question.revised"})
-ACTIONS = EMPTY_ACTIONS | MEMBERSHIP_ACTIONS | QUESTION_ACTIONS | {REQUEUE_ACTION}
+REVIEW_ACTIONS = frozenset(
+    {"question.review_" + action for action in ("submitted", "returned", "approved", "retired", "superseded")}
+)
+ACTIONS = EMPTY_ACTIONS | MEMBERSHIP_ACTIONS | QUESTION_ACTIONS | REVIEW_ACTIONS | {REQUEUE_ACTION}
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})
 
 
@@ -36,11 +39,24 @@ def clean_state(action: str, state: dict | None) -> dict:
     allowed = {"role", "status", "user_id"} if action in MEMBERSHIP_ACTIONS else set()
     if action in QUESTION_ACTIONS:
         allowed = {"version_id", "revision", "content_hash"}
+    if action in REVIEW_ACTIONS:
+        allowed = {"version_id", "revision", "content_hash", "review_revision", "review_state"}
     if action == REQUEUE_ACTION:
         allowed = {"status", "attempts", "reason_code"}
     if state.keys() - allowed:
         raise ValueError("Unapproved audit state field")
     for key, value in state.items():
+        if key == "review_revision" and (type(value) is not int or not 0 <= value <= 2147483647):
+            raise ValueError("Invalid review revision")
+        if key == "review_state" and value not in {
+            "draft",
+            "in_review",
+            "returned",
+            "approved",
+            "retired",
+            "superseded",
+        }:
+            raise ValueError("Invalid review state")
         if key == "version_id":
             state[key] = str(UUID(str(value)))
         if key == "revision" and (type(value) is not int or not 1 <= value <= 2147483647):

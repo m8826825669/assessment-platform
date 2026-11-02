@@ -14,8 +14,10 @@ from app.question_bank.contracts import Content, candidate_view, content_hash, v
 SCHEMA_VERSION = "question-content.v1"
 
 
-def authority(db: Session, tenant: UUID, actor: Principal, *, lock: bool = False):
-    member = tenant_membership(db, tenant, actor, "questions.write", lock=lock)
+def authority(
+    db: Session, tenant: UUID, actor: Principal, *, lock: bool = False, permission: str = "questions.write"
+):
+    member = tenant_membership(db, tenant, actor, permission, lock=lock)
     # Authentication may have waited for the institution lock; recheck live session/user now.
     valid = db.scalar(
         select(AuthSession.id)
@@ -66,7 +68,10 @@ def audit_state(saved):
     return {"version_id": str(saved.id), "revision": saved.version_number, "content_hash": saved.content_hash}
 
 
-def metadata(saved):
+def metadata(saved, db=None):
+    from app.question_bank import review
+
+    workflow = review.status(db, saved) if db is not None else {"state": "draft", "review_revision": 0}
     return {
         "question_id": saved.question_id,
         "version_id": saved.id,
@@ -76,13 +81,13 @@ def metadata(saved):
         "content_hash": saved.content_hash,
         "authored_by": saved.authored_by,
         "created_at": saved.created_at,
-        "state": "draft",  # No review or approval capability is exposed in this increment.
+        **workflow,
     }
 
 
-def detail(row, saved):
+def detail(row, saved, db=None):
     return {
-        **metadata(saved),
+        **metadata(saved, db=db),
         "tenant_id": row.tenant_id,
         "created_by": row.created_by,
         "revision": row.revision,
@@ -128,6 +133,9 @@ def revise(db, tenant, actor, identifier, expected_revision, title, content):
         reject(409, "question_conflict", "Question write conflicted; reload before retrying")
     previous = version(db, row)
     try:
+        from app.question_bank.review import supersede_pending
+
+        supersede_pending(db, row, previous, actor)
         row.revision += 1
         db.flush()
         saved = append_version(db, row, actor, title, content)
@@ -149,7 +157,7 @@ def revise(db, tenant, actor, identifier, expected_revision, title, content):
 
 def get(db, tenant, actor, identifier, version_id=None):
     row = question(db, tenant, actor, identifier)
-    return detail(row, version(db, row, version_id))
+    return detail(row, version(db, row, version_id), db=db)
 
 
 def history(db, tenant, actor, identifier, offset, limit):
@@ -164,7 +172,7 @@ def history(db, tenant, actor, identifier, offset, limit):
         .offset(offset)
         .limit(limit)
     )
-    return [metadata(saved) for saved in rows]
+    return [metadata(saved, db=db) for saved in rows]
 
 
 def listing(db, tenant, actor, offset, limit):
@@ -184,7 +192,7 @@ def listing(db, tenant, actor, offset, limit):
     if member.role != "admin":
         query = query.where(Question.created_by == actor.user_id)
     return [
-        metadata(saved)
+        metadata(saved, db=db)
         for saved in db.scalars(query.order_by(Question.created_at, Question.id).offset(offset).limit(limit))
     ]
 

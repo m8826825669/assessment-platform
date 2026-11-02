@@ -1,0 +1,62 @@
+P2-003 authoring evidence — 2 November 2026
+
+CPython 3.12.14 / Linux, unchanged pinned development resolution.
+Final portable gate:
+- Dependency compatibility and pin consistency passed.
+- Ruff lint/format passed.
+- 282 tests passed, zero skips, one existing Starlette/httpx warning, 2.70 seconds.
+- VERIFICATION=PARTIAL_PASS.
+Full collection: 444 tests (282 portable, 162 PostgreSQL).
+
+Offline evidence:
+- Alembic upgrade SQL generated: 99 statements parsed with pglast 8.7.
+- Seven upgrade function-definition statements parsed (including older functions and root guard replacement).
+- Downgrade 0005:0004 generated: 17 statements parsed, including restored root guard.
+- Literal runtime SQL parsed and known privilege/probe function argument counts checked.
+- These checks do NOT execute PostgreSQL, prove RLS semantics or prove transaction/concurrency behavior.
+
+No PostgreSQL server could be executed under this workspace's non-root process constraints. Strict owner-local PostgreSQL verification and new actual CI remain mandatory. No main database migration, remote commit, deployment or CI run occurred here.
+Protected comparisons against v0.7 passed for all four prior migrations, dependency locks, question-content.v1, domain reference, synthetic examples and original roadmap/Word baseline.
+
+Sanitized portable report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-02T04:05:43.162082+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 282,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-02T04:05:46.900289+00:00"
+}
+
+Package evidence:
+- Updater applied to extracted v0.7 source; repository/configuration/environment sentinels preserved.
+- Altered existing 0005 rejected before copying.
+- ZIP CRC and every manifest member digest verified.
+- Source text checked for common staged whitespace errors; private local environments/configuration excluded.

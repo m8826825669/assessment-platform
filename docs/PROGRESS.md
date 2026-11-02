@@ -1,25 +1,23 @@
 # Progress
 
-Controlling baseline: MASTER_ROADMAP.md v1.0; P2 plan: P2_QUESTION_BANK_PLAN.md. Updated 2 November 2026. Source/API release 0.7.0, P2-002. Original roadmap/Word baseline unchanged.
+Controlling baseline: MASTER_ROADMAP.md v1.0; phase plan: P2_QUESTION_BANK_PLAN.md. Updated 2 November 2026. Source/API 0.8.0, P2-003. The original roadmap/Word baseline is unchanged.
 
 ## Completed
 
-P0 and P1 engineering foundation are accepted; see P1_ACCEPTANCE.md. P2-001 is accepted from the owner's local 299-test strict PostgreSQL pass (147.03s, zero skips) and all four CI jobs green for the correct commit 918036d / run 41378575934. An older b00e0a8 rerun was excluded. See LOCAL_VERIFICATION_P2_001.md. Screenshot evidence proves job conclusions; remote logs/full SHA were not independently fetched.
+P0/P1 are accepted (P1_ACCEPTANCE.md). P2-001 is accepted for 918036d and its correct CI evidence. P2-002 is accepted: 357 strict local PostgreSQL tests passed, zero skips, 225.30s; 0004 head, clean comparison, restarted API ready and healthy worker status; workflow list screenshot shows successful Foundation gate #3 at e18af0c. No run ID or individual job logs were supplied for that screenshot. See LOCAL_VERIFICATION_P2_001.md and LOCAL_VERIFICATION_P2_002.md.
 
-## Current implementation: P2-002
+## Current: P2-003
 
-Persistent tenant-owned questions and immutable saved versions, current revision fencing, scoped composite references, guarded appends, own-author/admin draft CRUD subset (create/read/new-version/history), staff-only safe preview, current authority rechecks after lock waits, and atomic business/audit/outbox writes. No destructive draft edit or delete operation exists; every accepted save is a new snapshot.
+Implemented immutable exact-version review events, submit/return/approve/retire, independent-review checks against origin/editor/submitter, automatic pending-review supersession during edits, counters/hash fencing, scoped reviewer access and approved public selections. Added database-derived public projection, deferred decision/selection consistency guard, role/trigger readiness checks and atomic review/audit/outbox writes. Existing draft bank read responses now include actual state/review_revision; private drafts and future revisions remain hidden from reviewers until submitted.
 
-Migration 0004_question_versions creates the two new tables, policies, current-version FK and two guards. Application requires nine forced-RLS tables, enabled immutable guards and new restricted API grants; worker is denied question-table rights. API/source version 0.7.0. Dependencies, all three older migration bytes and question-content.v1 remain unchanged.
+Schema head 0005_question_review; eleven forced-RLS tables and five enabled guards. Runtime requires additional limited grants; worker receives no review/selection table access. Prior migrations, dependency locks and question-content.v1 stay unchanged. All previously saved drafts retain their content and start without fabricated decisions/approval.
 
-Portable evidence: 230 tests passed with no skips; dependency/lint/format checks clean. Full suite collection: 357 tests, including 127 PostgreSQL tests. SQL parser accepted 72 migration statements and both PL/pgSQL functions; syntax only, not database execution. See VALIDATION_P2_002.txt for exact evidence and limits.
+## Evidence and gate
 
-## Gate and next action
+P2-003 IMPLEMENTED, STRICT LOCAL POSTGRESQL AND NEW REMOTE CI ACCEPTANCE PENDING. Portable gate: 282 tests passed, no skips; dependency/lint/format passed. Full collection: 444 tests (162 PostgreSQL). Offline SQL parser accepted 99 upgrade statements and seven function-definition statements (including earlier definitions/replacement); syntax only. See VALIDATION_P2_003.txt. This workspace cannot execute PostgreSQL under its required non-root server constraints; no database/CI pass is invented.
 
-P2-002 IMPLEMENTED, LOCAL POSTGRESQL AND NEW REMOTE CI ACCEPTANCE PENDING. P2 overall remains in progress. This workspace cannot execute PostgreSQL under its required non-root server process constraints. Do not count portable tests or SQL parsing as persistence/concurrency proof.
+Next: apply P2_003_UPGRADE_WINDOWS.md, migrate/compare schema, refresh restricted role grants, run all 444 tests without skips, restart/check API and worker, then commit/push and inspect all new CI jobs for the new commit. Once P2-003 passes, record acceptance and begin P2-004 taxonomy/retrieval. Historical CI cannot validate later source.
 
-Follow P2_002_UPGRADE_WINDOWS.md: stop old processes, apply separate source bundle, migrate to 0004, compare schema, refresh existing restricted role grants, run all 357 tests with zero skips, restart/check readiness and worker status, inspect/commit/push and verify every CI job for the new commit. Then record P2-002 acceptance and implement P2-003 independent review/approval. Historical passing CI does not validate new source.
+## Limits
 
-## Explicit limits
-
-All saved versions are drafts; review/approval/retirement and approved selection are P2-003. Taxonomy, protected media, atomic imports and browser authoring are later P2 tasks. No frontend, live candidate runner, scoring/results or adaptive testing is delivered. Current preview is a staff-only JSON projection. Database credentials remain private server capabilities; an owner able to disable guards is outside the append-only protection claim. Initial create has no replay idempotency key; revision retries are conflict-controlled. Authoring mutations currently serialize per institution, without a capacity promise. Existing Starlette/httpx TestClient warning remains visible. Production/security/accessibility/recovery gates remain later work.
+No frontend/browser review journey, taxonomy, protected media, imports, exam publication/scheduling, candidate runner, evaluation/results or adaptive engine yet. Review/selection endpoints are authenticated JSON APIs. Returned content requires a new version to be resubmitted; duplicate commands conflict rather than replay success. Initial create remains without replay idempotency. Point-in-time authority checks do not retroactively cancel already authorized commits. Authoring/review currently serialize per institution; no capacity promise. Privileged owners can disable guards, outside the append-only protection claim. Local receipt worker sends no external messages. Existing Starlette/httpx warning remains tracked. Later production/security/accessibility/recovery gates still apply.

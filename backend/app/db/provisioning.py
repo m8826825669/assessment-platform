@@ -72,13 +72,25 @@ def grant_runtime(connection: Connection, role: str) -> None:
         sql.SQL("GRANT SELECT, INSERT ON questions, question_versions TO {}").format(identifier)
     )
     connection.execute(sql.SQL("GRANT UPDATE (revision) ON questions TO {}").format(identifier))
+    connection.execute(
+        sql.SQL("GRANT SELECT, INSERT ON question_review_events, question_selections TO {}").format(
+            identifier
+        )
+    )
+    connection.execute(
+        sql.SQL("GRANT UPDATE (state, last_event_id) ON question_selections TO {}").format(identifier)
+    )
 
 
 def grant_worker(connection: Connection, role: str) -> None:
     identifier = restricted_role(connection, role)
     if connection.execute(
-        "SELECT has_table_privilege(%s, 'users', 'SELECT') OR has_table_privilege(%s, 'audit_records', 'INSERT')",
-        (role, role),
+        "SELECT has_table_privilege(%s, 'users', 'SELECT') OR has_table_privilege(%s, 'audit_records', 'INSERT') "
+        "OR has_any_column_privilege(%s, 'question_review_events', 'SELECT, INSERT, UPDATE') "
+        "OR has_any_column_privilege(%s, 'question_selections', 'SELECT, INSERT, UPDATE') "
+        "OR has_table_privilege(%s, 'question_review_events', 'DELETE, TRUNCATE') "
+        "OR has_table_privilege(%s, 'question_selections', 'DELETE, TRUNCATE')",
+        (role, role, role, role, role, role),
     ).fetchone()[0]:
         raise ValueError("Use a separate worker role; API privileges are already present")
     grant_connection(connection, identifier)

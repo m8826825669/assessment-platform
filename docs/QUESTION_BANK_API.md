@@ -1,5 +1,7 @@
 # Persistent draft question API — P2-002
 
+Historical draft-release contract. Source 0.8.0 adds workflow state/review_revision and dedicated review/selection routes described in QUESTION_REVIEW_API.md; current head is 0005_question_review. Private draft routes remain author/admin only. The limitations below describe the original 0.7.0 release.
+
 Requirements QBK-01, TEN-01, PUB-01, IAM-01, GOV-01. API/source release 0.7.0. This increment implements saved drafts, not review/approval, retirement, taxonomy, media, imports, exam publication or grading. All new routes require a current bearer session and active institution membership. Successful and problem responses use Cache-Control: no-store.
 
 Base path: `/api/v1/tenants/{tenant_id}/questions`.

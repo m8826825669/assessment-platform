@@ -1,1 +1,1 @@
-"""Governed question content and persistent saved drafts; review follows in P2-003."""
+"""Governed immutable question content, independent review and approved selection."""

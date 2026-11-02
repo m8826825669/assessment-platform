@@ -1,3 +1,11 @@
+# Source/API 0.8.0 — P2-003 (2 November 2026)
+
+- Recorded P2-002 local/CI acceptance at e18af0c, with exact provenance limits.
+- Added append-only review events, independent approval/return, reasoned retirement, version/hash/counter fences and pending-review supersession during edits.
+- Added scoped review queue/history and approved public selection, with database-generated recursive projection and deferred decision/selection consistency.
+- Added reviewer/coordinator row policies, stricter grants/readiness and migration 0005; preserved earlier migrations/content/dependencies.
+- Added workflow/database failure-path coverage and upgrade/API documentation. Portable checks pass; real PostgreSQL/new CI acceptance pending. No frontend, imports, media or publication feature is claimed.
+
 # Source/API 0.7.0 — P2-002 (2 November 2026)
 
 - Recorded P2-001 local/CI acceptance for 918036d and run 41378575934.

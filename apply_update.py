@@ -41,9 +41,10 @@ def apply(source: Path, target: Path) -> Path:
         "0002_identity_tenancy.py",
         "0003_audit_outbox.py",
         "0004_question_versions.py",
+        "0005_question_review.py",
     ]:
         baseline = Path("backend/alembic/versions") / revision
-        if revision == "0004_question_versions.py" and not (target / baseline).exists():
+        if revision == "0005_question_review.py" and not (target / baseline).exists():
             continue  # New in this bundle; compare it on subsequent applications.
         if (
             not (target / baseline).is_file()

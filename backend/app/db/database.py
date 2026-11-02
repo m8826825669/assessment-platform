@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 
-EXPECTED_DATABASE_REVISION = "0004_question_versions"
+EXPECTED_DATABASE_REVISION = "0005_question_review"
 
 # The runtime must be neither migration owner nor a role that can bypass row policies.
 RUNTIME_ROLE_SAFE = text("""
@@ -22,13 +22,16 @@ SELECT NOT r.rolsuper AND NOT r.rolbypassrls AND NOT r.rolcreatedb
 FROM pg_roles r WHERE r.rolname = current_user
 """)
 RLS_CONFIGURED = text("""
-SELECT count(*) = 9 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
-AND (SELECT count(*) = 2 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
+SELECT count(*) = 11 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+AND (SELECT count(*) = 5 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
      WHERE NOT t.tgisinternal AND
      ((t.tgrelid = 'public.questions'::regclass AND t.tgname = 'question_identity_guard') OR
-      (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard')))
+      (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard') OR
+      (t.tgrelid = 'public.question_review_events'::regclass AND t.tgname = 'question_review_guard') OR
+      (t.tgrelid = 'public.question_selections'::regclass AND t.tgname = 'question_selection_guard') OR
+      (t.tgrelid = 'public.question_review_events'::regclass AND t.tgname = 'question_review_projection_guard')))
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions')
+WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections')
 """)
 
 
@@ -52,6 +55,21 @@ SELECT has_table_privilege(current_user, 'audit_records', 'SELECT')
    AND NOT has_column_privilege(current_user, 'questions', 'id', 'UPDATE')
    AND NOT has_column_privilege(current_user, 'questions', 'created_at', 'UPDATE')
    AND NOT has_any_column_privilege(current_user, 'question_versions', 'UPDATE')
+   AND has_table_privilege(current_user, 'question_review_events', 'SELECT')
+   AND has_table_privilege(current_user, 'question_review_events', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'question_review_events', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'question_review_events', 'DELETE, TRUNCATE')
+   AND has_table_privilege(current_user, 'question_selections', 'SELECT')
+   AND has_table_privilege(current_user, 'question_selections', 'INSERT')
+   AND has_column_privilege(current_user, 'question_selections', 'state', 'UPDATE')
+   AND has_column_privilege(current_user, 'question_selections', 'last_event_id', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'question_selections', 'DELETE, TRUNCATE')
+   AND NOT has_column_privilege(current_user, 'question_selections', 'public_content', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'question_selections', 'title', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'question_selections', 'version_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'question_selections', 'tenant_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'question_selections', 'question_id', 'UPDATE')
+   AND NOT has_column_privilege(current_user, 'question_selections', 'created_at', 'UPDATE')
 """)
 WORKER_GRANTS_READY = text("""
 SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
@@ -65,6 +83,10 @@ SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
    AND NOT has_table_privilege(current_user, 'question_versions', 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE')
    AND NOT has_any_column_privilege(current_user, 'questions', 'SELECT, INSERT, UPDATE')
    AND NOT has_any_column_privilege(current_user, 'question_versions', 'SELECT, INSERT, UPDATE')
+   AND NOT has_any_column_privilege(current_user, 'question_review_events', 'SELECT, INSERT, UPDATE')
+   AND NOT has_any_column_privilege(current_user, 'question_selections', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'question_review_events', 'DELETE, TRUNCATE')
+   AND NOT has_table_privilege(current_user, 'question_selections', 'DELETE, TRUNCATE')
 """)
 
 
@@ -125,7 +147,8 @@ class Database:
                             "AND to_regclass('login_buckets') IS NOT NULL AND to_regclass('security_events') IS NOT NULL "
                             "AND to_regclass('audit_records') IS NOT NULL AND to_regclass('outbox_events') IS NOT NULL "
                             "AND to_regclass('outbox_deliveries') IS NOT NULL AND to_regclass('consumer_receipts') IS NOT NULL "
-                            "AND to_regclass('questions') IS NOT NULL AND to_regclass('question_versions') IS NOT NULL"
+                            "AND to_regclass('questions') IS NOT NULL AND to_regclass('question_versions') IS NOT NULL "
+                            "AND to_regclass('question_review_events') IS NOT NULL AND to_regclass('question_selections') IS NOT NULL"
                         )
                     )
                     if revisions != {EXPECTED_DATABASE_REVISION} or not tables_exist:
