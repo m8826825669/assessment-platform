@@ -1,0 +1,8 @@
+# Runtime dependency declarations; requirements.lock pins the full tested resolution.
+fastapi==0.162.0
+SQLAlchemy==2.0.55
+alembic==1.20.1
+psycopg[binary]==3.3.6
+pydantic-settings==2.16.2
+uvicorn==0.54.0
+argon2-cffi==25.1.0

@@ -1,0 +1,77 @@
+{
+  "roadmap_version": "1.0",
+  "milestone": "P1",
+  "items": [
+    {
+      "id": "P1-001",
+      "title": "Domain invariant foundation",
+      "requirements": [
+        "PUB-01",
+        "TEN-01",
+        "DEL-01",
+        "DEL-02"
+      ],
+      "status": "done",
+      "acceptance": "25 domain tests pass; reference model only",
+      "depends_on": []
+    },
+    {
+      "id": "P1-002",
+      "title": "FastAPI and database foundation",
+      "requirements": [
+        "TEN-01",
+        "OPS-01"
+      ],
+      "status": "done",
+      "acceptance": "Fresh PostgreSQL database migrates from zero; API readiness reflects dependency health",
+      "depends_on": [
+        "P1-001"
+      ],
+      "evidence": "User Windows PostgreSQL execution: 0001_foundation head, alembic check clean, 57 tests passed, Ruff checks passed. See LOCAL_VERIFICATION_P1_002.md."
+    },
+    {
+      "id": "P1-003",
+      "title": "Identity and tenant enforcement",
+      "requirements": [
+        "IAM-01",
+        "TEN-01",
+        "SEC-01"
+      ],
+      "status": "done",
+      "acceptance": "134 tests pass with --require-postgres; cross tenant API and database denial, session lifecycle, role boundaries, safe runtime privileges and concurrent last administrator protection; readiness and bootstrap/login/logout verified.",
+      "depends_on": [
+        "P1-002"
+      ],
+      "evidence": "User Windows PostgreSQL verification: 134 passed, no skips, 88.43 seconds; restricted runtime readiness and identity/institutions/logout/revocation smoke passed. See LOCAL_VERIFICATION_P1_003.md."
+    },
+    {
+      "id": "P1-004",
+      "title": "Audit outbox and error contracts",
+      "requirements": [
+        "GOV-01",
+        "INT-01"
+      ],
+      "status": "done",
+      "acceptance": "227 tests pass with --require-postgres; transactional audit/outbox rollback, scoped audit API, separated worker grants, duplicate processing, lease recovery, bounded retries, reviewed requeue and error contracts; local producer/worker smoke.",
+      "depends_on": [
+        "P1-003"
+      ],
+      "evidence": "User Windows PostgreSQL: 227 passed, no skips; migration/schema and Ruff clean; separate worker provisioned; real pending event delivered, repeat produced no extra processing. See LOCAL_VERIFICATION_P1_004.md."
+    },
+    {
+      "id": "P1-005",
+      "title": "Developer environment and CI",
+      "requirements": [
+        "OPS-01",
+        "GOV-01"
+      ],
+      "status": "implemented_pending_fresh_local_and_remote_ci_verification",
+      "acceptance": "Fresh environment full verification: static checks, pinned dependencies, 236 tests with zero skips including fresh PostgreSQL migrations; all actual remote CI matrix jobs pass with linked commit/run evidence.",
+      "depends_on": [
+        "P1-004"
+      ],
+      "evidence": "Implementation delivered; authoring and user acceptance evidence recorded separately in VALIDATION_P1_005.txt and PROGRESS.md. Remote CI not run."
+    }
+  ],
+  "later_milestones": "P2 through P8 are defined in MASTER_ROADMAP.md; expand into tasks before entering each milestone."
+}

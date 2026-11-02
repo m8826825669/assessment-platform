@@ -1,0 +1,1 @@
+Source updater applied verified source to a disposable project copy, preserved .env and .venv markers, checked both prior migrations and created backups. No database was accessed. Windows execution remains local verification.

@@ -1,0 +1,14 @@
+/workspace/scratch/2cb3792f9c16/assessment-clean-venv/bin/ruff check assessment-platform/backend assessment-platform/apply_update.py
+All checks passed!
+
+/workspace/scratch/2cb3792f9c16/assessment-clean-venv/bin/ruff format --check assessment-platform/backend assessment-platform/apply_update.py
+27 files already formatted
+
+uv pip check --python assessment-clean-venv/bin/python
+Using Python 3.12.14 environment at: assessment-clean-venv
+Checked 36 packages in 0.64ms
+All installed packages are compatible
+
+Source updater smoke passed on a disposable project copy. Existing .env and .venv markers were preserved, source backup was created, and no database was accessed. Windows execution still needs local verification.
+
+Original migration 0001_foundation is byte-identical to version 0.2.0.

@@ -1,0 +1,1 @@
+Offline PostgreSQL parser accepted 29 SQL statements. This is syntax validation, not database execution.

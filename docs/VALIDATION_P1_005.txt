@@ -1,0 +1,60 @@
+P1-005 authoring evidence — 1 November 2026
+
+Fresh environment created with scripts/setup_dev.py in a separate initially absent folder.
+CPython 3.12.14, Linux. Pinned development installation and pip check passed.
+Fresh-environment scripts/verify.py --unit-only:
+  dependency compatibility: pass
+  declarations / resolution / installed-version checks: pass
+  Ruff lint: pass
+  Ruff formatting: pass
+  tests: 146 passed, 0 skipped, 1 existing Starlette/httpx warning, 2.30 seconds
+  VERIFICATION=PARTIAL_PASS
+Full suite collection: 236 tests (146 non-database, 90 PostgreSQL).
+All three migration files byte-identical to the delivered v0.4.1 archive.
+CI YAML parsed and matrix reviewed; no remote execution claimed.
+
+Not run here: real PostgreSQL tests (workspace cannot launch a PostgreSQL server as non-root); Windows commands; remote GitHub Actions.
+P1-004's 227-test PostgreSQL/user worker evidence is historical evidence for the prior increment, not proof of this release's full new gate.
+
+Sanitized partial report:
+{
+  "mode": "unit-only",
+  "status": "partial-pass",
+  "python": "3.12.14",
+  "started_at": "2026-11-01T16:30:32.702019+00:00",
+  "stages": [
+    {
+      "name": "dependency-compatibility",
+      "exit_code": 0
+    },
+    {
+      "name": "dependency-pins",
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "exit_code": 0
+    },
+    {
+      "name": "format",
+      "exit_code": 0
+    },
+    {
+      "name": "tests",
+      "exit_code": 0
+    }
+  ],
+  "tests": {
+    "tests": 146,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "finished_at": "2026-11-01T16:30:36.157688+00:00"
+}
+
+Additional source/package checks:
+- Full verification without PostgreSQL prerequisites exits 1 before running stages; report status failed.
+- Updater applied to an extracted v0.4.1 target; private configuration and virtual environment sentinels preserved; new tooling/workflow copied.
+- Altered existing migration 0003 rejected before update.
+- Package manifest and ZIP CRC/member digests verified by the release packager.

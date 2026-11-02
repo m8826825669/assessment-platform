@@ -1,0 +1,80 @@
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 31%]
+ssssssssssssssssss...................................................... [ 63%]
+........................................................................ [ 95%]
+...........                                                              [100%]
+=============================== warnings summary ===============================
+../../assessment-p1-004-venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/scratch/2cb3792f9c16/assessment-p1-004-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_audit_outbox.py:43: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:64: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:90: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:105: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:120: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:133: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:155: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:166: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:175: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:186: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:202: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:213: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:229: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:250: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:260: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [7] tests/integration/test_audit_outbox.py:268: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [7] tests/integration/test_audit_outbox.py:285: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:302: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:311: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:341: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:373: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:395: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:415: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_audit_outbox.py:434: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [2] tests/integration/test_audit_outbox.py:457: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:33: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:47: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:59: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:70: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:88: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:97: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:110: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:120: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [3] tests/integration/test_database.py:132: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:150: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:158: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:179: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_database.py:191: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:22: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:28: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:44: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:54: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:75: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:85: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:99: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:115: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:127: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:141: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:155: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:178: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:190: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:206: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:217: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:231: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:242: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:250: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:267: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:277: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:283: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:293: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:302: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:312: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [8] tests/integration/test_identity_tenancy.py:323: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:342: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:373: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:388: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:404: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+SKIPPED [1] tests/integration/test_identity_tenancy.py:423: Set ASSESSMENT_TEST_ADMIN_URL to enable real PostgreSQL tests
+137 passed, 90 skipped, 1 warning in 2.08s

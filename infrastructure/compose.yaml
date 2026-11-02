@@ -1,0 +1,19 @@
+name: assessment-platform-local
+services:
+  postgres:
+    image: postgres:17.6
+    environment:
+      POSTGRES_DB: assessment_dev
+      POSTGRES_USER: assessment_dev
+      POSTGRES_PASSWORD: assessment_local_only
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - assessment_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U assessment_dev -d assessment_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+volumes:
+  assessment_pgdata:

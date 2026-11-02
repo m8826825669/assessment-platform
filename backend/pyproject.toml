@@ -1,0 +1,28 @@
+[project]
+name = "institutional-assessment-platform"
+version = "0.4.0"
+description = "Institutional assessment API and domain foundation"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.162.0",
+    "SQLAlchemy==2.0.55",
+    "alembic==1.20.1",
+    "psycopg[binary]==3.3.6",
+    "pydantic-settings==2.16.2",
+    "uvicorn==0.54.0",
+    "argon2-cffi==25.1.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = ["integration: requires a disposable PostgreSQL database"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["alembic", "app", "assessment_core"]

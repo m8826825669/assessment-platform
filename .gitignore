@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv*/
+.env*
+!.env.example
+node_modules/
+.pytest_cache/
+.ruff_cache/
+
+artifacts/
+
+# Local patch backups
+*.before-correlation-fix

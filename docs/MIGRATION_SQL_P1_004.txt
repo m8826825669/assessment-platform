@@ -1,0 +1,1 @@
+Offline PostgreSQL parser accepted 54 upgrade SQL statements. CURRENT_USER SQL compiled and parsed. Syntax evidence only; real migration and isolation tests remain pending.
