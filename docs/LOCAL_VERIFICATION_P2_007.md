@@ -19,3 +19,9 @@ Frontend 0.12.2 separates saved prompt labels, constrains responsive intrinsic s
 Frontend18 tests, typecheck, format and build passed. Real browser seven-type author/review/coordinator/snapshot journey passed in49.4s; tenant/role journey passed in5.2s. Image/conflict journey reached final viewport assertion and failed in8.6s: viewport390, document474, body390, ordinary outside-table offending element list empty. Two scenarios passed, one failed; Python harness failed after79.58s. Thus saved-label correction is proven, but full browser acceptance is not.
 
 Frontend0.12.3 removes absolute hidden table labels in favor of equivalent explicit accessible button names, establishes a local table scroll containing block, and expands width diagnostics to positioned table descendants/shadow roots. Corrected viewport and new CI remain pending.
+
+## Final owner acceptance (7 November 2026)
+
+Owner reported 0.12.3 frontend checks and actual browser gate passing. The supplied GitHub Actions screenshot shows a successful Foundation gate for a164343. Pilot Institute manual screenshots show imported drafts, taxonomy assignment, self-review denial, separate reviewer approval, an approved preview with no visible answer key, and a new draft alongside an earlier approved version. After retirement, a refreshed approved list excluded the retired snapshot and reopened history showed the retired state. The immediate history badge was stale until reopening. The media scenario recovered after the local media services were started and showed the clean, attached image and its description in the saved preview.
+
+P2-007 is accepted on this evidence. The history badge correction and its browser regression are part of P2-008.

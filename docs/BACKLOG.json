@@ -179,7 +179,7 @@
         "IAM-01",
         "ACC-01"
       ],
-      "status": "implemented_pending_local_browser_postgresql_and_ci_verification",
+      "status": "accepted",
       "acceptance": "Prototype then real browser journeys for seven types, review/history/media/import UI, candidate-safe preview traffic, keyboard/error/conflict recovery and narrow-screen evidence.",
       "depends_on": [
         "P2-003",
@@ -187,7 +187,7 @@
         "P2-005",
         "P2-006"
       ],
-      "evidence": "Owner backend659; UI0.12.2 frontend18/type/format/build pass; seven-type author/review/coordinator/snapshot and role/tenant browser scenarios pass. Narrow width390/474 fails; UI0.12.3 table-label containment correction, actual viewport/manual/new CI pending. See LOCAL_VERIFICATION_P2_007.md."
+      "evidence": "Owner strict backend, corrected frontend and real browser gates, successful CI on a164343, and manual Pilot Institute acceptance. See LOCAL_VERIFICATION_P2_007.md."
     },
     {
       "id": "P2-008",
@@ -201,12 +201,12 @@
         "ACC-01",
         "GOV-01"
       ],
-      "status": "queued",
+      "status": "implemented_pending_local_browser_postgresql_and_ci_verification",
       "acceptance": "Full real PostgreSQL/storage/browser/CI evidence; prior used/approved versions survive edits; malformed imports and unauthorized media denied; P2 exit checklist and release limitations recorded.",
       "depends_on": [
         "P2-007"
       ],
-      "evidence": "Not implemented; detailed acceptance in P2_QUESTION_BANK_PLAN.md."
+      "evidence": "History badge correction and regression checks prepared. Strict local and new CI evidence pending. See P2_008_ACCEPTANCE.md."
     }
   ],
   "later_milestones": "P3 through P8 retain the controlling roadmap scope; expand tasks before entering each milestone.",

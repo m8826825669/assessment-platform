@@ -33,3 +33,7 @@ Owner 0.12.1: zero npm vulnerabilities; 17 frontend tests/type/format/build pass
 ### Table-label containment correction0.12.3
 
 Owner0.12.2 proves all seven-type author/review/coordinator/immutable snapshot and tenant/role browser journeys. Frontend18/type/format/build pass. Only final narrow width fails (390 viewport,474 document,390 body). Source0.12.3 replaces absolute hidden table action labels with explicit accessible names and contains positioned descendants in the scrolling table. Diagnostic includes positioned table/shadow content; strict width assertion unchanged. No dependency/backend/schema change. Follow P2_007_FIXES_0_12_3_WINDOWS.md; viewport/manual/new-CI acceptance remains pending.
+
+## P2-008 acceptance work (8 November 2026)
+
+P2-007 accepted on the owner evidence in LOCAL_VERIFICATION_P2_007.md. P2-008 adds an immediate history-state update after review decisions and strengthens the existing browser and PostgreSQL regressions. The phase remains open until the corrected source passes the strict local and CI gates in P2_008_ACCEPTANCE.md.

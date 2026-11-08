@@ -331,6 +331,17 @@ export default function Workspace() {
         },
       );
       setDetail(updated);
+      setHistory((rows) =>
+        rows.map((row) =>
+          row.version_id === updated.version_id
+            ? {
+                ...row,
+                state: updated.state,
+                review_revision: updated.review_revision,
+              }
+            : row,
+        ),
+      );
       setReason("");
       setNotice(
         `Version ${action === "submit" ? "submitted for independent review" : action === "approve" ? "approved" : action === "return" ? "returned with feedback" : "retired"}.`,

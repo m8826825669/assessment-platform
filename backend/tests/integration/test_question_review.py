@@ -210,14 +210,18 @@ def test_approved_version_survives_new_draft_and_retirement_hides_only_new_selec
     db = security_database
     author, reviewer, coordinator = prepare(db)
     first = approve(db, reviewer, submit(db, author, create(db, author)))
-    public = db.client.get(path(db, "question-selections"), headers=coordinator).json()[0]
+    public = db.client.get(path(db, "question-selections"), headers=coordinator)
+    assert public.status_code == 200
+    assert [row["version_id"] for row in public.json()] == [first["version_id"]]
     edited = db.client.post(
         path(db, suffix=f"/{first['question_id']}/versions"),
         headers=author,
         json={"expected_revision": 1, "title": "Future draft", "content": EXAMPLES[1]},
     )
     assert edited.status_code == 201
-    assert db.client.get(path(db, "question-selections"), headers=coordinator).json() == [public]
+    after_edit = db.client.get(path(db, "question-selections"), headers=coordinator)
+    assert after_edit.status_code == 200
+    assert after_edit.content == public.content
     old = db.client.get(review_path(db, first), headers=reviewer).json()
     retired = decide(db, reviewer, old, "retire", "Content needs updating")
     assert retired.status_code == 200 and retired.json()["state"] == "retired"

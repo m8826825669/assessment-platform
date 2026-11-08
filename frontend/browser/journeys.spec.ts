@@ -155,6 +155,33 @@ test("all seven types: import, author, review, coordinator, immutable old snapsh
       .getByRole("article", { name: "Candidate rendering" })
       .innerText(),
   ).toBe(old);
+  await logout(page);
+  await login(page, "admin_a@example.test");
+  await page
+    .getByRole("row")
+    .filter({ hasText: "Changed newer draft" })
+    .getByRole("button", { name: /Open/ })
+    .click();
+  const historyRow = page.locator(".history-row").filter({
+    has: page.getByRole("button", { name: "Inspect version 2", exact: true }),
+  });
+  await expect(historyRow.locator(".badge")).toHaveText("approved");
+  await historyRow.getByRole("button", { name: "Inspect version 2" }).click();
+  await page
+    .getByLabel(/Reason \(required for return or retirement\)/)
+    .fill("Retire this approved snapshot after revision.");
+  await page.getByRole("button", { name: "Retire approved version" }).click();
+  await expect(page.getByRole("status")).toContainText("Version retired.");
+  await expect(historyRow.locator(".badge")).toHaveText("retired");
+  await page
+    .getByRole("button", { name: "Approved versions", exact: true })
+    .click();
+  await expect(
+    page.getByRole("row").filter({ hasText: examples.items[0].title }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("row").filter({ hasText: examples.items[6].title }),
+  ).toHaveCount(0);
   await Promise.all(pending);
   expect(previews.length).toBeGreaterThanOrEqual(14);
   expect(failures).toEqual([]);
