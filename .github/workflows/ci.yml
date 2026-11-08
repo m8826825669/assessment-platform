@@ -47,12 +47,30 @@ jobs:
       - name: Start isolated object storage and scanner
         run: |
           docker compose -f infrastructure/compose.media.yaml up -d --build media_test_store clamav
+          scanner_ready() {
+            PYTHONPATH=backend backend/.venv/bin/python - <<'PYTHON'
+          from types import SimpleNamespace
+          from app.config import Settings
+          from app.media.adapters import Scanner
+
+          scanner = Scanner(SimpleNamespace(
+              media_scanner_host="127.0.0.1",
+              media_scanner_port=13310,
+              media_signature_max_age_days=Settings.model_fields["media_signature_max_age_days"].default,
+          ))
+          print(scanner.ready())
+          PYTHON
+          }
           for attempt in $(seq 1 90); do
-            if curl -fsS http://127.0.0.1:19010/minio/health/live >/dev/null && docker compose -f infrastructure/compose.media.yaml exec -T clamav clamdscan --ping=1; then
+            if curl -fsS http://127.0.0.1:19010/minio/health/live >/dev/null && scanner_ready 2>/dev/null; then
               exit 0
             fi
             sleep 5
           done
+          date -u
+          docker compose -f infrastructure/compose.media.yaml logs --tail=100 clamav
+          docker compose -f infrastructure/compose.media.yaml exec -T clamav clamdscan --version || true
+          scanner_ready || true
           exit 1
       - name: Full gate (no skipped tests)
         run: backend/.venv/bin/python scripts/verify.py
