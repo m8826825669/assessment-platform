@@ -65,6 +65,10 @@ jobs:
             if curl -fsS http://127.0.0.1:19010/minio/health/live >/dev/null && scanner_ready 2>/dev/null; then
               exit 0
             fi
+            # FreshClam can finish before clamd opens its socket and miss the reload notification.
+            if (( attempt % 6 == 1 )); then
+              docker compose -f infrastructure/compose.media.yaml exec -T clamav clamdscan --reload || true
+            fi
             sleep 5
           done
           date -u
