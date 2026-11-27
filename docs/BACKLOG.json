@@ -1,6 +1,6 @@
 {
   "roadmap_version": "1.0",
-  "milestone": "P2",
+  "milestone": "P3",
   "items": [
     {
       "id": "P1-001",
@@ -187,7 +187,7 @@
         "P2-005",
         "P2-006"
       ],
-      "evidence": "Owner strict backend, corrected frontend and real browser gates, successful CI on a164343, and manual Pilot Institute acceptance. See LOCAL_VERIFICATION_P2_007.md."
+      "evidence": "Owner strict local/backend/frontend/browser evidence and green Foundation gate #11 at 63b4e96; subsequent backend baseline 680 tests and gate #12 at 3c22436. P3_DRAFT_REVISIONS.md records the current scope."
     },
     {
       "id": "P2-008",
@@ -201,17 +201,85 @@
         "ACC-01",
         "GOV-01"
       ],
-      "status": "implemented_pending_local_browser_postgresql_and_ci_verification",
+      "status": "accepted",
       "acceptance": "Full real PostgreSQL/storage/browser/CI evidence; prior used/approved versions survive edits; malformed imports and unauthorized media denied; P2 exit checklist and release limitations recorded.",
       "depends_on": [
         "P2-007"
       ],
-      "evidence": "History badge correction and regression checks prepared. Strict local and new CI evidence pending. See P2_008_ACCEPTANCE.md."
+      "evidence": "Owner strict local/backend/frontend/browser evidence and green Foundation gate #11 at 63b4e96; subsequent backend baseline 680 tests and gate #12 at 3c22436. P3_DRAFT_REVISIONS.md records the current scope."
+    },
+    {
+      "id": "P3-001",
+      "title": "Exam blueprint and publication contract",
+      "requirements": [
+        "ASM-01",
+        "PUB-01",
+        "TEN-01"
+      ],
+      "status": "contract_defined_pending_verification",
+      "depends_on": [
+        "P2-008"
+      ],
+      "acceptance": "Specify section coverage, immutable publication, revision and timing policies."
+    },
+    {
+      "id": "P3-002",
+      "title": "Draft assembly and blueprint validation",
+      "requirements": [
+        "ASM-01",
+        "TEN-01"
+      ],
+      "status": "in_progress",
+      "depends_on": [
+        "P3-001"
+      ],
+      "acceptance": "Revision lineage, stale-edit/replay/concurrency, tenant boundaries and coordinator assembly verified through API/database/browser and CI."
+    },
+    {
+      "id": "P3-003",
+      "title": "Immutable exam publication",
+      "requirements": [
+        "PUB-01",
+        "TEN-01"
+      ],
+      "status": "in_progress",
+      "depends_on": [
+        "P3-002"
+      ],
+      "acceptance": "Freeze exact content/media/policy and protect publication from concurrent edits or retirement; verify current revision and historical stability."
+    },
+    {
+      "id": "P3-004",
+      "title": "Sittings, registration and accommodations",
+      "requirements": [
+        "SCH-01",
+        "TEN-01"
+      ],
+      "status": "planned",
+      "depends_on": [
+        "P3-003"
+      ],
+      "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots."
+    },
+    {
+      "id": "P3-005",
+      "title": "Coordinator workflows and P3 acceptance",
+      "requirements": [
+        "ASM-01",
+        "PUB-01",
+        "SCH-01"
+      ],
+      "status": "planned",
+      "depends_on": [
+        "P3-004"
+      ],
+      "acceptance": "End-to-end coordinator publish/schedule flow, browser evidence, full local and actual CI gates."
     }
   ],
-  "later_milestones": "P3 through P8 retain the controlling roadmap scope; expand tasks before entering each milestone.",
+  "later_milestones": "P4 through P8 retain controlling roadmap scope; expand tasks before entry.",
   "completed_milestones": [
     "P0",
-    "P1"
+    "P1",
+    "P2"
   ]
 }

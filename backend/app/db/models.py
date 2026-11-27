@@ -498,12 +498,37 @@ class QuestionImportReceipt(Base):
 
 class ExamBlueprintDraft(Base):
     __tablename__ = "exam_blueprint_drafts"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "exam_id", "revision", name="uq_exam_draft_revision"),
+        ForeignKeyConstraint(
+            ["tenant_id", "exam_id"],
+            ["exam_blueprint_drafts.tenant_id", "exam_blueprint_drafts.id"],
+            name="fk_exam_draft_root",
+            deferrable=True,
+            initially="DEFERRED",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "parent_id"],
+            ["exam_blueprint_drafts.tenant_id", "exam_blueprint_drafts.id"],
+            name="fk_exam_draft_parent",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("revision >= 1", name="draft_revision_positive"),
+        CheckConstraint(
+            "(revision = 1 AND parent_id IS NULL AND exam_id = id) OR "
+            "(revision > 1 AND parent_id IS NOT NULL)",
+            name="draft_lineage",
+        ),
+    )
 
     tenant_id: Mapped[UUID] = mapped_column(
         ForeignKey("institutions.id", ondelete="RESTRICT"), primary_key=True
     )
     id: Mapped[UUID] = mapped_column(primary_key=True)
     blueprint: Mapped[dict] = mapped_column(JSONB)
+    exam_id: Mapped[UUID] = mapped_column(Uuid)
+    revision: Mapped[int] = mapped_column(Integer, server_default=text("1"))
+    parent_id: Mapped[UUID | None] = mapped_column(Uuid)
 
 
 class ExamPublication(Base):

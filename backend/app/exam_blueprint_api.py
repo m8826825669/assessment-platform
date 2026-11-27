@@ -4,10 +4,10 @@ from dataclasses import asdict
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.audit.service import record
@@ -95,6 +95,33 @@ def load_blueprint(db, tenant_id, body):
 
 class SavedBlueprint(BlueprintBody):
     id: UUID
+    exam_id: UUID
+    revision: int
+    parent_id: UUID | None
+
+
+class DraftRevisionBody(BlueprintBody):
+    id: UUID
+    expected_revision: Annotated[int, Field(strict=True, ge=1, le=2147483646)]
+
+
+def saved_blueprint(draft):
+    return SavedBlueprint(
+        id=draft.id,
+        exam_id=draft.exam_id,
+        revision=draft.revision,
+        parent_id=draft.parent_id,
+        **draft.blueprint,
+    )
+
+
+def latest_revision(db, tenant_id, exam_id):
+    return db.scalar(
+        select(func.max(ExamBlueprintDraft.revision)).where(
+            ExamBlueprintDraft.tenant_id == tenant_id,
+            ExamBlueprintDraft.exam_id == exam_id,
+        )
+    )
 
 
 @router.get("/exam-blueprints/drafts/{draft_id}", response_model=SavedBlueprint)
@@ -103,7 +130,7 @@ def reopen_draft(tenant_id: UUID, draft_id: UUID, actor: Actor, db: Db):
     draft = db.get(ExamBlueprintDraft, (tenant_id, draft_id))
     if draft is None:
         reject(404, "blueprint_draft_not_found", "Blueprint draft not found")
-    return SavedBlueprint(id=draft_id, **draft.blueprint)
+    return saved_blueprint(draft)
 
 
 @router.put("/exam-blueprints/drafts/{draft_id}", response_model=SavedBlueprint)
@@ -117,7 +144,7 @@ def save_draft(tenant_id: UUID, draft_id: UUID, body: BlueprintBody, actor: Acto
     else:
         db.execute(
             insert(ExamBlueprintDraft)
-            .values(tenant_id=tenant_id, id=draft_id, blueprint=blueprint)
+            .values(tenant_id=tenant_id, id=draft_id, exam_id=draft_id, revision=1, blueprint=blueprint)
             .on_conflict_do_nothing(index_elements=["tenant_id", "id"])
         )
         record(
@@ -129,8 +156,76 @@ def save_draft(tenant_id: UUID, draft_id: UUID, body: BlueprintBody, actor: Acto
             before={},
             after={},
         )
+    draft = db.get(ExamBlueprintDraft, (tenant_id, draft_id))
+    response = saved_blueprint(draft)
     db.commit()
-    return SavedBlueprint(id=draft_id, **blueprint)
+    return response
+
+
+@router.post("/exam-blueprints/drafts/{draft_id}/revisions", response_model=SavedBlueprint)
+def revise_draft(tenant_id: UUID, draft_id: UUID, body: DraftRevisionBody, actor: Actor, db: Db):
+    access(db, tenant_id, actor, lock=True, permission="exams.manage")
+    previous = db.get(ExamBlueprintDraft, (tenant_id, draft_id))
+    if previous is None:
+        reject(404, "blueprint_draft_not_found", "Blueprint draft not found")
+    blueprint = BlueprintBody(sections=body.sections).model_dump(mode="json")
+    existing = db.get(ExamBlueprintDraft, (tenant_id, body.id))
+    if existing is not None:
+        if (
+            existing.exam_id != previous.exam_id
+            or existing.parent_id != previous.id
+            or existing.revision != body.expected_revision + 1
+            or existing.blueprint != blueprint
+        ):
+            reject(409, "blueprint_draft_conflict", "Revision ID already contains a different draft")
+        response = saved_blueprint(existing)
+        db.commit()
+        return response
+    if (
+        previous.revision != body.expected_revision
+        or latest_revision(db, tenant_id, previous.exam_id) != previous.revision
+    ):
+        reject(409, "blueprint_revision_conflict", "Draft changed; reopen its latest revision")
+    draft = ExamBlueprintDraft(
+        tenant_id=tenant_id,
+        id=body.id,
+        exam_id=previous.exam_id,
+        parent_id=previous.id,
+        revision=previous.revision + 1,
+        blueprint=blueprint,
+    )
+    db.add(draft)
+    record(
+        db,
+        "exam.draft_revised",
+        actor=actor.user_id,
+        tenant=tenant_id,
+        subject=str(draft.id),
+        before={"revision": previous.revision},
+        after={"revision": draft.revision},
+    )
+    response = saved_blueprint(draft)
+    db.commit()
+    return response
+
+
+@router.get("/exam-blueprints/drafts/{draft_id}/history", response_model=list[SavedBlueprint])
+def draft_history(tenant_id: UUID, draft_id: UUID, actor: Actor, db: Db):
+    access(db, tenant_id, actor, permission="exams.manage")
+    draft = db.get(ExamBlueprintDraft, (tenant_id, draft_id))
+    if draft is None:
+        reject(404, "blueprint_draft_not_found", "Blueprint draft not found")
+    return [
+        saved_blueprint(row)
+        for row in db.scalars(
+            select(ExamBlueprintDraft)
+            .where(
+                ExamBlueprintDraft.tenant_id == tenant_id,
+                ExamBlueprintDraft.exam_id == draft.exam_id,
+            )
+            .order_by(ExamBlueprintDraft.revision)
+        )
+    ]
 
 
 def publication_response(publication):
@@ -168,16 +263,25 @@ def get_publication(tenant_id: UUID, draft_id: UUID, actor: Actor, db: Db):
 
 
 @router.post("/exam-blueprints/drafts/{draft_id}/publish")
-def publish_draft(tenant_id: UUID, draft_id: UUID, actor: Actor, db: Db):
+def publish_draft(
+    tenant_id: UUID,
+    draft_id: UUID,
+    actor: Actor,
+    db: Db,
+    expected_revision: Annotated[int | None, Query(ge=1, le=2147483647)] = None,
+):
     # Review and retirement acquire the same institution lock.
     access(db, tenant_id, actor, lock=True, permission="exams.manage")
-    publication = db.get(ExamPublication, (tenant_id, draft_id))
-    if publication is not None:
-        return publication_response(publication)
-
     draft = db.get(ExamBlueprintDraft, (tenant_id, draft_id))
     if draft is None:
         reject(404, "blueprint_draft_not_found", "Blueprint draft not found")
+    if expected_revision is not None and expected_revision != draft.revision:
+        reject(409, "blueprint_revision_conflict", "Publication revision does not match the selected draft")
+    publication = db.get(ExamPublication, (tenant_id, draft_id))
+    if publication is not None:
+        return publication_response(publication)
+    if latest_revision(db, tenant_id, draft.exam_id) != draft.revision:
+        reject(409, "blueprint_revision_conflict", "Only the current draft revision can be published")
     sections, approved = load_blueprint(db, tenant_id, BlueprintBody.model_validate(draft.blueprint))
     if validate_blueprint(sections, approved) or not approved:
         reject(409, "blueprint_not_publishable", "Blueprint is no longer eligible for publication")

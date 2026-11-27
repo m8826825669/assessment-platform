@@ -37,3 +37,13 @@ Owner0.12.2 proves all seven-type author/review/coordinator/immutable snapshot a
 ## P2-008 acceptance work (8 November 2026)
 
 P2-007 accepted on the owner evidence in LOCAL_VERIFICATION_P2_007.md. P2-008 adds an immediate history-state update after review decisions and strengthens the existing browser and PostgreSQL regressions. The phase remains open until the corrected source passes the strict local and CI gates in P2_008_ACCEPTANCE.md.
+
+
+## P3 baseline verification and revision work — 27 November 2026
+
+Owner evidence closes the current fixed-draft/publication/audit/access increment at 3c22436. Full Windows verification passed 680 tests, zero skips; Foundation gate #12 (45951039305) succeeded in 7m 36s. P2 acceptance is recorded from prior owner strict/backend/frontend/browser evidence and green run #11 at 63b4e96. The repository backlog previously lagged this evidence.
+
+P3 revisioned drafts are now implemented under migration 0013, with immutable lineage, same-exam counters, replay and stale-write checks, audit/outbox atomicity, publication fencing and preserved historical publication reads. Authoring unit tests 398 passed; lint/format and offline SQL passed; 20 new PostgreSQL cases collect. Real database execution, full gate and new CI remain pending. See P3_DRAFT_REVISIONS.md. No P3 milestone completion is claimed. Scheduling and coordinator acceptance remain planned.
+
+
+27 November 2026 ? Owner verification for migration 0013 passed. The corrected legacy-data preservation test passed, application schema comparison is clean, and the full Windows gate passed 703 tests with zero failures, errors or skips. Dependencies, lint, formatting and live PostgreSQL/media checks passed. Remote CI remains pending.

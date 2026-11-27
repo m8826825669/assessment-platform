@@ -111,3 +111,8 @@ Use explicit unique prompt label/control association so imported saved textarea 
 ### P2-007 table-label containment
 
 Retain the owner's two successful0.12.2 browser scenarios. Remove absolute sr-only table title spans, preserving their semantics in explicit button aria-labels; establish a table scroll containing block. This addresses a code-supported root overflow source consistent with document474/body390 metrics; no actual corrected viewport pass is inferred. Keep strict document-width assertion and improve positioned/shadow diagnostics instead of clipping the document or extending timeouts. Dependencies and all backend/schema bytes unchanged.
+
+
+## P3 immutable draft lineage — 27 November 2026
+
+Preserve the deployed immutable draft-ID contract. Each edit appends a new draft row and ID, sharing the initial draft ID as stable exam_id, with a strict parent revision precondition. Existing IDs become revision 1. This avoids rewriting publications or widening runtime UPDATE grants. The public revision URL plus expected_revision protects stale editing; identical request-ID retries return original revisions. New publications must use the current revision; existing publication retries continue serving their frozen snapshots. Optional publication expected_revision keeps current clients compatible while the immutable draft ID and current-head check remain mandatory. These are implementation choices within ASM-01/PUB-01; archive/scheduling/UI acceptance remain future work.

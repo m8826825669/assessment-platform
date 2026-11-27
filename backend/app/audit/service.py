@@ -39,7 +39,7 @@ ACTIONS = (
     | TAXONOMY_ACTIONS
     | MEDIA_ACTIONS
     | IMPORT_ACTIONS
-    | {REQUEUE_ACTION, "exam.published", "exam.draft_created"}
+    | {REQUEUE_ACTION, "exam.published", "exam.draft_created", "exam.draft_revised"}
 )
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})
 
@@ -49,6 +49,8 @@ def clean_state(action: str, state: dict | None) -> dict:
         raise ValueError("Unregistered audit action")
     state = dict(state or {})
     allowed = {"role", "status", "user_id"} if action in MEMBERSHIP_ACTIONS else set()
+    if action == "exam.draft_revised":
+        allowed = {"revision"}
     if action in QUESTION_ACTIONS:
         allowed = {"version_id", "revision", "content_hash"}
     if action in REVIEW_ACTIONS:
