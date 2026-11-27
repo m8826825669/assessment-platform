@@ -39,7 +39,14 @@ ACTIONS = (
     | TAXONOMY_ACTIONS
     | MEDIA_ACTIONS
     | IMPORT_ACTIONS
-    | {REQUEUE_ACTION, "exam.published", "exam.draft_created", "exam.draft_revised"}
+    | {
+        REQUEUE_ACTION,
+        "exam.published",
+        "exam.draft_created",
+        "exam.draft_revised",
+        "exam.sitting_created",
+        "exam.candidate_registered",
+    }
 )
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})
 

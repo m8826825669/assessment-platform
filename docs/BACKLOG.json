@@ -233,7 +233,8 @@
       "depends_on": [
         "P3-001"
       ],
-      "acceptance": "Revision lineage, stale-edit/replay/concurrency, tenant boundaries and coordinator assembly verified through API/database/browser and CI."
+      "acceptance": "Revision lineage, stale-edit/replay/concurrency, tenant boundaries and coordinator assembly verified through API/database/browser and CI.",
+      "evidence": "Backend revision/publication increment verified at 6af1026, 703 local tests and green Foundation gate #13. Coordinator browser and final P3 acceptance remain pending."
     },
     {
       "id": "P3-003",
@@ -246,7 +247,8 @@
       "depends_on": [
         "P3-002"
       ],
-      "acceptance": "Freeze exact content/media/policy and protect publication from concurrent edits or retirement; verify current revision and historical stability."
+      "acceptance": "Freeze exact content/media/policy and protect publication from concurrent edits or retirement; verify current revision and historical stability.",
+      "evidence": "Backend revision/publication increment verified at 6af1026, 703 local tests and green Foundation gate #13. Coordinator browser and final P3 acceptance remain pending."
     },
     {
       "id": "P3-004",
@@ -255,11 +257,12 @@
         "SCH-01",
         "TEN-01"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "P3-003"
       ],
-      "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots."
+      "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
+      "evidence": "Initial sitting/JSON registration/extra-time/eligibility foundation prepared under migration 0014. Authoring checks passed; PostgreSQL/full/CI pending. Lifecycle amendments, invitation acceptance/delivery, CSV and browser acceptance remain open. See P3_SITTINGS.md."
     },
     {
       "id": "P3-005",

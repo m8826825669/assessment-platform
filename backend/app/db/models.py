@@ -545,3 +545,71 @@ class ExamPublication(Base):
     tenant_id: Mapped[UUID] = mapped_column(primary_key=True)
     id: Mapped[UUID] = mapped_column(primary_key=True)
     snapshot: Mapped[dict] = mapped_column(JSONB)
+
+
+class ExamSitting(Base):
+    __tablename__ = "exam_sittings"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "publication_id"],
+            ["exam_publications.tenant_id", "exam_publications.id"],
+            name="fk_sitting_publication",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("length(trim(title)) BETWEEN 1 AND 160", name="sitting_title"),
+        CheckConstraint("duration_minutes BETWEEN 1 AND 1440", name="sitting_duration"),
+        CheckConstraint(
+            "closes_at >= opens_at + duration_minutes * interval '1 minute'", name="sitting_window"
+        ),
+        CheckConstraint(
+            "display_timezone ~ '^UTC([+-]((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$'", name="sitting_timezone"
+        ),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    publication_id: Mapped[UUID] = mapped_column(Uuid)
+    title: Mapped[str] = mapped_column(String(160))
+    opens_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    closes_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    display_timezone: Mapped[str] = mapped_column(String(9))
+    duration_minutes: Mapped[int] = mapped_column(Integer)
+    policy: Mapped[dict] = mapped_column(JSONB)
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SittingRegistration(Base):
+    __tablename__ = "sitting_registrations"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "sitting_id"],
+            ["exam_sittings.tenant_id", "exam_sittings.id"],
+            name="fk_registration_sitting",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "candidate_user_id"],
+            ["memberships.tenant_id", "memberships.user_id"],
+            name="fk_registration_candidate",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("tenant_id", "sitting_id", "candidate_user_id", name="uq_sitting_candidate"),
+        CheckConstraint(
+            "extra_minutes BETWEEN 0 AND 240 AND allowed_minutes BETWEEN 1 AND 1680",
+            name="registration_duration",
+        ),
+        CheckConstraint(
+            "(extra_minutes=0 AND accommodation_reason IS NULL) OR "
+            "(extra_minutes>0 AND length(trim(accommodation_reason)) BETWEEN 3 AND 500 AND accommodation_reason IS NOT NULL)",
+            name="registration_reason",
+        ),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    sitting_id: Mapped[UUID] = mapped_column(Uuid)
+    candidate_user_id: Mapped[UUID] = mapped_column(Uuid)
+    extra_minutes: Mapped[int] = mapped_column(Integer)
+    allowed_minutes: Mapped[int] = mapped_column(Integer)
+    accommodation_reason: Mapped[str | None] = mapped_column(String(500))
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -47,3 +47,11 @@ P3 revisioned drafts are now implemented under migration 0013, with immutable li
 
 
 27 November 2026 ? Owner verification for migration 0013 passed. The corrected legacy-data preservation test passed, application schema comparison is clean, and the full Windows gate passed 703 tests with zero failures, errors or skips. Dependencies, lint, formatting and live PostgreSQL/media checks passed. Remote CI remains pending.
+
+
+## P3-004 scheduling foundation - 27 November 2026
+
+Owner baseline 6af1026 is verified by 703 passing local tests and green Foundation gate #13 in 7m 23s. Prepared migration 0014 for immutable exact-publication sittings, atomic JSON candidate registration batches, recorded extra-time allowances and candidate timing eligibility. Added tenant/role SQL policies, guarded inserts, safe audit/outbox actions and readiness/grant checks. Authoring pinned unit suite 425 passed, lint/format/dependency/offline SQL passed, 27 integration cases collect. Real PostgreSQL, full regression and new CI remain pending. See P3_SITTINGS.md for boundaries and remaining P3-004 work.
+
+
+27 November 2026 - Owner verification for migration 0014 passed. The corrected downgrade/reupgrade test passed; application revision 0014_exam_sittings and runtime grants are ready. Full Windows verification passed 757 tests with zero failures, errors or skips. Dependencies, lint, formatting and PostgreSQL/live-media checks passed. Remote CI remains pending. P3-004 remains incomplete.

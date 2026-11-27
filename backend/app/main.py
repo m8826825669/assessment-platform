@@ -15,6 +15,7 @@ from app.question_bank.api import router as questions_router
 from app.question_bank.review_api import router as review_router
 from app.question_bank.taxonomy_api import router as taxonomy_router
 from app.question_imports.api import router as imports_router
+from app.scheduling.api import router as sittings_router
 
 
 class Liveness(BaseModel):
@@ -57,6 +58,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(media_router)
     app.include_router(imports_router)
     app.include_router(blueprint_router)
+    app.include_router(sittings_router)
     install(app)
 
     @app.get("/api/v1/health", response_model=Liveness, tags=["operations"])

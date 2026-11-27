@@ -55,6 +55,10 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
     app = create_app(unavailable_settings())
     paths = app.openapi()["paths"]
     assert set(paths) == {
+        "/api/v1/tenants/{tenant_id}/exam-sittings",
+        "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}",
+        "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations",
+        "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/eligibility",
         "/api/v1/tenants/{tenant_id}/exam-blueprints/drafts/{draft_id}/revisions",
         "/api/v1/tenants/{tenant_id}/exam-blueprints/drafts/{draft_id}/history",
         "/api/v1/tenants/{tenant_id}/exam-blueprints/validate",
@@ -98,13 +102,13 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
 @pytest.mark.parametrize(
     "revisions,tables_exist,expected",
     [
-        (["0013_exam_draft_revisions"], True, "ok"),
+        (["0014_exam_sittings"], True, "ok"),
         ([], True, "not_ready"),
         (["old_revision"], True, "not_ready"),
         (["0012_publication_access"], True, "not_ready"),
         (["0010_exam_publications"], True, "not_ready"),
-        (["0013_exam_draft_revisions", "other_branch"], True, "not_ready"),
-        (["0013_exam_draft_revisions"], False, "not_ready"),
+        (["0014_exam_sittings", "other_branch"], True, "not_ready"),
+        (["0014_exam_sittings"], False, "not_ready"),
     ],
 )
 def test_schema_readiness_decisions(revisions, tables_exist, expected):
@@ -149,6 +153,6 @@ def test_readiness_reports_missing_audit_outbox_grants():
     database.engine.dispose()
     database.engine = MagicMock()
     connection = database.engine.connect.return_value.__enter__.return_value
-    connection.execute.return_value.scalars.return_value = iter(["0013_exam_draft_revisions"])
+    connection.execute.return_value.scalars.return_value = iter(["0014_exam_sittings"])
     connection.scalar.side_effect = [True, True, True, False]
     assert database.readiness() == {"postgresql": "ok", "schema": "ok", "runtime_role": "missing_grants"}

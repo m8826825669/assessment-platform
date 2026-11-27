@@ -102,6 +102,10 @@ def grant_runtime(connection: Connection, role: str) -> None:
         sql.SQL("GRANT SELECT, INSERT ON exam_blueprint_drafts, exam_publications TO {}").format(identifier)
     )
 
+    connection.execute(
+        sql.SQL("GRANT SELECT, INSERT ON exam_sittings, sitting_registrations TO {}").format(identifier)
+    )
+
 
 def grant_worker(connection: Connection, role: str) -> None:
     identifier = restricted_role(connection, role)
@@ -116,8 +120,12 @@ def grant_worker(connection: Connection, role: str) -> None:
         "OR has_any_column_privilege(%s, 'media_assets', 'SELECT, INSERT, UPDATE') "
         "OR has_any_column_privilege(%s, 'question_version_media', 'SELECT, INSERT, UPDATE') "
         "OR has_any_column_privilege(%s, 'question_import_receipts', 'SELECT, INSERT, UPDATE') "
-        "OR has_table_privilege(%s, 'question_import_receipts', 'DELETE, TRUNCATE')",
-        (role, role, role, role, role, role, role, role, role, role, role, role),
+        "OR has_table_privilege(%s, 'question_import_receipts', 'DELETE, TRUNCATE') "
+        "OR has_any_column_privilege(%s, 'exam_sittings', 'SELECT, INSERT, UPDATE') "
+        "OR has_any_column_privilege(%s, 'sitting_registrations', 'SELECT, INSERT, UPDATE') "
+        "OR has_table_privilege(%s, 'exam_sittings', 'DELETE, TRUNCATE') "
+        "OR has_table_privilege(%s, 'sitting_registrations', 'DELETE, TRUNCATE')",
+        (role,) * 16,
     ).fetchone()[0]:
         raise ValueError("Use a separate worker role; API privileges are already present")
     grant_connection(connection, identifier)

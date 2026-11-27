@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 
-EXPECTED_DATABASE_REVISION = "0013_exam_draft_revisions"
+EXPECTED_DATABASE_REVISION = "0014_exam_sittings"
 
 # The runtime must be neither migration owner nor a role that can bypass row policies.
 RUNTIME_ROLE_SAFE = text("""
@@ -22,8 +22,8 @@ SELECT NOT r.rolsuper AND NOT r.rolbypassrls AND NOT r.rolcreatedb
 FROM pg_roles r WHERE r.rolname = current_user
 """)
 RLS_CONFIGURED = text("""
-SELECT count(*) = 18 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
-AND (SELECT count(*) = 11 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
+SELECT count(*) = 20 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+AND (SELECT count(*) = 13 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
      WHERE NOT t.tgisinternal AND
      ((t.tgrelid = 'public.questions'::regclass AND t.tgname = 'question_identity_guard') OR
       (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard') OR
@@ -34,10 +34,12 @@ AND (SELECT count(*) = 11 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
       (t.tgrelid = 'public.question_version_taxa'::regclass AND t.tgname = 'version_taxon_guard') OR
       (t.tgrelid = 'public.media_assets'::regclass AND t.tgname = 'media_asset_guard') OR
       (t.tgrelid = 'public.question_version_media'::regclass AND t.tgname = 'version_media_guard') OR
+      (t.tgrelid = 'public.exam_sittings'::regclass AND t.tgname = 'exam_sitting_guard') OR
+      (t.tgrelid = 'public.sitting_registrations'::regclass AND t.tgname = 'sitting_registration_guard') OR
       (t.tgrelid = 'public.exam_blueprint_drafts'::regclass AND t.tgname = 'exam_draft_guard') OR
       (t.tgrelid = 'public.question_import_receipts'::regclass AND t.tgname = 'question_import_receipt_guard')))
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa', 'media_assets', 'question_version_media', 'question_import_receipts', 'exam_blueprint_drafts', 'exam_publications')
+WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa', 'media_assets', 'question_version_media', 'question_import_receipts', 'exam_blueprint_drafts', 'exam_publications', 'exam_sittings', 'sitting_registrations')
 """)
 
 
@@ -121,6 +123,14 @@ SELECT has_table_privilege(current_user, 'audit_records', 'SELECT')
    AND has_table_privilege(current_user, 'exam_publications', 'SELECT')
    AND has_table_privilege(current_user, 'exam_blueprint_drafts', 'INSERT')
    AND has_table_privilege(current_user, 'exam_publications', 'INSERT')
+   AND has_table_privilege(current_user, 'exam_sittings', 'SELECT')
+   AND has_table_privilege(current_user, 'exam_sittings', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'exam_sittings', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'exam_sittings', 'DELETE, TRUNCATE')
+   AND has_table_privilege(current_user, 'sitting_registrations', 'SELECT')
+   AND has_table_privilege(current_user, 'sitting_registrations', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'sitting_registrations', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'sitting_registrations', 'DELETE, TRUNCATE')
    AND NOT has_any_column_privilege(current_user, 'exam_blueprint_drafts', 'UPDATE')
    AND NOT has_any_column_privilege(current_user, 'exam_publications', 'UPDATE')
    AND NOT has_table_privilege(current_user, 'exam_blueprint_drafts', 'DELETE, TRUNCATE')
@@ -158,6 +168,10 @@ SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
    AND NOT has_any_column_privilege(current_user, 'exam_publications', 'SELECT, INSERT, UPDATE')
    AND NOT has_table_privilege(current_user, 'exam_blueprint_drafts', 'DELETE, TRUNCATE')
    AND NOT has_table_privilege(current_user, 'exam_publications', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'exam_sittings', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'exam_sittings', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'sitting_registrations', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'sitting_registrations', 'DELETE, TRUNCATE')
    AND NOT has_any_column_privilege(current_user, 'question_import_receipts', 'SELECT, INSERT, UPDATE')
    AND NOT has_table_privilege(current_user, 'question_import_receipts', 'DELETE, TRUNCATE')
 """)
@@ -226,6 +240,7 @@ class Database:
                             "AND to_regclass('media_assets') IS NOT NULL AND to_regclass('question_version_media') IS NOT NULL "
                             "AND to_regclass('question_import_receipts') IS NOT NULL AND to_regclass('exam_blueprint_drafts') IS NOT NULL"
                             " AND to_regclass('exam_publications') IS NOT NULL"
+                            " AND to_regclass('exam_sittings') IS NOT NULL AND to_regclass('sitting_registrations') IS NOT NULL"
                             " AND NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' "
                             "AND tablename='question_versions' AND policyname='question_version_publication_read')"
                         )
