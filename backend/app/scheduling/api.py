@@ -1,7 +1,7 @@
 """SCH-01/TEN-01 frozen sittings and atomic candidate registration."""
 
 from datetime import UTC
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Query
@@ -9,7 +9,14 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validato
 from sqlalchemy import func, select
 
 from app.audit.service import record
-from app.db.models import ExamPublication, ExamSitting, Membership, SittingRegistration, User
+from app.db.models import (
+    ExamPublication,
+    ExamSitting,
+    Membership,
+    SittingCancellation,
+    SittingRegistration,
+    User,
+)
 from app.identity.api import Actor, Db
 from app.identity.service import reject, tenant_membership
 from app.question_bank.review import access
@@ -42,6 +49,57 @@ class SittingBody(BaseModel):
     def window(self):
         check_window(self.opens_at, self.closes_at, 1)
         return self
+
+
+class CancellationBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reason_code: Literal["administrative", "schedule_error", "operational"]
+
+
+def cancellation_response(row):
+    return {"sitting_id": row.sitting_id, "reason_code": row.reason_code, "cancelled_at": row.created_at}
+
+
+@router.put("/exam-sittings/{sitting_id}/cancellation")
+def cancel(tenant_id: UUID, sitting_id: UUID, body: CancellationBody, actor: Actor, db: Db):
+    access(db, tenant_id, actor, lock=True, permission="exams.manage")
+    sitting = get_sitting(db, tenant_id, sitting_id)
+    existing = db.get(SittingCancellation, (tenant_id, sitting_id))
+    if existing is not None:
+        if existing.reason_code != body.reason_code:
+            reject(409, "cancellation_conflict", "Sitting already has a different cancellation")
+        response = cancellation_response(existing)
+        db.commit()
+        return response
+    if sitting.opens_at <= db.scalar(select(func.clock_timestamp())):
+        reject(409, "cancellation_closed", "Cancellation is only available before the sitting opens")
+    row = SittingCancellation(
+        tenant_id=tenant_id, sitting_id=sitting_id, reason_code=body.reason_code, created_by=actor.user_id
+    )
+    db.add(row)
+    record(
+        db,
+        "exam.sitting_cancelled",
+        actor=actor.user_id,
+        tenant=tenant_id,
+        subject=str(sitting_id),
+        before={},
+        after={},
+    )
+    db.flush()
+    response = cancellation_response(row)
+    db.commit()
+    return response
+
+
+@router.get("/exam-sittings/{sitting_id}/cancellation")
+def cancellation(tenant_id: UUID, sitting_id: UUID, actor: Actor, db: Db):
+    access(db, tenant_id, actor, permission="exams.manage")
+    get_sitting(db, tenant_id, sitting_id)
+    row = db.get(SittingCancellation, (tenant_id, sitting_id))
+    if row is None:
+        reject(404, "cancellation_not_found", "Cancellation not found")
+    return cancellation_response(row)
 
 
 class RegistrationBody(BaseModel):
@@ -239,6 +297,8 @@ def register(tenant_id: UUID, sitting_id: UUID, body: RegistrationBatch, actor: 
         )
         pending.append(row)
         result.append(row)
+    if pending and db.get(SittingCancellation, (tenant_id, sitting_id)) is not None:
+        reject(409, "sitting_cancelled", "Sitting is cancelled")
     if pending and sitting.opens_at <= db.scalar(select(func.clock_timestamp())):
         reject(409, "registration_closed", "New registrations close when the sitting opens")
     for row in pending:
@@ -293,6 +353,14 @@ def eligibility(tenant_id: UUID, sitting_id: UUID, actor: Actor, db: Db):
     )
     if registration is None:
         reject(404, "sitting_not_found", "Sitting not found")
+    readiness = start_readiness(
+        sitting.opens_at,
+        sitting.closes_at,
+        db.scalar(select(func.clock_timestamp())),
+        registration.allowed_minutes,
+    )
+    if db.get(SittingCancellation, (tenant_id, sitting_id)) is not None:
+        readiness.update(window_state="cancelled", can_start=False, deadline_if_started_now=None)
     return {
         "sitting_id": sitting.id,
         "publication_id": sitting.publication_id,
@@ -302,10 +370,5 @@ def eligibility(tenant_id: UUID, sitting_id: UUID, actor: Actor, db: Db):
         "opens_at": sitting.opens_at,
         "closes_at": sitting.closes_at,
         "display_timezone": sitting.display_timezone,
-        **start_readiness(
-            sitting.opens_at,
-            sitting.closes_at,
-            db.scalar(select(func.clock_timestamp())),
-            registration.allowed_minutes,
-        ),
+        **readiness,
     }

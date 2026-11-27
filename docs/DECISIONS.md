@@ -121,3 +121,8 @@ Preserve the deployed immutable draft-ID contract. Each edit appends a new draft
 ## P3-004 initial scheduling contract - 27 November 2026
 
 Use immutable sitting and registration snapshots tied to exact publications. The initial import format is a bounded atomic JSON batch for existing candidate accounts, with stable registration IDs as internal invitation references. External invitation delivery/acceptance and CSV remain explicit follow-up scope. Store UTC instants and an explicit fixed display offset initially; do not infer IANA/DST behavior. Accommodations add recorded minutes and require a reason and sufficient window length; sitting close remains the hard cap. New registrations close at sitting open. Current membership and server time drive the informational candidate eligibility projection; P4 must recheck the actual start atomically. Cancellation, withdrawal and accommodation amendments require separate audited lifecycle work before P3 acceptance.
+
+
+## SCH-01 pre-opening cancellation boundary (27 November 2026)
+
+Store permanent cancellations separately from immutable sitting/registration snapshots. Accept a fixed reason code only; preserve existing receipts on replay, reject new registrations and return cancelled candidate timing eligibility. Serialize cancellation/registration with the institution lock, require atomic audit/outbox and guard inserts/immutability in SQL. Cancellation after opens_at and any effect on running attempts are deferred to the attempt lifecycle design; no external notification is introduced.

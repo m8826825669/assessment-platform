@@ -262,7 +262,7 @@
         "P3-003"
       ],
       "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
-      "evidence": "Initial sitting/JSON registration/extra-time/eligibility foundation prepared under migration 0014. Authoring checks passed; PostgreSQL/full/CI pending. Lifecycle amendments, invitation acceptance/delivery, CSV and browser acceptance remain open. See P3_SITTINGS.md."
+      "evidence": "Sitting/JSON registration foundation accepted at 43bc993: 757 local tests and green Foundation gate #14. Pre-opening cancellation prepared under migration 0015; owner full gate and new CI pending. Rescheduling, withdrawal/accommodation amendments, invitations, CSV and browser acceptance remain open. See P3_SITTINGS.md and P3_CANCELLATIONS.md."
     },
     {
       "id": "P3-005",

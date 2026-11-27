@@ -103,7 +103,9 @@ def grant_runtime(connection: Connection, role: str) -> None:
     )
 
     connection.execute(
-        sql.SQL("GRANT SELECT, INSERT ON exam_sittings, sitting_registrations TO {}").format(identifier)
+        sql.SQL(
+            "GRANT SELECT, INSERT ON exam_sittings, sitting_registrations, sitting_cancellations TO {}"
+        ).format(identifier)
     )
 
 
@@ -124,8 +126,10 @@ def grant_worker(connection: Connection, role: str) -> None:
         "OR has_any_column_privilege(%s, 'exam_sittings', 'SELECT, INSERT, UPDATE') "
         "OR has_any_column_privilege(%s, 'sitting_registrations', 'SELECT, INSERT, UPDATE') "
         "OR has_table_privilege(%s, 'exam_sittings', 'DELETE, TRUNCATE') "
-        "OR has_table_privilege(%s, 'sitting_registrations', 'DELETE, TRUNCATE')",
-        (role,) * 16,
+        "OR has_table_privilege(%s, 'sitting_registrations', 'DELETE, TRUNCATE') "
+        "OR has_any_column_privilege(%s, 'sitting_cancellations', 'SELECT, INSERT, UPDATE') "
+        "OR has_table_privilege(%s, 'sitting_cancellations', 'DELETE, TRUNCATE')",
+        (role,) * 18,
     ).fetchone()[0]:
         raise ValueError("Use a separate worker role; API privileges are already present")
     grant_connection(connection, identifier)

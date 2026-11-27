@@ -613,3 +613,23 @@ class SittingRegistration(Base):
     accommodation_reason: Mapped[str | None] = mapped_column(String(500))
     created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SittingCancellation(Base):
+    __tablename__ = "sitting_cancellations"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "sitting_id"],
+            ["exam_sittings.tenant_id", "exam_sittings.id"],
+            name="fk_cancellation_sitting",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "reason_code IN ('administrative', 'schedule_error', 'operational')", name="cancellation_reason"
+        ),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    sitting_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    reason_code: Mapped[str] = mapped_column(String(20))
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

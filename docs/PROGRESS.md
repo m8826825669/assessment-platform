@@ -55,3 +55,10 @@ Owner baseline 6af1026 is verified by 703 passing local tests and green Foundati
 
 
 27 November 2026 - Owner verification for migration 0014 passed. The corrected downgrade/reupgrade test passed; application revision 0014_exam_sittings and runtime grants are ready. Full Windows verification passed 757 tests with zero failures, errors or skips. Dependencies, lint, formatting and PostgreSQL/live-media checks passed. Remote CI remains pending. P3-004 remains incomplete.
+
+
+## P3-004 cancellation increment - 27 November 2026
+
+Scheduling foundation 43bc993 is accepted on owner evidence: 757 strict local tests, schema 0014/runtime grants ready and green Foundation gate #14 (46013682334), all four jobs successful in 7m 59s. Added a separate immutable pre-opening cancellation receipt, retry/conflict rules, blocked new registrations, candidate cancellation eligibility, tenant SQL boundaries and atomic audit/outbox. Migration 0015 extends readiness/runtime grants; worker privileges remain separate. See P3_CANCELLATIONS.md. Owner full live-media gate and new CI remain pending; P3 stays open.
+
+Authoring cancellation evidence: 426 portable tests passed; real PostgreSQL 16.2 focused runs passed 62 and 136 tests (overlapping), including all 24 cancellation cases and migration/schema checks. Repository lint/format, dependency checks and guarded-installer smoke tests passed. Owner PostgreSQL 17/full live-media verification and new CI are still pending.
