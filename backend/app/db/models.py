@@ -494,3 +494,29 @@ class QuestionImportReceipt(Base):
     item_count: Mapped[int] = mapped_column(Integer)
     result: Mapped[list] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ExamBlueprintDraft(Base):
+    __tablename__ = "exam_blueprint_drafts"
+
+    tenant_id: Mapped[UUID] = mapped_column(
+        ForeignKey("institutions.id", ondelete="RESTRICT"), primary_key=True
+    )
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    blueprint: Mapped[dict] = mapped_column(JSONB)
+
+
+class ExamPublication(Base):
+    __tablename__ = "exam_publications"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "id"],
+            ["exam_blueprint_drafts.tenant_id", "exam_blueprint_drafts.id"],
+            name="fk_exam_publication_draft",
+            ondelete="RESTRICT",
+        ),
+    )
+
+    tenant_id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    snapshot: Mapped[dict] = mapped_column(JSONB)

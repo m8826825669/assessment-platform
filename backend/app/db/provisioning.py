@@ -98,6 +98,9 @@ def grant_runtime(connection: Connection, role: str) -> None:
     )
 
     connection.execute(sql.SQL("GRANT SELECT, INSERT ON question_import_receipts TO {}").format(identifier))
+    connection.execute(
+        sql.SQL("GRANT SELECT, INSERT ON exam_blueprint_drafts, exam_publications TO {}").format(identifier)
+    )
 
 
 def grant_worker(connection: Connection, role: str) -> None:

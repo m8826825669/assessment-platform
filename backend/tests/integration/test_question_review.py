@@ -541,3 +541,74 @@ def test_upgrade_preserves_populated_v4_drafts_without_fabricated_approval(test_
         ) == content.model_dump(mode="json")
         assert connection.scalar(text("SELECT count(*) FROM question_review_events")) == 0
         assert connection.scalar(text("SELECT count(*) FROM question_selections")) == 0
+
+
+def publication_fixture(db):
+    author, reviewer, coordinator = prepare(db)
+    question = approve(db, reviewer, submit(db, author, create(db, author)))
+    draft_id = uuid4()
+    draft_url = path(db, "exam-blueprints", f"/drafts/{draft_id}")
+    response = db.client.put(
+        draft_url,
+        headers=coordinator,
+        json={"sections": [{"version_ids": [question["version_id"]], "minimum": 1, "maximum": 1}]},
+    )
+    assert response.status_code == 200, response.text
+    publication_url = path(db, "exam-blueprints", f"/publications/{draft_id}")
+    return question, reviewer, coordinator, draft_url + "/publish", publication_url
+
+
+def test_publication_rolls_back_with_outbox_failure(security_database):
+    db = security_database
+    _, _, coordinator, publish_url, publication_url = publication_fixture(db)
+    engine = db.client.app.state.database.engine
+
+    def fail(connection, cursor, statement, parameters, ctx, executemany):
+        if statement.startswith("INSERT INTO outbox_deliveries"):
+            raise SQLAlchemyError("Injected publication outbox failure")
+
+    event.listen(engine, "before_cursor_execute", fail)
+    try:
+        response = db.client.post(publish_url, headers=coordinator)
+    finally:
+        event.remove(engine, "before_cursor_execute", fail)
+
+    assert response.status_code == 503, response.text
+    assert db.client.get(publication_url, headers=coordinator).status_code == 404
+    with db.admin_engine.begin() as connection:
+        context(connection, db)
+        assert (
+            connection.scalar(text("SELECT count(*) FROM audit_records WHERE action='exam.published'")) == 0
+        )
+        assert (
+            connection.scalar(
+                text("SELECT count(*) FROM outbox_events WHERE payload->>'action'='exam.published'")
+            )
+            == 0
+        )
+
+    retry = db.client.post(publish_url, headers=coordinator)
+    assert retry.status_code == 200, retry.text
+    assert db.client.get(publication_url, headers=coordinator).json() == retry.json()
+
+
+def test_publication_and_retirement_serialize(security_database):
+    db = security_database
+    question, reviewer, coordinator, publish_url, publication_url = publication_fixture(db)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        publish = executor.submit(db.client.post, publish_url, headers=coordinator)
+        retire = executor.submit(decide, db, reviewer, question, "retire", "Remove from future exams")
+        published = publish.result(timeout=30)
+        retired = retire.result(timeout=30)
+
+    assert retired.status_code == 200, retired.text
+    assert db.client.get(path(db, "question-selections"), headers=coordinator).json() == []
+    saved = db.client.get(publication_url, headers=coordinator)
+    retry = db.client.post(publish_url, headers=coordinator)
+    if published.status_code == 200:
+        assert saved.status_code == retry.status_code == 200
+        assert saved.json() == retry.json() == published.json()
+        assert saved.json()["sections"][0]["items"][0]["version_id"] == question["version_id"]
+    else:
+        assert published.status_code == retry.status_code == 409, published.text
+        assert saved.status_code == 404

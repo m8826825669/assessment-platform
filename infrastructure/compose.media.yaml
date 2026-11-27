@@ -28,7 +28,7 @@ services:
   clamav:
     image: clamav/clamav:1.5.4
     ports:
-      - "127.0.0.1:13310:3310"
+      - "127.0.0.1:${ASSESSMENT_MEDIA_SCANNER_PORT:-13310}:3310"
     volumes:
       - assessment_clamav:/var/lib/clamav
     environment:

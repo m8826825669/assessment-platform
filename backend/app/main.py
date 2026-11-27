@@ -7,6 +7,7 @@ from app.audit.api import router as audit_router
 from app.config import Settings
 from app.db.database import Database
 from app.errors import ERROR_STATUSES, Problem, install
+from app.exam_blueprint_api import router as blueprint_router
 from app.identity.api import router
 from app.media.adapters import Gateway
 from app.media.api import router as media_router
@@ -55,6 +56,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(taxonomy_router)
     app.include_router(media_router)
     app.include_router(imports_router)
+    app.include_router(blueprint_router)
     install(app)
 
     @app.get("/api/v1/health", response_model=Liveness, tags=["operations"])

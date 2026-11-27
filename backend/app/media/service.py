@@ -200,8 +200,8 @@ def capture(db, row, saved, actor, ids):
         reject(409, "media_conflict", "Media changed; reload before retrying")
 
 
-def snapshots(db, tenant, version_id, *, verify=False):
-    assets = db.scalars(
+def version_assets(db, tenant, version_id):
+    return db.scalars(
         select(MediaAsset)
         .join(
             QuestionVersionMedia,
@@ -211,8 +211,11 @@ def snapshots(db, tenant, version_id, *, verify=False):
         .where(QuestionVersionMedia.tenant_id == tenant, QuestionVersionMedia.version_id == version_id)
         .order_by(MediaAsset.id)
     )
+
+
+def snapshots(db, tenant, version_id, *, verify=False):
     result = []
-    for asset in assets:
+    for asset in version_assets(db, tenant, version_id):
         if asset.state != "clean":
             reject(409, "media_not_clean", "Media is not available for use")
         if verify:
