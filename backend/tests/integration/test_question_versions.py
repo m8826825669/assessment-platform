@@ -473,7 +473,7 @@ def test_upgrade_from_populated_p1_preserves_existing_records(test_database):
         assert connection.scalar(select(User.email).where(User.id == user)) == "preserved@example.test"
         assert connection.scalar(select(Membership.role).where(Membership.user_id == user)) == "author"
         assert (
-            connection.scalar(text("SELECT version_num FROM alembic_version")) == "0015_sitting_cancellations"
+            connection.scalar(text("SELECT version_num FROM alembic_version")) == "0016_registration_changes"
         )
 
 

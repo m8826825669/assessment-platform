@@ -46,6 +46,8 @@ ACTIONS = (
         "exam.draft_revised",
         "exam.sitting_created",
         "exam.sitting_cancelled",
+        "exam.registration_withdrawn",
+        "exam.registration_accommodation_changed",
         "exam.candidate_registered",
     }
 )

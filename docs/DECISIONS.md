@@ -126,3 +126,8 @@ Use immutable sitting and registration snapshots tied to exact publications. The
 ## SCH-01 pre-opening cancellation boundary (27 November 2026)
 
 Store permanent cancellations separately from immutable sitting/registration snapshots. Accept a fixed reason code only; preserve existing receipts on replay, reject new registrations and return cancelled candidate timing eligibility. Serialize cancellation/registration with the institution lock, require atomic audit/outbox and guard inserts/immutability in SQL. Cancellation after opens_at and any effect on running attempts are deferred to the attempt lifecycle design; no external notification is introduced.
+
+
+## SCH-01 registration decision lineage (27 November 2026)
+
+Preserve original registration receipts as revision 1 and append server-fenced decisions. Amendments can replace or remove extra time before opening, with candidate eligibility and window checks. Withdrawal is terminal and also permitted for an inactive candidate; no reinstatement or second-registration bypass is added. Both new operations reject cancelled/open sittings, while authorized identical retries acknowledge their historical receipt. Keep free-text reasons in a separate staff-only table and use a deferred SQL constraint to require them atomically. Expose only safe timing/state to candidates; defer post-opening attempt/deadline changes to P4.

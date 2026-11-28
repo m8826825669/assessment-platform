@@ -633,3 +633,48 @@ class SittingCancellation(Base):
     reason_code: Mapped[str] = mapped_column(String(20))
     created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RegistrationChange(Base):
+    __tablename__ = "registration_changes"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "registration_id"],
+            ["sitting_registrations.tenant_id", "sitting_registrations.id"],
+            name="fk_change_registration",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("tenant_id", "registration_id", "revision", name="uq_registration_change_revision"),
+        CheckConstraint("revision BETWEEN 2 AND 1000000", name="change_revision"),
+        CheckConstraint("action IN ('amend_accommodation', 'withdraw')", name="change_action"),
+        CheckConstraint(
+            "extra_minutes BETWEEN 0 AND 240 AND allowed_minutes BETWEEN 1 AND 1680", name="change_duration"
+        ),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    registration_id: Mapped[UUID] = mapped_column(Uuid)
+    sitting_id: Mapped[UUID] = mapped_column(Uuid)
+    candidate_user_id: Mapped[UUID] = mapped_column(Uuid)
+    revision: Mapped[int] = mapped_column(Integer)
+    action: Mapped[str] = mapped_column(String(24))
+    extra_minutes: Mapped[int] = mapped_column(Integer)
+    allowed_minutes: Mapped[int] = mapped_column(Integer)
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RegistrationChangeReason(Base):
+    __tablename__ = "registration_change_reasons"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "change_id"],
+            ["registration_changes.tenant_id", "registration_changes.id"],
+            name="fk_change_reason",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("length(trim(reason)) BETWEEN 3 AND 500", name="change_reason_length"),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    change_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    reason: Mapped[str] = mapped_column(String(500))

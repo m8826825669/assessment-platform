@@ -10,6 +10,8 @@ from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 from test_exam_sittings import registration, schedule
 from test_question_review import context
 
+from app.db.database import EXPECTED_DATABASE_REVISION
+
 pytestmark = pytest.mark.integration
 BODY = {"reason_code": "administrative"}
 
@@ -274,7 +276,7 @@ def test_downgrade_preserves_cancellations(sitting_setup, test_database):
         config.attributes.pop("connection", None)
     with engine.connect() as c:
         assert c.scalar(text("SELECT count(*) FROM sitting_cancellations")) == 1
-        assert c.scalar(text("SELECT version_num FROM alembic_version")) == "0015_sitting_cancellations"
+        assert c.scalar(text("SELECT version_num FROM alembic_version")) == EXPECTED_DATABASE_REVISION
 
 
 @pytest.mark.parametrize("privilege", ["SELECT", "INSERT"])

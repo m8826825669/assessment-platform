@@ -13,6 +13,8 @@ from app.db.models import (
     ExamPublication,
     ExamSitting,
     Membership,
+    RegistrationChange,
+    RegistrationChangeReason,
     SittingCancellation,
     SittingRegistration,
     User,
@@ -353,22 +355,214 @@ def eligibility(tenant_id: UUID, sitting_id: UUID, actor: Actor, db: Db):
     )
     if registration is None:
         reject(404, "sitting_not_found", "Sitting not found")
+    effective = registration_status(db, registration)
     readiness = start_readiness(
         sitting.opens_at,
         sitting.closes_at,
         db.scalar(select(func.clock_timestamp())),
-        registration.allowed_minutes,
+        effective["allowed_minutes"],
     )
     if db.get(SittingCancellation, (tenant_id, sitting_id)) is not None:
         readiness.update(window_state="cancelled", can_start=False, deadline_if_started_now=None)
+    if effective["status"] == "withdrawn" and readiness["window_state"] != "cancelled":
+        readiness.update(window_state="withdrawn", can_start=False, deadline_if_started_now=None)
     return {
         "sitting_id": sitting.id,
         "publication_id": sitting.publication_id,
         "title": sitting.title,
         "registration_id": registration.id,
-        "allowed_minutes": registration.allowed_minutes,
+        "allowed_minutes": effective["allowed_minutes"],
         "opens_at": sitting.opens_at,
         "closes_at": sitting.closes_at,
         "display_timezone": sitting.display_timezone,
         **readiness,
     }
+
+
+class RegistrationChangeBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: Annotated[int, Field(strict=True, ge=1, lt=1000000)]
+    action: Literal["amend_accommodation", "withdraw"]
+    extra_minutes: Annotated[int | None, Field(strict=True, ge=0, le=240)] = None
+    reason: Annotated[str, Field(min_length=3, max_length=500)]
+
+    @field_validator("reason")
+    @classmethod
+    def nonblank_reason(cls, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise ValueError("A recorded reason is required")
+        return value
+
+    @model_validator(mode="after")
+    def allowance(self):
+        if (self.action == "withdraw") != (self.extra_minutes is None):
+            raise ValueError("Only an accommodation amendment requires extra_minutes")
+        return self
+
+
+def latest_registration_change(db, registration):
+    return db.scalar(
+        select(RegistrationChange)
+        .where(
+            RegistrationChange.tenant_id == registration.tenant_id,
+            RegistrationChange.registration_id == registration.id,
+        )
+        .order_by(RegistrationChange.revision.desc())
+        .limit(1)
+    )
+
+
+def registration_status(db, registration):
+    latest = latest_registration_change(db, registration)
+    return {
+        "registration_id": registration.id,
+        "revision": latest.revision if latest else 1,
+        "status": "withdrawn" if latest and latest.action == "withdraw" else "active",
+        "extra_minutes": latest.extra_minutes if latest else registration.extra_minutes,
+        "allowed_minutes": latest.allowed_minutes if latest else registration.allowed_minutes,
+    }
+
+
+def get_registration(db, tenant_id, sitting_id, registration_id):
+    get_sitting(db, tenant_id, sitting_id)
+    row = db.get(SittingRegistration, (tenant_id, registration_id))
+    if row is None or row.sitting_id != sitting_id:
+        reject(404, "registration_not_found", "Registration not found")
+    return row
+
+
+def change_response(db, row):
+    reason = db.get(RegistrationChangeReason, (row.tenant_id, row.id))
+    return {
+        "id": row.id,
+        "registration_id": row.registration_id,
+        "revision": row.revision,
+        "action": row.action,
+        "extra_minutes": row.extra_minutes,
+        "allowed_minutes": row.allowed_minutes,
+        "reason": reason.reason,
+        "created_at": row.created_at,
+    }
+
+
+@router.get("/exam-sittings/{sitting_id}/registrations/{registration_id}/status")
+def current_registration(tenant_id: UUID, sitting_id: UUID, registration_id: UUID, actor: Actor, db: Db):
+    access(db, tenant_id, actor, permission="exams.manage")
+    return registration_status(db, get_registration(db, tenant_id, sitting_id, registration_id))
+
+
+@router.get("/exam-sittings/{sitting_id}/registrations/{registration_id}/changes")
+def registration_history(
+    tenant_id: UUID,
+    sitting_id: UUID,
+    registration_id: UUID,
+    actor: Actor,
+    db: Db,
+    offset: Annotated[int, Query(ge=0, le=1000000)] = 0,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+):
+    access(db, tenant_id, actor, permission="exams.manage")
+    get_registration(db, tenant_id, sitting_id, registration_id)
+    return [
+        change_response(db, row)
+        for row in db.scalars(
+            select(RegistrationChange)
+            .where(
+                RegistrationChange.tenant_id == tenant_id,
+                RegistrationChange.registration_id == registration_id,
+            )
+            .order_by(RegistrationChange.revision)
+            .offset(offset)
+            .limit(limit)
+        )
+    ]
+
+
+@router.put("/exam-sittings/{sitting_id}/registrations/{registration_id}/changes/{change_id}")
+def change_registration(
+    tenant_id: UUID,
+    sitting_id: UUID,
+    registration_id: UUID,
+    change_id: UUID,
+    body: RegistrationChangeBody,
+    actor: Actor,
+    db: Db,
+):
+    access(db, tenant_id, actor, lock=True, permission="exams.manage")
+    registration = get_registration(db, tenant_id, sitting_id, registration_id)
+    existing = db.get(RegistrationChange, (tenant_id, change_id))
+    if existing is not None:
+        reason = db.get(RegistrationChangeReason, (tenant_id, change_id))
+        if (
+            existing.registration_id != registration_id
+            or existing.action != body.action
+            or existing.revision != body.expected_revision + 1
+            or reason.reason != body.reason
+            or (body.action == "amend_accommodation" and existing.extra_minutes != body.extra_minutes)
+        ):
+            reject(409, "registration_change_conflict", "Change ID already contains different data")
+        response = change_response(db, existing)
+        db.commit()
+        return response
+    sitting = get_sitting(db, tenant_id, sitting_id)
+    current = registration_status(db, registration)
+    if current["revision"] != body.expected_revision:
+        reject(409, "registration_revision_conflict", "Registration revision is stale")
+    if current["status"] == "withdrawn":
+        reject(409, "registration_withdrawn", "Registration is withdrawn")
+    if db.get(SittingCancellation, (tenant_id, sitting_id)) is not None:
+        reject(409, "sitting_cancelled", "Sitting is cancelled")
+    if sitting.opens_at <= db.scalar(select(func.clock_timestamp())):
+        reject(409, "registration_changes_closed", "Registration changes close when the sitting opens")
+    extra = current["extra_minutes"]
+    if body.action == "amend_accommodation":
+        eligible = db.scalar(
+            select(Membership.id)
+            .join(User, User.id == Membership.user_id)
+            .where(
+                Membership.tenant_id == tenant_id,
+                Membership.user_id == registration.candidate_user_id,
+                Membership.role == "candidate",
+                Membership.status == "active",
+                User.is_active.is_(True),
+            )
+        )
+        if eligible is None:
+            reject(409, "candidate_unavailable", "Candidate is not eligible in this institution")
+        extra = body.extra_minutes
+        if extra == current["extra_minutes"]:
+            reject(409, "accommodation_unchanged", "Accommodation allowance is unchanged")
+    allowed = sitting.duration_minutes + extra
+    try:
+        check_window(sitting.opens_at, sitting.closes_at, allowed)
+    except ValueError:
+        reject(409, "accommodation_window_too_short", "Sitting window does not fit the accommodation")
+    row = RegistrationChange(
+        tenant_id=tenant_id,
+        id=change_id,
+        registration_id=registration_id,
+        sitting_id=sitting_id,
+        candidate_user_id=registration.candidate_user_id,
+        revision=current["revision"] + 1,
+        action=body.action,
+        extra_minutes=extra,
+        allowed_minutes=allowed,
+        created_by=actor.user_id,
+    )
+    db.add(row)
+    db.flush()
+    db.add(RegistrationChangeReason(tenant_id=tenant_id, change_id=change_id, reason=body.reason))
+    record(
+        db,
+        "exam.registration_" + ("withdrawn" if body.action == "withdraw" else "accommodation_changed"),
+        actor=actor.user_id,
+        tenant=tenant_id,
+        subject=str(registration_id),
+        before={},
+        after={},
+    )
+    db.flush()
+    response = change_response(db, row)
+    db.commit()
+    return response

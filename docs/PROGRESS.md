@@ -62,3 +62,10 @@ Owner baseline 6af1026 is verified by 703 passing local tests and green Foundati
 Scheduling foundation 43bc993 is accepted on owner evidence: 757 strict local tests, schema 0014/runtime grants ready and green Foundation gate #14 (46013682334), all four jobs successful in 7m 59s. Added a separate immutable pre-opening cancellation receipt, retry/conflict rules, blocked new registrations, candidate cancellation eligibility, tenant SQL boundaries and atomic audit/outbox. Migration 0015 extends readiness/runtime grants; worker privileges remain separate. See P3_CANCELLATIONS.md. Owner full live-media gate and new CI remain pending; P3 stays open.
 
 Authoring cancellation evidence: 426 portable tests passed; real PostgreSQL 16.2 focused runs passed 62 and 136 tests (overlapping), including all 24 cancellation cases and migration/schema checks. Repository lint/format, dependency checks and guarded-installer smoke tests passed. Owner PostgreSQL 17/full live-media verification and new CI are still pending.
+
+
+## P3-004 registration decisions - 27 November 2026
+
+Cancellation cc82675 is accepted on owner evidence: 782 strict local tests and green Foundation gate #15, run 46030933675 (9m 11s), all four jobs green. Migration 0016 adds immutable withdrawal/accommodation decisions with per-registration revisions and separate staff-only private reasons. Candidate timing uses current allowance and terminal withdrawal, original receipts stay frozen, and transaction/SQL guards fence races and preserve audit/outbox atomicity. P3 remains open; see P3_REGISTRATION_CHANGES.md. Owner full live-media verification and new CI are pending.
+
+Registration-decision authoring checks: 442 portable tests and 222 real PostgreSQL 16.2 integration tests passed, including 44 new lifecycle/privacy/rollback/concurrency/grant cases. Metadata/schema and downgrade/reupgrade checks, repository lint/format/dependency checks and guarded-installer baseline/replay/drift checks passed. Owner PostgreSQL 17/full live-media verification and new CI remain pending; P3 is not complete.

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 
-EXPECTED_DATABASE_REVISION = "0015_sitting_cancellations"
+EXPECTED_DATABASE_REVISION = "0016_registration_changes"
 
 # The runtime must be neither migration owner nor a role that can bypass row policies.
 RUNTIME_ROLE_SAFE = text("""
@@ -22,8 +22,8 @@ SELECT NOT r.rolsuper AND NOT r.rolbypassrls AND NOT r.rolcreatedb
 FROM pg_roles r WHERE r.rolname = current_user
 """)
 RLS_CONFIGURED = text("""
-SELECT count(*) = 21 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
-AND (SELECT count(*) = 15 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
+SELECT count(*) = 23 AND bool_and(c.relrowsecurity AND c.relforcerowsecurity)
+AND (SELECT count(*) = 18 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
      WHERE NOT t.tgisinternal AND
      ((t.tgrelid = 'public.questions'::regclass AND t.tgname = 'question_identity_guard') OR
       (t.tgrelid = 'public.question_versions'::regclass AND t.tgname = 'question_version_guard') OR
@@ -34,6 +34,9 @@ AND (SELECT count(*) = 15 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
       (t.tgrelid = 'public.question_version_taxa'::regclass AND t.tgname = 'version_taxon_guard') OR
       (t.tgrelid = 'public.media_assets'::regclass AND t.tgname = 'media_asset_guard') OR
       (t.tgrelid = 'public.question_version_media'::regclass AND t.tgname = 'version_media_guard') OR
+      (t.tgrelid = 'public.registration_changes'::regclass AND t.tgname = 'registration_change_guard') OR
+      (t.tgrelid = 'public.registration_changes'::regclass AND t.tgname = 'registration_change_reason_required') OR
+      (t.tgrelid = 'public.registration_change_reasons'::regclass AND t.tgname = 'registration_change_reason_guard') OR
       (t.tgrelid = 'public.sitting_cancellations'::regclass AND t.tgname = 'sitting_cancellation_guard') OR
       (t.tgrelid = 'public.sitting_registrations'::regclass AND t.tgname = 'registration_cancellation_guard') OR
       (t.tgrelid = 'public.exam_sittings'::regclass AND t.tgname = 'exam_sitting_guard') OR
@@ -41,7 +44,7 @@ AND (SELECT count(*) = 15 AND bool_and(t.tgenabled = 'O') FROM pg_trigger t
       (t.tgrelid = 'public.exam_blueprint_drafts'::regclass AND t.tgname = 'exam_draft_guard') OR
       (t.tgrelid = 'public.question_import_receipts'::regclass AND t.tgname = 'question_import_receipt_guard')))
 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa', 'media_assets', 'question_version_media', 'question_import_receipts', 'exam_blueprint_drafts', 'exam_publications', 'exam_sittings', 'sitting_registrations', 'sitting_cancellations')
+WHERE n.nspname = 'public' AND c.relname IN ('institutions', 'memberships', 'security_events', 'audit_records', 'outbox_events', 'outbox_deliveries', 'consumer_receipts', 'questions', 'question_versions', 'question_review_events', 'question_selections', 'taxonomy_terms', 'question_version_taxa', 'media_assets', 'question_version_media', 'question_import_receipts', 'exam_blueprint_drafts', 'exam_publications', 'exam_sittings', 'sitting_registrations', 'sitting_cancellations', 'registration_changes', 'registration_change_reasons')
 """)
 
 
@@ -129,6 +132,14 @@ SELECT has_table_privilege(current_user, 'audit_records', 'SELECT')
    AND has_table_privilege(current_user, 'exam_sittings', 'INSERT')
    AND NOT has_any_column_privilege(current_user, 'exam_sittings', 'UPDATE')
    AND NOT has_table_privilege(current_user, 'exam_sittings', 'DELETE, TRUNCATE')
+   AND has_table_privilege(current_user, 'registration_changes', 'SELECT')
+   AND has_table_privilege(current_user, 'registration_changes', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'registration_changes', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'registration_changes', 'DELETE, TRUNCATE')
+   AND has_table_privilege(current_user, 'registration_change_reasons', 'SELECT')
+   AND has_table_privilege(current_user, 'registration_change_reasons', 'INSERT')
+   AND NOT has_any_column_privilege(current_user, 'registration_change_reasons', 'UPDATE')
+   AND NOT has_table_privilege(current_user, 'registration_change_reasons', 'DELETE, TRUNCATE')
    AND has_table_privilege(current_user, 'sitting_cancellations', 'SELECT')
    AND has_table_privilege(current_user, 'sitting_cancellations', 'INSERT')
    AND NOT has_any_column_privilege(current_user, 'sitting_cancellations', 'UPDATE')
@@ -176,6 +187,10 @@ SELECT has_table_privilege(current_user, 'outbox_events', 'SELECT')
    AND NOT has_table_privilege(current_user, 'exam_publications', 'DELETE, TRUNCATE')
    AND NOT has_any_column_privilege(current_user, 'exam_sittings', 'SELECT, INSERT, UPDATE')
    AND NOT has_table_privilege(current_user, 'exam_sittings', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'registration_changes', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'registration_changes', 'DELETE, TRUNCATE')
+   AND NOT has_any_column_privilege(current_user, 'registration_change_reasons', 'SELECT, INSERT, UPDATE')
+   AND NOT has_table_privilege(current_user, 'registration_change_reasons', 'DELETE, TRUNCATE')
    AND NOT has_any_column_privilege(current_user, 'sitting_cancellations', 'SELECT, INSERT, UPDATE')
    AND NOT has_table_privilege(current_user, 'sitting_cancellations', 'DELETE, TRUNCATE')
    AND NOT has_any_column_privilege(current_user, 'sitting_registrations', 'SELECT, INSERT, UPDATE')
@@ -248,6 +263,7 @@ class Database:
                             "AND to_regclass('media_assets') IS NOT NULL AND to_regclass('question_version_media') IS NOT NULL "
                             "AND to_regclass('question_import_receipts') IS NOT NULL AND to_regclass('exam_blueprint_drafts') IS NOT NULL"
                             " AND to_regclass('exam_publications') IS NOT NULL"
+                            " AND to_regclass('registration_changes') IS NOT NULL AND to_regclass('registration_change_reasons') IS NOT NULL"
                             " AND to_regclass('sitting_cancellations') IS NOT NULL AND to_regclass('exam_sittings') IS NOT NULL AND to_regclass('sitting_registrations') IS NOT NULL"
                             " AND NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' "
                             "AND tablename='question_versions' AND policyname='question_version_publication_read')"
