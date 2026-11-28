@@ -50,6 +50,7 @@ ACTIONS = (
         "exam.registration_withdrawn",
         "exam.registration_accommodation_changed",
         "exam.candidate_registered",
+        "exam.invitation_accepted",
     }
 )
 REASONS = frozenset({"handler_fixed", "transient_failure_reviewed"})

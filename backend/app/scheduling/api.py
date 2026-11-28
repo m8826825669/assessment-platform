@@ -365,13 +365,23 @@ def eligibility(tenant_id: UUID, sitting_id: UUID, actor: Actor, db: Db):
     if registration is None:
         reject(404, "sitting_not_found", "Sitting not found")
     effective = registration_status(db, registration)
+    return candidate_eligibility(
+        sitting,
+        registration,
+        effective,
+        db.scalar(select(func.clock_timestamp())),
+        cancelled=db.get(SittingCancellation, (tenant_id, sitting_id)) is not None,
+    )
+
+
+def candidate_eligibility(sitting, registration, effective, now, *, cancelled=False):
     readiness = start_readiness(
         sitting.opens_at,
         sitting.closes_at,
-        db.scalar(select(func.clock_timestamp())),
+        now,
         effective["allowed_minutes"],
     )
-    if db.get(SittingCancellation, (tenant_id, sitting_id)) is not None:
+    if cancelled:
         readiness.update(window_state="cancelled", can_start=False, deadline_if_started_now=None)
     if effective["status"] == "withdrawn" and readiness["window_state"] != "cancelled":
         readiness.update(window_state="withdrawn", can_start=False, deadline_if_started_now=None)

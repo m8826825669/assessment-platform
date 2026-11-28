@@ -262,7 +262,7 @@
         "P3-003"
       ],
       "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
-      "evidence": "CSV baseline 9c638bf accepted: 895 owner full tests and green Foundation gate #17. Atomic unopened sitting replacement prepared under migration 0017, preserving exact publication and historical registrations without automatic transfer. Owner full gate/new CI pending. External invitations and coordinator browser acceptance remain open. See P3_RESCHEDULING.md."
+      "evidence": "Rescheduling baseline 51d35c5 accepted: 943 owner full tests and green Foundation gate #18. Candidate-owned in-app invitation discovery and audited optional acknowledgement prepared under migration 0018; it does not start attempts or replace current eligibility. Owner full gate/new CI pending. External invitation delivery and candidate/coordinator browser acceptance remain open. See P3_INVITATION_INBOX.md."
     },
     {
       "id": "P3-005",

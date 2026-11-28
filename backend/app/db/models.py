@@ -707,3 +707,22 @@ class SittingReschedule(Base):
     reason_code: Mapped[str] = mapped_column(String(20))
     created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class RegistrationAcceptance(Base):
+    __tablename__ = "registration_acceptances"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "registration_id"],
+            ["sitting_registrations.tenant_id", "sitting_registrations.id"],
+            name="fk_acceptance_registration",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("registration_revision BETWEEN 1 AND 1000000", name="acceptance_revision"),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    registration_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    sitting_id: Mapped[UUID] = mapped_column(Uuid)
+    candidate_user_id: Mapped[UUID] = mapped_column(Uuid)
+    registration_revision: Mapped[int] = mapped_column(Integer)
+    accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

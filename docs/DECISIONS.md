@@ -141,3 +141,8 @@ Accept raw UTF-8 text/csv with four fixed columns, 64 KiB and 50-record bounds, 
 ## SCH-01 atomic pre-opening replacement (28 November 2026)
 
 Preserve immutable sitting snapshots by creating a new sitting and cancelling/linking the original in one institution-serialized transaction. Retain the exact publication/title/policy; require a fresh replacement UUID and future fitting window. Store only fixed reason codes and immutable same-tenant one-to-one links. Historical retries acknowledge immediate successors, even after later replacement decisions. Do not transfer registrations/allowances or restore withdrawn candidates automatically: staff must explicitly re-register them. Candidate link discovery, external notification and open/running attempt changes remain separate scope.
+
+
+## SCH-01 in-app invitation acknowledgement (28 November 2026)
+
+Use existing registration references for a signed-in candidate's own paged inbox. Add an immutable receipt of the current registration revision under the institution lock, with a database-owned timestamp and atomic audit/outbox. Acknowledgement is optional for both old and new registrations, may occur before close, and never starts an attempt, changes timing, restores authority or freezes later accommodations. Separate current invitation state from historical receipt replay. Staff may inspect receipts but cannot accept on a candidate's behalf. External email/link delivery and browser workflows remain separate scope; no new outbox side effect is authorized.
