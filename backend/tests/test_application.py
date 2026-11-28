@@ -55,6 +55,8 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
     app = create_app(unavailable_settings())
     paths = app.openapi()["paths"]
     assert set(paths) == {
+        "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/csv",
+        "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/csv/preview",
         "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/{registration_id}/status",
         "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/{registration_id}/changes",
         "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/{registration_id}/changes/{change_id}",

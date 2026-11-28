@@ -131,3 +131,8 @@ Store permanent cancellations separately from immutable sitting/registration sna
 ## SCH-01 registration decision lineage (27 November 2026)
 
 Preserve original registration receipts as revision 1 and append server-fenced decisions. Amendments can replace or remove extra time before opening, with candidate eligibility and window checks. Withdrawal is terminal and also permitted for an inactive candidate; no reinstatement or second-registration bypass is added. Both new operations reject cancelled/open sittings, while authorized identical retries acknowledge their historical receipt. Keep free-text reasons in a separate staff-only table and use a deferred SQL constraint to require them atomically. Expose only safe timing/state to candidates; defer post-opening attempt/deadline changes to P4.
+
+
+## SCH-01 CSV registration profile (28 November 2026)
+
+Accept raw UTF-8 text/csv with four fixed columns, 64 KiB and 50-record bounds, stable caller registration UUIDs and existing candidate account UUIDs. Preview is read-only and never reserves eligibility; commit rechecks authority/timing and shares the original JSON batch's locked, atomic business/audit/outbox flow. Per-row retry receipts acknowledge history rather than restoring withdrawn/cancelled eligibility. Keep private CSV cells out of diagnostics and preview, show effective status separately from original receipt values, release read transactions before streaming, and retain schema/grants at 0016. External invitations/account creation and browser upload controls remain separate increments.

@@ -16,6 +16,9 @@ from app.request_context import request_id
 
 LOGGER = logging.getLogger("assessment.errors")
 MESSAGES = {
+    "registration_csv_invalid": "Invalid CSV registration request",
+    "registration_csv_media_type": "Use UTF-8 text/csv",
+    "registration_csv_too_large": "CSV registration document exceeds the size limit",
     "import_invalid": "Invalid import document",
     "import_conflict": "Import key was used for a different document",
     "import_not_found": "Import receipt not found",

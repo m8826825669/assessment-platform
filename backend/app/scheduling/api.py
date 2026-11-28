@@ -247,9 +247,7 @@ def listing(
     ]
 
 
-@router.post("/exam-sittings/{sitting_id}/registrations")
-def register(tenant_id: UUID, sitting_id: UUID, body: RegistrationBatch, actor: Actor, db: Db):
-    access(db, tenant_id, actor, lock=True, permission="exams.manage")
+def plan_registration_batch(db, tenant_id, sitting_id, body, actor):
     sitting = get_sitting(db, tenant_id, sitting_id)
     pending, result = [], []
     for candidate in body.registrations:
@@ -303,6 +301,10 @@ def register(tenant_id: UUID, sitting_id: UUID, body: RegistrationBatch, actor: 
         reject(409, "sitting_cancelled", "Sitting is cancelled")
     if pending and sitting.opens_at <= db.scalar(select(func.clock_timestamp())):
         reject(409, "registration_closed", "New registrations close when the sitting opens")
+    return pending, result
+
+
+def persist_registration_batch(db, tenant_id, actor, pending, result):
     for row in pending:
         db.add(row)
         record(
@@ -317,6 +319,13 @@ def register(tenant_id: UUID, sitting_id: UUID, body: RegistrationBatch, actor: 
     response = [registration_response(row) for row in result]
     db.commit()
     return response
+
+
+@router.post("/exam-sittings/{sitting_id}/registrations")
+def register(tenant_id: UUID, sitting_id: UUID, body: RegistrationBatch, actor: Actor, db: Db):
+    access(db, tenant_id, actor, lock=True, permission="exams.manage")
+    pending, result = plan_registration_batch(db, tenant_id, sitting_id, body, actor)
+    return persist_registration_batch(db, tenant_id, actor, pending, result)
 
 
 @router.get("/exam-sittings/{sitting_id}/registrations")

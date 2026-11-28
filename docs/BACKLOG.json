@@ -262,7 +262,7 @@
         "P3-003"
       ],
       "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
-      "evidence": "Sitting/registration foundation 43bc993 and cancellation cc82675 accepted on owner full gates (757/782 tests) and CI #14/#15. Immutable registration withdrawals and accommodation decisions prepared under migration 0016 with private reasons and revision fencing. Owner full verification/new CI pending. Rescheduling, invitations, CSV and coordinator browser acceptance remain open. See P3_REGISTRATION_CHANGES.md."
+      "evidence": "Registration decision baseline e7fae39 accepted: 842 owner full tests and green Foundation gate #16. Bounded existing-candidate CSV preview/atomic commit prepared, sharing JSON registration planning/persistence; schema remains 0016. Owner full gate/new CI pending for CSV. Rescheduling, invitations and coordinator browser acceptance remain open. See P3_REGISTRATION_CSV.md."
     },
     {
       "id": "P3-005",
