@@ -1,0 +1,32 @@
+# ASM-01 / PUB-01 / SCH-01 coordinator assembly browser increment
+
+## Baseline and bounded acceptance
+
+Candidate browser commit 1b3df29 is accepted on owner evidence: 990 strict backend tests, both full browser suite wrappers, and all four jobs of Foundation gate #20 in 16m 2s. Migration 0018 is unchanged. This increment implements coordinator assembly, immutable draft recovery/revisions, publication and new sitting creation. It does not close P3, add external invitations, implement an exam runner, or provide the separate registration/lifecycle management screens.
+
+## Screen prototype and recovery contract
+
+| Panel | Action | Server boundary and recovery |
+| --- | --- | --- |
+| Approved versions | Browse 20-row pages, preview exact public content, choose a target section | Uses existing coordinator-safe question-selections API and public renderer. No private question detail or scoring keys. Refresh rechecks catalogue; old IDs remain references until validation. |
+| Ordered sections | Add/remove sections, exact versions, order controls, count bounds and coverage rules | Fixed explicit selections, at most 20 sections, 100 selections per section, 25 coverage rules; shared server validation explains duplicates, counts and unavailable selections. Passage group is one selection. |
+| Draft recovery | Save initial draft, append new revision, reopen ID, inspect history or reload latest | Each write freezes its generated UUID/body; uncertain requests retain that operation for explicit identical retry. IDs must be retained because the API has no draft catalogue. Stale revision conflicts keep form values; reload latest requires explicit discard. |
+| Validation and publication | Validate current body, save, validate saved revision, confirm publish | Editing/save clears prior validation/publication state. Publish sends expected_revision for the exact immutable ID, and server rechecks current eligibility. Fixed pilot policy is read-only. Public content/media descriptions render through explicit public components. |
+| Publication recovery | Reopen a frozen publication by its ID | The original public snapshot is returned, never resolved against newest questions. No private grading/storage representation is requested or rendered. |
+| New sitting | Name sitting, enter opening/closing with explicit fixed UTC offset, schedule and reopen receipt | Convert times using the chosen offset, independent of machine timezone. Server enforces future opening, fitting duration, authority and exact publication. Uncertain PUT retries preserve sitting UUID and original payload. Receipt describes immutable schedule, not current cancellation/registration eligibility. |
+
+Workspace navigation and tab-close use unsaved-state warnings. Session/tenant-keyed panels ignore late responses after unmount. An expired session clears the workspace; permission denial clears protected panel data. Named error alerts receive focus. No automatic retry, auto-save, remembered token or browser draft cache is introduced. Refresh/re-login loses local unsaved forms and uncertain-operation memory; copy recovery IDs before leaving. Historical request replay acknowledges an existing record and never restores eligibility.
+
+The pilot's 30-minute duration, weight/negative/unanswered/rounding policies are fixed by the accepted server publication builder; this is not an institution policy editor. Taxonomy suggestions use the existing active catalogue limit; an exact saved taxonomy UUID may also be entered. The approved catalogue has bounded paging and no new cross-tenant search API. A full draft catalogue, archive UI, registration imports/withdrawals/amendments/cancellation/rescheduling controls and staff acknowledgement inspection remain future browser increments.
+
+## Verification and operational handoff
+
+Frontend 0.14.0 retains all accepted dependency pins (including Next.js 16.4.6). Standard frontend checks are npm ci, npm run typecheck, npm run format:check, npm test and npm run build. The separate `python ../scripts/verify_coordinator_browser.py` reads local migration credentials privately to create disposable PostgreSQL fixtures and a loopback restricted API. It requires ASSESSMENT_ALLOW_TEST_DATABASE_CREATION=1, frontend dependencies, Playwright Chromium and free port 14173. No application database changes, migration or grant refresh occur. Existing CI's all-Python-browser invocation discovers this new suite automatically; the complete media browser gate still needs dedicated live storage/ClamAV.
+
+Real-browser scenarios cover duplicate/coverage diagnostics, public publication rendering, committed publication/sitting response loss, lost draft save/replay, two-tab stale revision retention/latest recovery, narrow keyboard workflow and another institution/reviewer-role boundaries. SQL row/audit counts check that retries do not duplicate records. Component tests distinguish public snapshots from injected private fields and exercise fixed-offset calendar conversion. Neither these checks nor the existing API tests constitute a production, capacity or full accessibility claim.
+
+Owner Windows focused verification, full backend/live-media/all-browser gate and actual new CI remain required. External email delivery, remaining coordinator registration/lifecycle controls and final P3 acceptance stay open.
+
+## Authoring verification
+
+Authoring evidence: 496 portable backend tests and 47 real PostgreSQL draft-revision/sitting API tests passed. All 42 frontend tests, TypeScript checks, Prettier, production build, repository Ruff and dependency-pin checks passed; npm audit reports zero vulnerabilities. Three coordinator browser scenarios passed against the restricted API and disposable PostgreSQL 16.2 on authoring Chromium 158.0.8127.0, including lost responses for initial draft, revision, publication and sitting, stale second-tab retention/latest reload, explicit coverage/order, publication stability after a later revision, keyboard/390px layout and role/tenant boundaries. All five accepted candidate browser scenarios also passed after shared navigation changes. SQL confirms four immutable draft rows (two created/two revised), one publication and one sitting with matching audit counts and no duplicate on retries. The timezone accessible label was corrected, and the keyboard check waits for the ready control without weakening assertions or extending timeouts. Existing live-media authoring journeys were not rerun here; owner Windows/full live-media/all-browser and new CI remain required.

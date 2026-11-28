@@ -262,7 +262,7 @@
         "P3-003"
       ],
       "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
-      "evidence": "Invitation API 799c74c accepted: 990 owner full tests and green Foundation gate #19 (run 46128839007, 11m 39s). Candidate browser discovery and optional acknowledgement increment prepared; owner browser/full/new-CI evidence pending. Schema stays 0018. External delivery and coordinator browser acceptance remain open. See P3_CANDIDATE_BROWSER.md."
+      "evidence": "Candidate browser 1b3df29 accepted on owner evidence: 990 full backend tests, both full browser wrappers and all four Foundation gate #20 jobs green in 16m 2s. Schema 0018. External delivery and remaining coordinator registration/lifecycle browser controls remain open."
     },
     {
       "id": "P3-005",
@@ -272,11 +272,12 @@
         "PUB-01",
         "SCH-01"
       ],
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "P3-004"
       ],
-      "acceptance": "End-to-end coordinator publish/schedule flow, browser evidence, full local and actual CI gates."
+      "acceptance": "End-to-end coordinator publish/schedule flow, browser evidence, full local and actual CI gates.",
+      "evidence": "Coordinator assembly/revision/publication/new-sitting browser increment prepared over accepted 1b3df29. Owner focused/full/browser and actual new CI pending. See P3_COORDINATOR_BROWSER.md; P3 remains incomplete."
     }
   ],
   "later_milestones": "P4 through P8 retain controlling roadmap scope; expand tasks before entry.",

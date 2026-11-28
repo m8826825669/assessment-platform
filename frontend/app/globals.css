@@ -986,3 +986,35 @@ legend {
 .invitation-detail dd {
   overflow-wrap: anywhere;
 }
+
+.exam-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 20px;
+  align-items: start;
+}
+.exam-columns > .panel {
+  min-width: 0;
+}
+.exam-selections {
+  list-style: none;
+  padding: 0;
+}
+.exam-selections li,
+.exam-selected li {
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
+  overflow-wrap: anywhere;
+}
+.exam-selected {
+  padding-left: 20px;
+}
+.reference {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+@media (max-width: 1000px) {
+  .exam-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

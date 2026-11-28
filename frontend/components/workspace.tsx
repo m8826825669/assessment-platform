@@ -21,13 +21,15 @@ import MediaPanel from "./media-panel";
 import ImportPanel from "./import-panel";
 import TaxonomyPanel from "./taxonomy-panel";
 import InvitationInbox from "./invitation-inbox";
+import ExamWorkspace from "./exam-workspace";
 type View =
   | "bank"
   | "review"
   | "approved"
   | "imports"
   | "taxonomy"
-  | "invitations";
+  | "invitations"
+  | "exams";
 export default function Workspace() {
   const [token, setToken] = useState("");
   const tokenRef = useRef("");
@@ -54,6 +56,7 @@ export default function Workspace() {
   const [media, setMedia] = useState<Media[]>([]);
   const [dirty, setDirty] = useState(false);
   const [importDirty, setImportDirty] = useState(false);
+  const [examDirty, setExamDirty] = useState(false);
   const [history, setHistory] = useState<Row[]>([]);
   const [historyOffset, setHistoryOffset] = useState(0);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -87,6 +90,7 @@ export default function Workspace() {
     setTaxonomy([]);
     setDirty(false);
     setImportDirty(false);
+    setExamDirty(false);
     setPassword("");
   }
   const jobs = useRef(0);
@@ -119,17 +123,17 @@ export default function Workspace() {
   }, [error]);
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (dirty || importDirty) {
+      if (dirty || importDirty || examDirty) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [dirty, importDirty]);
+  }, [dirty, importDirty, examDirty]);
   function canLeave() {
     return (
-      (!dirty && !importDirty) ||
+      (!dirty && !importDirty && !examDirty) ||
       window.confirm(
         "Discard unsaved work? Retain an uncertain import retry key and copy your changes first.",
       )
@@ -137,6 +141,7 @@ export default function Workspace() {
   }
   function resetEditor() {
     setImportDirty(false);
+    setExamDirty(false);
     setEditing(false);
     setDetail(null);
     setPreview(null);
@@ -530,6 +535,15 @@ export default function Workspace() {
           {select && (
             <button
               disabled={busy || pending > 0}
+              aria-current={view === "exams" ? "page" : undefined}
+              onClick={() => nav("exams")}
+            >
+              Assemble exams
+            </button>
+          )}
+          {select && (
+            <button
+              disabled={busy || pending > 0}
               aria-current={view === "approved" ? "page" : undefined}
               onClick={() => nav("approved")}
             >
@@ -616,6 +630,15 @@ export default function Workspace() {
           )}
           {!access ? (
             <p role="status">Loading institution…</p>
+          ) : view === "exams" && select ? (
+            <ExamWorkspace
+              key={`${tenant}:${token}`}
+              tenant={tenant}
+              token={token}
+              terms={terms}
+              onDirtyChange={setExamDirty}
+              onSessionExpired={clearSession}
+            />
           ) : view === "invitations" && take ? (
             <InvitationInbox
               key={`${tenant}:${token}`}
@@ -1246,8 +1269,14 @@ export default function Workspace() {
             </>
           )}
           <footer className="page-footer">
-            Assessment platform · Governed question bank{" "}
-            <span>P2 · Authoring & review</span>
+            Assessment platform · Institution workspace{" "}
+            <span>
+              {view === "exams"
+                ? "P3 · Assembly & scheduling"
+                : take
+                  ? "P3 · Invitations"
+                  : "P2 · Authoring & review"}
+            </span>
           </footer>
         </div>
       </main>

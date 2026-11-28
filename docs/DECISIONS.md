@@ -151,3 +151,8 @@ Use existing registration references for a signed-in candidate's own paged inbox
 ## SCH-01 candidate invitation browser boundary (28 November 2026)
 
 Reuse memory-only identity and the existing candidate-safe invitation API for a paged inbox and optional acknowledgement. No local clock eligibility, question content, public registration, persisted bearer token or attempt-start control is introduced. Preserve the same registration identity during uncertain acknowledgement outcomes; separate historical receipt from a fresh state read. Tenant/session unmount discards late work. Candidate browser fixtures use disposable PostgreSQL without requiring media; existing authoring media journeys stay separate. Pin Next.js 16.4.6 to address audit-reported advisories exposed by the build of baseline 16.4.3. Coordinator screens, external delivery and P3 closure remain deferred.
+
+
+## ASM-01 / PUB-01 / SCH-01 coordinator browser boundary (28 November 2026)
+
+Expose accepted assembly/publication/sitting APIs through one permission-scoped workflow. Preserve exact version order, server diagnostics, immutable revision IDs and expected_revision publication fencing. Recover by explicit IDs rather than inventing a draft catalogue or persisted local token/draft cache. Freeze UUID, body and endpoint during uncertain requests, and keep form values after stale conflicts. Convert sitting times using an explicit fixed offset, never implicit browser/DST inference. Fixed pilot scoring policy remains read-only. Candidate-safe snapshots use explicit rendering, and current registration/lifecycle management remains a separate browser increment. No schema, grant, dependency pin or outbound effect change is required.
