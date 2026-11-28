@@ -20,7 +20,14 @@ import CandidatePreview from "./candidate-preview";
 import MediaPanel from "./media-panel";
 import ImportPanel from "./import-panel";
 import TaxonomyPanel from "./taxonomy-panel";
-type View = "bank" | "review" | "approved" | "imports" | "taxonomy";
+import InvitationInbox from "./invitation-inbox";
+type View =
+  | "bank"
+  | "review"
+  | "approved"
+  | "imports"
+  | "taxonomy"
+  | "invitations";
 export default function Workspace() {
   const [token, setToken] = useState("");
   const tokenRef = useRef("");
@@ -59,6 +66,7 @@ export default function Workspace() {
   const base = `tenants/${tenant}`;
   const write = access?.permissions.includes("questions.write") ?? false;
   const review = access?.permissions.includes("questions.review") ?? false;
+  const take = access?.permissions.includes("exams.take") ?? false;
   const select = access?.permissions.includes("exams.manage") ?? false;
   function clearSession() {
     generation.current++;
@@ -196,7 +204,9 @@ export default function Workspace() {
         ? "bank"
         : a.permissions.includes("questions.review")
           ? "review"
-          : "approved",
+          : a.permissions.includes("exams.take")
+            ? "invitations"
+            : "approved",
     );
     if (a.permissions.includes("taxonomy.read")) await loadTerms(id, auth);
   }
@@ -486,8 +496,19 @@ export default function Workspace() {
             ))}
           </select>
         </label>
-        <div className="nav-heading">CONTENT WORKSPACE</div>
+        <div className="nav-heading">
+          {take ? "CANDIDATE WORKSPACE" : "CONTENT WORKSPACE"}
+        </div>
         <nav aria-label="Workspace">
+          {take && (
+            <button
+              disabled={busy || pending > 0}
+              aria-current={view === "invitations" ? "page" : undefined}
+              onClick={() => nav("invitations")}
+            >
+              My invitations
+            </button>
+          )}
           {write && (
             <button
               disabled={busy || pending > 0}
@@ -537,7 +558,9 @@ export default function Workspace() {
         <div className="sidebar-note">
           <strong>Built for trust.</strong>
           <p>
-            Approval belongs to an exact version. Editing creates a new draft.
+            {take
+              ? "Your institution controls registration and timing. Acknowledgement does not start an exam."
+              : "Approval belongs to an exact version. Editing creates a new draft."}
           </p>
         </div>
         <div className="session">
@@ -581,7 +604,7 @@ export default function Workspace() {
             </strong>
           </span>
           <span className="environment">
-            <span /> Authoring workspace
+            <span /> {take ? "Candidate workspace" : "Authoring workspace"}
           </span>
         </header>
         <div className="page-content">
@@ -593,6 +616,13 @@ export default function Workspace() {
           )}
           {!access ? (
             <p role="status">Loading institution…</p>
+          ) : view === "invitations" && take ? (
+            <InvitationInbox
+              key={`${tenant}:${token}`}
+              tenant={tenant}
+              token={token}
+              onSessionExpired={clearSession}
+            />
           ) : !write && !review && !select ? (
             <section className="panel">
               <h1>Question bank access unavailable</h1>

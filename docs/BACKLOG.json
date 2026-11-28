@@ -262,7 +262,7 @@
         "P3-003"
       ],
       "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
-      "evidence": "Rescheduling baseline 51d35c5 accepted: 943 owner full tests and green Foundation gate #18. Candidate-owned in-app invitation discovery and audited optional acknowledgement prepared under migration 0018; it does not start attempts or replace current eligibility. Owner full gate/new CI pending. External invitation delivery and candidate/coordinator browser acceptance remain open. See P3_INVITATION_INBOX.md."
+      "evidence": "Invitation API 799c74c accepted: 990 owner full tests and green Foundation gate #19 (run 46128839007, 11m 39s). Candidate browser discovery and optional acknowledgement increment prepared; owner browser/full/new-CI evidence pending. Schema stays 0018. External delivery and coordinator browser acceptance remain open. See P3_CANDIDATE_BROWSER.md."
     },
     {
       "id": "P3-005",

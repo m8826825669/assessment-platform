@@ -69,7 +69,10 @@ def test_real_browser_journeys(live_media):
             time.sleep(0.1)
         assert server.started, "Isolated browser API did not start"
         result = subprocess.run(
-            [npm, "run", "test:browser"], cwd=root / "frontend", env=environment, check=False
+            [npm, "run", "test:browser", "--", "journeys.spec.ts"],
+            cwd=root / "frontend",
+            env=environment,
+            check=False,
         )
         assert result.returncode == 0, "Real browser gate failed; inspect Playwright output"
     finally:

@@ -146,3 +146,8 @@ Preserve immutable sitting snapshots by creating a new sitting and cancelling/li
 ## SCH-01 in-app invitation acknowledgement (28 November 2026)
 
 Use existing registration references for a signed-in candidate's own paged inbox. Add an immutable receipt of the current registration revision under the institution lock, with a database-owned timestamp and atomic audit/outbox. Acknowledgement is optional for both old and new registrations, may occur before close, and never starts an attempt, changes timing, restores authority or freezes later accommodations. Separate current invitation state from historical receipt replay. Staff may inspect receipts but cannot accept on a candidate's behalf. External email/link delivery and browser workflows remain separate scope; no new outbox side effect is authorized.
+
+
+## SCH-01 candidate invitation browser boundary (28 November 2026)
+
+Reuse memory-only identity and the existing candidate-safe invitation API for a paged inbox and optional acknowledgement. No local clock eligibility, question content, public registration, persisted bearer token or attempt-start control is introduced. Preserve the same registration identity during uncertain acknowledgement outcomes; separate historical receipt from a fresh state read. Tenant/session unmount discards late work. Candidate browser fixtures use disposable PostgreSQL without requiring media; existing authoring media journeys stay separate. Pin Next.js 16.4.6 to address audit-reported advisories exposed by the build of baseline 16.4.3. Coordinator screens, external delivery and P3 closure remain deferred.

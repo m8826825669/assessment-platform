@@ -10,6 +10,9 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:14173",
     browserName: "chromium",
+    launchOptions: process.env.ASSESSMENT_BROWSER_EXECUTABLE
+      ? { executablePath: process.env.ASSESSMENT_BROWSER_EXECUTABLE }
+      : undefined,
     trace: "off",
     screenshot: "off",
     video: "off",

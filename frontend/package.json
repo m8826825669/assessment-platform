@@ -1,6 +1,6 @@
 {
   "name": "assessment-workspace",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "private": true,
   "engines": {
     "node": ">=22.12.0"
@@ -15,7 +15,7 @@
     "format:check": "prettier --check app components lib tests browser *.ts package.json"
   },
   "dependencies": {
-    "next": "16.4.3",
+    "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
