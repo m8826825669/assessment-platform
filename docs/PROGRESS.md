@@ -76,3 +76,10 @@ Registration-decision authoring checks: 442 portable tests and 222 real PostgreS
 Registration decisions e7fae39 are accepted on owner evidence: 842 full local tests and green Foundation gate #16, run 46107461594 (9m 43s), all four jobs green. Added bounded raw UTF-8 CSV preview and atomic registration commit for existing candidate accounts, with safe row diagnostics and original receipt/effective-state distinction. JSON and CSV reuse shared planning/persistence; original snapshots, audit actions and schema/grants remain unchanged at 0016. Owner full verification/new CI for this source are pending. P3 remains open; see P3_REGISTRATION_CSV.md.
 
 CSV authoring evidence: 473 portable tests and 251 distinct real PostgreSQL 16.2 integration tests passed across disjoint 130/121-case runs, including all 22 CSV cases. Lint/format/dependency and guarded installer checks passed. Schema/grants remain unchanged at 0016; owner PostgreSQL 17/full live-media verification and new CI are pending.
+
+
+## P3-004 sitting replacement - 28 November 2026
+
+CSV baseline 9c638bf is accepted on owner evidence: 895 strict local tests and Foundation gate #17, run 46113506495 (9m 33s), all four jobs green. Added atomic pre-opening sitting replacement: exact publication/title/policy retained, original cancelled, immutable link persisted with audit/outbox and SQL/tenant guards. No registration or allowance is silently copied; explicit new registration is required. Migration 0017 extends readiness/runtime grants. Owner full live-media verification and new CI remain pending. P3 remains open; see P3_RESCHEDULING.md.
+
+Rescheduling authoring evidence: 484 portable tests and 288 distinct real PostgreSQL 16.2 integration tests passed across disjoint 169/119-case runs, including all 37 new replacement cases. Migration/metadata, SQL guards, tenant/worker separation, transaction rollback/concurrency, repository lint/format/dependency and guarded-installer checks passed. Owner PostgreSQL 17/full live-media verification and new CI remain pending; P3 is not complete.

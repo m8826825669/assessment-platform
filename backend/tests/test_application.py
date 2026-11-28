@@ -55,6 +55,7 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
     app = create_app(unavailable_settings())
     paths = app.openapi()["paths"]
     assert set(paths) == {
+        "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/reschedule",
         "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/csv",
         "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/csv/preview",
         "/api/v1/tenants/{tenant_id}/exam-sittings/{sitting_id}/registrations/{registration_id}/status",
@@ -108,13 +109,13 @@ def test_documented_identity_and_institution_endpoints_are_exposed():
 @pytest.mark.parametrize(
     "revisions,tables_exist,expected",
     [
-        (["0016_registration_changes"], True, "ok"),
+        (["0017_sitting_reschedules"], True, "ok"),
         ([], True, "not_ready"),
         (["old_revision"], True, "not_ready"),
         (["0012_publication_access"], True, "not_ready"),
         (["0010_exam_publications"], True, "not_ready"),
-        (["0016_registration_changes", "other_branch"], True, "not_ready"),
-        (["0016_registration_changes"], False, "not_ready"),
+        (["0017_sitting_reschedules", "other_branch"], True, "not_ready"),
+        (["0017_sitting_reschedules"], False, "not_ready"),
     ],
 )
 def test_schema_readiness_decisions(revisions, tables_exist, expected):
@@ -159,6 +160,6 @@ def test_readiness_reports_missing_audit_outbox_grants():
     database.engine.dispose()
     database.engine = MagicMock()
     connection = database.engine.connect.return_value.__enter__.return_value
-    connection.execute.return_value.scalars.return_value = iter(["0016_registration_changes"])
+    connection.execute.return_value.scalars.return_value = iter(["0017_sitting_reschedules"])
     connection.scalar.side_effect = [True, True, True, False]
     assert database.readiness() == {"postgresql": "ok", "schema": "ok", "runtime_role": "missing_grants"}

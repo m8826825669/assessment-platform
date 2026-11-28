@@ -136,3 +136,8 @@ Preserve original registration receipts as revision 1 and append server-fenced d
 ## SCH-01 CSV registration profile (28 November 2026)
 
 Accept raw UTF-8 text/csv with four fixed columns, 64 KiB and 50-record bounds, stable caller registration UUIDs and existing candidate account UUIDs. Preview is read-only and never reserves eligibility; commit rechecks authority/timing and shares the original JSON batch's locked, atomic business/audit/outbox flow. Per-row retry receipts acknowledge history rather than restoring withdrawn/cancelled eligibility. Keep private CSV cells out of diagnostics and preview, show effective status separately from original receipt values, release read transactions before streaming, and retain schema/grants at 0016. External invitations/account creation and browser upload controls remain separate increments.
+
+
+## SCH-01 atomic pre-opening replacement (28 November 2026)
+
+Preserve immutable sitting snapshots by creating a new sitting and cancelling/linking the original in one institution-serialized transaction. Retain the exact publication/title/policy; require a fresh replacement UUID and future fitting window. Store only fixed reason codes and immutable same-tenant one-to-one links. Historical retries acknowledge immediate successors, even after later replacement decisions. Do not transfer registrations/allowances or restore withdrawn candidates automatically: staff must explicitly re-register them. Candidate link discovery, external notification and open/running attempt changes remain separate scope.

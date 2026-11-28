@@ -262,7 +262,7 @@
         "P3-003"
       ],
       "acceptance": "Exact publication scheduling, eligibility, invitations/import and accommodation/timing snapshots.",
-      "evidence": "Registration decision baseline e7fae39 accepted: 842 owner full tests and green Foundation gate #16. Bounded existing-candidate CSV preview/atomic commit prepared, sharing JSON registration planning/persistence; schema remains 0016. Owner full gate/new CI pending for CSV. Rescheduling, invitations and coordinator browser acceptance remain open. See P3_REGISTRATION_CSV.md."
+      "evidence": "CSV baseline 9c638bf accepted: 895 owner full tests and green Foundation gate #17. Atomic unopened sitting replacement prepared under migration 0017, preserving exact publication and historical registrations without automatic transfer. Owner full gate/new CI pending. External invitations and coordinator browser acceptance remain open. See P3_RESCHEDULING.md."
     },
     {
       "id": "P3-005",

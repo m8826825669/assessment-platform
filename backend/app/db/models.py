@@ -678,3 +678,32 @@ class RegistrationChangeReason(Base):
     tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     change_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     reason: Mapped[str] = mapped_column(String(500))
+
+
+class SittingReschedule(Base):
+    __tablename__ = "sitting_reschedules"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["tenant_id", "sitting_id"],
+            ["exam_sittings.tenant_id", "exam_sittings.id"],
+            name="fk_reschedule_original",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["tenant_id", "replacement_id"],
+            ["exam_sittings.tenant_id", "exam_sittings.id"],
+            name="fk_reschedule_replacement",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("tenant_id", "replacement_id", name="uq_reschedule_replacement"),
+        CheckConstraint("sitting_id <> replacement_id", name="reschedule_distinct"),
+        CheckConstraint(
+            "reason_code IN ('administrative', 'schedule_error', 'operational')", name="reschedule_reason"
+        ),
+    )
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    sitting_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    replacement_id: Mapped[UUID] = mapped_column(Uuid)
+    reason_code: Mapped[str] = mapped_column(String(20))
+    created_by: Mapped[UUID] = mapped_column(Uuid, ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
